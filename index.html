@@ -24,37 +24,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 
 /* ── Stat Cards ── */
 .scards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:28px;max-width:1280px;margin-left:auto;margin-right:auto;}
-.fscards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:16px 20px;}
-@media(max-width:700px){.scards{grid-template-columns:repeat(3,1fr);}.fscards{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:700px){.scards{grid-template-columns:repeat(3,1fr);}}
 .sc{background:var(--s-lowest);border-radius:12px;padding:16px 12px;text-align:center;box-shadow:0 8px 24px rgba(70,21,153,0.05);transition:background .25s;}
 .sc:hover{background:var(--primary-fixed);}
 .sc .v{font-family:'Manrope',sans-serif;font-size:22px;font-weight:800;line-height:1;margin-bottom:4px;}
 .sc .l{font-size:9px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;}
 .sc.p .v{color:var(--p);}.sc.g .v{color:#16a34a;}.sc.r .v{color:#dc2626;}.sc.o .v{color:#e07020;}
 
-/* ── Accordion Course Blocks ── */
-.dt{background:var(--s-lowest);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(70,21,153,0.04);}
-.dth{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;padding:14px 20px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;border-radius:12px 12px 0 0;}
-.dt-body{background:var(--s-cnt);}
-.dt table{width:100%;border-collapse:collapse;font-size:12px;background:var(--s-lowest);}
-.dt th{background:var(--s-low);color:var(--p);font-family:'Inter',sans-serif;font-weight:700;padding:9px 16px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;}
-.dt td{padding:10px 16px;font-weight:500;color:var(--tx);font-size:13px;}
-.dt tr{border-bottom:none;}
-.dt tr:not(:last-child) td{padding-bottom:10px;}
-.dt tbody tr:not(:last-child){margin-bottom:12px;}
-.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
-.pill.g{background:#f0fdf4;color:#16a34a;}
-.pill.r{background:#fef2f2;color:#dc2626;}
-.pill.p{background:var(--pb);color:var(--p);}
-.pill.o{background:#fef3e8;color:#e07020;}
-
 /* ── Section wrapper ── */
 .sts-wrap{max-width:1024px;margin:0 auto;}
-.sts-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px;}
-.sts-user{display:flex;align-items:center;gap:10px;}
 .sts-progress-bar{height:8px;border-radius:99px;background:var(--s-highest);overflow:hidden;margin-top:6px;}
 .sts-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--pl));transition:width .5s ease;}
-.dt-not-started{padding:16px 20px;font-size:13px;color:var(--mu);font-weight:500;font-style:italic;}
 
 /* ── Login ── */
 #sLogin{
@@ -62,65 +42,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
   background:#f8f7ff;
   position:relative;overflow:hidden;
 }
-#sLogin::before{
-  content:'';position:absolute;
-  width:700px;height:700px;border-radius:50%;
-  background:radial-gradient(circle,rgba(92,61,181,.08) 0%,transparent 70%);
-  top:-200px;right:-200px;pointer-events:none;
-}
-#sLogin::after{
-  content:'';position:absolute;
-  width:500px;height:500px;border-radius:50%;
-  background:radial-gradient(circle,rgba(70,21,153,.05) 0%,transparent 70%);
-  bottom:-150px;left:-150px;pointer-events:none;
-}
+#sLogin::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(92,61,181,.08) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;}
+#sLogin::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(70,21,153,.05) 0%,transparent 70%);bottom:-150px;left:-150px;pointer-events:none;}
 .l-ring1{position:absolute;bottom:-400px;left:50%;transform:translateX(-50%);width:800px;height:800px;border-radius:50%;border:1px solid rgba(70,21,153,.12);pointer-events:none;}
 .l-ring2{position:absolute;bottom:-300px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;border:1px solid rgba(70,21,153,.08);pointer-events:none;}
 @keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .l-wrap{display:flex;flex-direction:column;align-items:center;width:100%;max-width:360px;position:relative;z-index:1;animation:fu .5s ease both;}
 .l-brand{text-align:center;margin-bottom:36px;}
-.lico{
-  width:72px;height:72px;
-  background:linear-gradient(135deg,#5c3db5,#4a2d9c);
-  border-radius:20px;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:32px;margin-bottom:16px;
-  box-shadow:0 8px 24px rgba(70,21,153,.28);
-  transform:rotate(3deg);
-}
+.lico{width:72px;height:72px;background:linear-gradient(135deg,#5c3db5,#4a2d9c);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px;box-shadow:0 8px 24px rgba(70,21,153,.28);transform:rotate(3deg);}
 .l-brand h1{font-size:26px;font-weight:800;color:#1a162d;font-family:'Manrope',sans-serif;letter-spacing:-.02em;}
 .l-brand p{font-size:13px;color:#47435e;margin-top:4px;font-weight:500;letter-spacing:.02em;}
-.lbox{
-  background:#fff;border-radius:32px;
-  padding:40px 36px;width:100%;
-  box-shadow:0 20px 50px rgba(92,61,181,.08);
-}
+.lbox{background:#fff;border-radius:32px;padding:40px 36px;width:100%;box-shadow:0 20px 50px rgba(92,61,181,.08);}
 .fg{margin-bottom:20px;}
 .fg label{display:block;font-size:11px;font-weight:700;color:#47435e;text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px;margin-left:4px;}
 .fg .fi-wrap{position:relative;}
 .fg .fi-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#78728d;font-size:18px;pointer-events:none;line-height:1;}
-.fg input{
-  width:100%;padding:14px 14px 14px 44px;
-  border:none;border-radius:16px;
-  font-family:'Inter',sans-serif;font-size:15px;font-weight:500;
-  color:#1a162d;background:#e2dbf7;outline:none;
-  transition:box-shadow .2s,background .2s;
-}
+.fg input{width:100%;padding:14px 14px 14px 44px;border:none;border-radius:16px;font-family:'Inter',sans-serif;font-size:15px;font-weight:500;color:#1a162d;background:#e2dbf7;outline:none;transition:box-shadow .2s,background .2s;}
 .fg input:focus{box-shadow:0 0 0 2px rgba(70,21,153,.25);background:#ddd5f5;}
 .fg .fi-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#78728d;padding:4px;line-height:1;transition:color .2s;}
 .fg .fi-eye:hover{color:#5c3db5;}
 .l-forgot{display:flex;justify-content:flex-end;margin-top:8px;}
 .l-forgot a{font-size:12px;font-weight:700;color:#5c3db5;text-decoration:none;opacity:.85;transition:opacity .2s;}
 .l-forgot a:hover{opacity:1;text-decoration:underline;text-underline-offset:3px;}
-.btnL{
-  width:100%;padding:15px;
-  background:linear-gradient(135deg,#5c3db5,#4a2d9c);
-  color:#fff;border:none;border-radius:99px;
-  font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;
-  cursor:pointer;margin-top:4px;
-  box-shadow:0 4px 16px rgba(70,21,153,.35);
-  transition:all .2s;letter-spacing:.01em;
-}
+.btnL{width:100%;padding:15px;background:linear-gradient(135deg,#5c3db5,#4a2d9c);color:#fff;border:none;border-radius:99px;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;box-shadow:0 4px 16px rgba(70,21,153,.35);transition:all .2s;letter-spacing:.01em;}
 .btnL:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(70,21,153,.45);}
 .btnL:active{transform:scale(.98);}
 .btnL:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none;}
@@ -128,55 +72,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .l-footer{margin-top:28px;text-align:center;font-size:13px;color:#47435e;}
 .l-footer a{color:#5c3db5;font-weight:700;margin-left:4px;text-decoration:none;}
 .l-footer a:hover{text-decoration:underline;text-underline-offset:3px;}
-/* modal fg input override */
-.md .fg input,.md .fg select{padding:12px 16px;border-radius:10px;background:var(--s-highest);color:var(--tx);}
 
 /* ── Header ── */
-.hdr{
-  background:var(--surface);
-  padding:0;height:56px;
-  display:flex;align-items:center;
-  flex-shrink:0;
-  border-bottom:1px solid rgba(203,195,213,.28);
-  position:sticky;top:0;z-index:200;
-}
-.hdr-inner{
-  width:100%;max-width:1280px;
-  margin:0 auto;padding:0 28px;
-  display:flex;align-items:center;gap:12px;
-}
+.hdr{background:var(--surface);padding:0;height:56px;display:flex;align-items:center;flex-shrink:0;border-bottom:1px solid rgba(203,195,213,.28);position:sticky;top:0;z-index:200;}
+.hdr-inner{width:100%;max-width:1280px;margin:0 auto;padding:0 28px;display:flex;align-items:center;gap:12px;}
 .hdr .logo{font-family:'Manrope',sans-serif;font-size:18px;font-weight:800;flex:1;color:var(--p);white-space:nowrap;}
 .hdr .logo span{color:var(--o);}
 .hu{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
 .hav{width:34px;height:34px;border-radius:50%;background:var(--sec-cnt);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--p);border:2px solid var(--pb);flex-shrink:0;}
 .hrl{border-radius:99px;padding:3px 11px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;}
 .hrl.student{background:var(--pb);color:var(--p);}
-.hrl.admin{background:#fef3e8;color:var(--od);}
-.hrl.teacher{background:#f0fdf4;color:#16a34a;}
 .btnO{background:transparent;border:1px solid rgba(203,195,213,.6);color:var(--p);border-radius:99px;padding:6px 14px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.02em;white-space:nowrap;}
 .btnO:hover{background:var(--pb);}
 
 /* ── Tab Nav ── */
-.tnav-wrap{
-  background:var(--surface);
-  border-bottom:1px solid rgba(203,195,213,.35);
-  flex-shrink:0;
-  overflow-x:auto;
-}
+.tnav-wrap{background:var(--surface);border-bottom:1px solid rgba(203,195,213,.35);flex-shrink:0;overflow-x:auto;}
 .tnav-wrap::-webkit-scrollbar{display:none;}
-.tnav{
-  width:100%;
-  padding:0 28px;
-  display:flex;gap:24px;
-  justify-content:center;
-}
+.tnav{width:100%;padding:0 28px;display:flex;gap:24px;justify-content:center;}
 .tb{padding:13px 0;border:none;background:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;letter-spacing:.01em;}
 .tb:hover{color:var(--p);}
 .tb.on{color:var(--p);border-bottom-color:var(--p);}
 
 /* ── Content Area ── */
 .ca{flex:1;overflow-y:auto;padding:36px 28px;background:var(--s-low);}
-.ca-inner{max-width:1280px;margin:0 auto;}
 .tp{display:none;}.tp.on{display:block;}
 .stit{font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--mu);margin-bottom:16px;}
 
@@ -209,65 +127,46 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .fc-progress-fill.none{background:var(--s-highest);width:100%!important;}
 .fc-btn{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(203,195,213,.4);background:transparent;color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
 .fc-btn:hover{background:var(--p);color:#fff;border-color:var(--p);}
-.fc-btn-watch{width:100%;padding:8px;border-radius:10px;border:1.5px solid #f59e0b;background:#fffbeb;color:#92400e;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;margin-top:6px;}
-.fc-btn-watch:hover{background:#f59e0b;color:#fff;border-color:#f59e0b;}
-.fst{display:none;}
-.fs{display:none;}
 
-/* ── User List (Yönetim) ── */
-.ul{background:var(--s-lowest);border-radius:16px;overflow:hidden;margin-bottom:20px;box-shadow:0 4px 16px rgba(70,21,153,.04);}
-.ulh{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0;}
-.ulh h3{font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;}
-.btn{border:none;border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
-.btn:hover{opacity:.85;}
-.btn.pr{background:var(--p);color:#fff;}.btn.su{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border-radius:99px;padding:8px 18px;}.btn.da{background:#dc2626;color:#fff;}.btn.dl{background:#7f1d1d;color:#fff;}.btn.gh{background:var(--pb);color:var(--p);}
-.ur{display:flex;align-items:center;padding:14px 20px;gap:12px;flex-wrap:wrap;border-top:1px solid rgba(203,195,213,.18);transition:background .15s;}
-.ur:hover{background:var(--s-low);}
-.uav{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-.uav.admin{background:#fef3e8;color:var(--od);}.uav.teacher{background:#f0fdf4;color:#16a34a;}.uav.student{background:var(--pb);color:var(--p);}
-.ui{flex:1;min-width:120px;}
-.un{font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;}
-.um{font-size:11px;color:var(--mu);font-weight:500;margin-top:2px;}
-.ua{display:flex;gap:6px;flex-wrap:wrap;}
+/* ── Modals ── */
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;}
 .mo.on{display:flex;}
 .md{background:#fff;border-radius:24px;padding:32px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,.2);animation:fu .25s ease both;max-height:90vh;overflow-y:auto;}
 .md h3{font-family:'Manrope',sans-serif;font-size:18px;font-weight:700;color:var(--p);margin-bottom:20px;}
 .mda{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.btn{border:none;border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn:hover{opacity:.85;}
+.btn.pr{background:var(--p);color:#fff;}.btn.gh{background:var(--pb);color:var(--p);}
 .ld{text-align:center;padding:48px;color:var(--mu);font-weight:600;}
 .sp{width:32px;height:32px;border:3px solid var(--s-high);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .es{text-align:center;padding:48px 24px;color:var(--mu);}
 .es .ic{font-size:40px;margin-bottom:12px;}
 .es p{font-size:14px;font-weight:500;}
-.sdiv{border:none;border-top:1px solid rgba(203,195,213,.3);margin:28px 0;}
-.cbx{background:var(--s-low);border-radius:12px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:2;color:var(--p);}
-@media(max-width:600px){.ca{padding:16px;}.lbox{padding:32px 24px;}.fgrid{grid-template-columns:1fr 1fr;}.scards{grid-template-columns:1fr 1fr;}.hdr-inner{padding:0 16px;}.tnav{padding:0 0px;}}
 
-/* ── Page header inside content ── */
+/* ── Page header ── */
 .pg-hdr{max-width:1280px;margin:0 auto 28px;padding:0;text-align:center;}
 .pg-title{font-family:'Manrope',sans-serif;font-size:28px;font-weight:800;color:var(--tx);letter-spacing:-.5px;margin-bottom:6px;}
 .pg-sub{font-size:14px;color:var(--mu);font-weight:500;}
-.yon-wrap{max-width:896px;margin:0 auto;}
 
 /* ── Fasikül overlay ── */
 #frmOverlay{display:none;position:fixed;inset:0;z-index:5000;background:var(--p);flex-direction:column;}
 #frmOverlay.on{display:flex;}
-#frmBar{background:linear-gradient(135deg,var(--pd),var(--p));color:#fff;padding:0 16px;height:48px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
-#frmBar button{background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:99px;padding:6px 16px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
-#frmBar button:hover{background:rgba(255,255,255,0.25);}
-#frmBar .ftitle{font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;flex:1;}
 #fasikülFrame{flex:1;border:none;width:100%;height:100%;}
-@media(max-width:768px){#frmBar{display:none;}}
+@media(max-width:600px){.ca{padding:16px;}.lbox{padding:32px 24px;}.fgrid{grid-template-columns:1fr 1fr;}.hdr-inner{padding:0 16px;}.tnav{padding:0;}}
 </style>
 </head>
 <body>
+
+<!-- Loading -->
 <div id="sLoading" style="position:fixed;inset:0;background:linear-gradient(135deg,#2d1b69,#4a2f99,#6B4FBB);display:flex;align-items:center;justify-content:center;z-index:9999;">
   <div style="text-align:center;color:#fff;">
     <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;"></div>
-    <div style="font-family:Nunito,sans-serif;font-weight:700;font-size:14px;opacity:.8;">Yükleniyor...</div>
+    <div style="font-family:'Manrope',sans-serif;font-weight:700;font-size:14px;opacity:.8;">Yükleniyor...</div>
   </div>
 </div>
+
+<!-- Login -->
 <div id="sLogin" class="scr">
   <div class="l-ring1"></div>
   <div class="l-ring2"></div>
@@ -302,6 +201,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
     </div>
   </div>
 </div>
+
+<!-- Öğrenci Uygulaması -->
 <div id="sApp" class="scr">
   <div class="hdr">
     <div class="hdr-inner">
@@ -309,7 +210,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
       <div class="hu">
         <div class="hav" id="hav">?</div>
         <span id="hnm" style="white-space:nowrap;">-</span>
-        <span class="hrl" id="hrl">-</span>
+        <span class="hrl student" id="hrl">Öğrenci</span>
         <button class="btnO" onclick="doLogout()">Çıkış</button>
       </div>
     </div>
@@ -326,75 +227,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
       <div class="fgrid" id="fgrid"></div>
     </div>
     <div class="tp" id="tBen"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
-    <div class="tp" id="tOgr"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
-    <div class="tp" id="tOgt"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
-    <div class="tp" id="tYon"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
   </div>
 </div>
-<!-- Modals -->
-<div class="mo" id="mAdd">
-  <div class="md">
-    <h3>➕ Kullanıcı Ekle</h3>
-    <div class="fg"><label>Ad Soyad</label><input type="text" id="nn" placeholder="Ali Yılmaz"></div>
-    <div class="fg"><label>Kullanıcı Adı</label><input type="text" id="nu" placeholder="aliyilmaz"></div>
-    <div class="fg"><label>Şifre</label><input type="text" id="np" placeholder="şifre123"></div>
-    <div class="fg"><label>Rol</label><select id="nr" onchange="toggleTA()"><option value="student">Öğrenci</option><option value="teacher">Öğretmen</option></select></div>
-    <div class="fg" id="tag"><label>Öğretmen Ata</label><select id="nt"><option value="">-- Öğretmen seç --</option></select></div>
-    <div class="mda"><button class="btn gh" onclick="closeModal('mAdd')">İptal</button><button class="btn pr" id="sbtn" onclick="saveUser()">Kaydet</button></div>
-  </div>
-</div>
-<div class="mo" id="mReset">
-  <div class="md">
-    <h3>🗑️ İstatistikleri Sıfırla</h3>
-    <p style="font-size:14px;color:var(--mu);font-weight:600;" id="rtxt">Emin misiniz?</p>
-    <div class="mda"><button class="btn gh" onclick="closeModal('mReset')">İptal</button><button class="btn da" onclick="doReset()">Sıfırla</button></div>
-  </div>
-</div>
-<div class="mo" id="mCred">
-  <div class="md">
-    <h3>📋 Giriş Bilgileri</h3>
-    <div class="cbx" id="credbox"></div>
-    <div class="mda"><button class="btn gh" onclick="closeModal('mCred')">Kapat</button><button class="btn pr" onclick="doCopy()">📋 Kopyala</button></div>
-  </div>
-</div>
-<div class="mo" id="mFasAssign">
-  <div class="md" style="max-width:520px;">
-    <h3>📚 Fasikül Erişimi</h3>
-    <p style="font-size:13px;color:var(--mu);font-weight:600;margin-bottom:16px;" id="fasAssignTxt"></p>
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <button class="btn gh" onclick="fasToggleAll(true)">✅ Tümünü Seç</button>
-      <button class="btn gh" onclick="fasToggleAll(false)">⬜ Tümünü Kaldır</button>
-    </div>
-    <div id="fasCheckList" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:4px;"></div>
-    <div class="mda">
-      <button class="btn gh" onclick="closeModal('mFasAssign')">İptal</button>
-      <button class="btn pr" id="fasAssignBtn" onclick="doFasAssign()">💾 Kaydet</button>
-    </div>
-  </div>
-</div>
-<div class="mo" id="mAssign">
-  <div class="md">
-    <h3>👨‍🏫 Öğretmen Ata</h3>
-    <p style="font-size:13px;color:var(--mu);font-weight:600;margin-bottom:16px;" id="assignTxt"></p>
-    <div class="fg">
-      <label>Öğretmen</label>
-      <select id="assignSel"><option value="">-- Öğretmen seç --</option></select>
-    </div>
-    <div class="mda">
-      <button class="btn gh" onclick="closeModal('mAssign')">İptal</button>
-      <button class="btn pr" id="assignBtn" onclick="doAssign()">💾 Kaydet</button>
-    </div>
-  </div>
+
+<!-- Fasikül iframe overlay -->
+<div id="frmOverlay">
+  <iframe id="fasikülFrame" src="" allowfullscreen></iframe>
 </div>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,where,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import{getDatabase,ref as rtRef,onValue,remove as rtRemove}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
-const auth=getAuth(FB),db=getFirestore(FB),rtdb=getDatabase(FB);
+const auth=getAuth(FB),db=getFirestore(FB);
 
 const FASIKUL=[
   {id:'f1',t:'Fonksiyonlar_1',s:'Matematik',f:'Fonksiyonlar_1.html',c:'purple',n:'1'},
@@ -404,15 +251,13 @@ const FASIKUL=[
   {id:'f5',t:'Kâr-Zarar-Karışım Hareket-İşçi Problemleri',s:'Matematik 10. Sınıf',f:'kr_akademi_5.html',c:'green',n:'5'},
   {id:'f6',t:'Hareket',s:'Fizik 10. Sınıf',f:'duzgun-dogrusal-hareket.html',c:'orange',n:'6'},
   {id:'f7',t:'İş-Güç-Enerji',s:'Fizik 10. Sınıf',f:'is-guc-enerji.html',c:'green',n:'7'},
-  {id:'f8',t:'Temel_Matematik',s:'Matematik 10. Sınıf',f:'Temel_Matematik.html',c:'orange',n:'8'}
+  {id:'f8',t:'Temel Matematik',s:'Matematik',f:'Temel_Matematik.html',c:'purple',n:'8'}
 ];
 
-let CU=null,CP=null,rUID=null,cpTxt='';
+let CU=null,CP=null;
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
 const ini=n=>(n||'?').charAt(0).toUpperCase();
 const $=id=>document.getElementById(id);
-window.closeModal=id=>$(id).classList.remove('on');
-const oModal=id=>$(id).classList.add('on');
 const showScr=id=>{document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const actTab=id=>{document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));document.querySelectorAll('.tp').forEach(p=>p.classList.toggle('on',p.id===id));};
 const ld=id=>$(id).innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
@@ -430,102 +275,72 @@ window.doLogin=async()=>{
   if(!ok){err.textContent='Kullanıcı adı veya şifre hatalı.';err.style.display='block';btn.disabled=false;btn.textContent='Giriş Yap';}
 };
 
-
-window.openLiveWatch=(studentUid, fasUrl, fasTitle, _sid)=>{
-  /* Öğrenci UID'sini URL parametresi olarak geç */
-  sessionStorage.setItem('dd_uid', CU.uid);
-  sessionStorage.setItem('dd_name', CP.name);
-  sessionStorage.setItem('dd_role', CP.role);
-  sessionStorage.setItem('dd_fid', 'watch');
-  sessionStorage.setItem('dd_tid', '');
-  sessionStorage.setItem('dd_username', CP.username||'');
-  sessionStorage.setItem('dd_password', CP.password||'');
-  const watchUrl = fasUrl + '?watch=' + encodeURIComponent(studentUid);
-  const ov=$('frmOverlay');
-  document.getElementById('fasikülFrame').src=watchUrl;
-  document.getElementById('frmTitle').textContent='👁 Canlı İzleme: '+fasTitle;
-  ov.classList.add('on');
-};
-
 window.openFrame=(url,title)=>{
-  const ov=$('frmOverlay');
-  document.getElementById('fasikülFrame').src=url;
-  document.getElementById('frmTitle').textContent=title||'';
-  ov.classList.add('on');
+  $('fasikülFrame').src=url;
+  $('frmOverlay').classList.add('on');
 };
 window.closeFrame=async()=>{
-  const ov=$('frmOverlay');
-  ov.classList.remove('on');
-  document.getElementById('fasikülFrame').src='';
-  // Günlük aktiviteyi kaydet
+  $('frmOverlay').classList.remove('on');
+  $('fasikülFrame').src='';
   if(CU){
     const today=new Date().toISOString().slice(0,10);
     const snap=await getDoc(doc(db,'stats',CU.uid));
     const existing=snap.exists()?snap.data():{};
-    const todayData=existing.daily&&existing.daily[today]||{minutes:0,questions:0,pages:0};
-    // Bugünün verisini fasikül istatistiklerinden güncelle
-    let totalMin=0,totalQ=0;
-    FASIKUL.forEach(f=>{const fs=existing[f.id]||{};totalMin+=fs.minutes||0;totalQ+=(fs.correct||0)+(fs.wrong||0);});
-    // daily kaydı: daha önce kaydedilmemişse bugün için hesapla
     const newDaily={...(existing.daily||{})};
     if(!newDaily[today]) newDaily[today]={minutes:0,questions:0,pages:0};
     await setDoc(doc(db,'stats',CU.uid),{daily:newDaily},{merge:true});
   }
   renderFas();
 };
-// Fasikül sayfasından postMessage dinle - günlük aktivite verisi de gelebilir
+
 window.addEventListener('message',async e=>{
-  if(e.data==='closeFrame'){ closeFrame(); return; }
-  // {type:'activity', minutes:N, questions:N, pages:N} formatında veri
+  if(e.data==='closeFrame'){closeFrame();return;}
   if(e.data&&e.data.type==='activity'&&CU){
     const today=new Date().toISOString().slice(0,10);
     const snap=await getDoc(doc(db,'stats',CU.uid));
     const existing=snap.exists()?snap.data():{};
     const prev=(existing.daily||{})[today]||{minutes:0,questions:0,pages:0};
     const newDay={
-      minutes:Math.max(prev.minutes||0, e.data.minutes||0),
-      questions:Math.max(prev.questions||0, e.data.questions||0),
-      pages:Math.max(prev.pages||0, e.data.pages||0),
+      minutes:Math.max(prev.minutes||0,e.data.minutes||0),
+      questions:Math.max(prev.questions||0,e.data.questions||0),
+      pages:Math.max(prev.pages||0,e.data.pages||0),
     };
-    const newDaily={...(existing.daily||{}),[today]:newDay};
-    await setDoc(doc(db,'stats',CU.uid),{daily:newDaily},{merge:true});
+    await setDoc(doc(db,'stats',CU.uid),{daily:{...(existing.daily||{}),[today]:newDay}},{merge:true});
   }
 });
 
 window.doLogout=async()=>{await signOut(auth);CU=null;CP=null;showScr('sLogin');};
 
 onAuthStateChanged(auth,async user=>{
-  const loadEl=document.getElementById('sLoading');
+  const loadEl=$('sLoading');
   const btn=$('lbtn');
   if(user){
     CU=user;
     let snap=await getDoc(doc(db,'users',user.uid));
-    const isAdmin = user.email==='admin@dijital-fasikul.com'||user.email==='admin@admin.com'||user.email==='admin@brngs.com';
+    const isAdmin=user.email==='admin@dijital-fasikul.com'||user.email==='admin@admin.com'||user.email==='admin@brngs.com';
     if(!snap.exists()){
       await setDoc(doc(db,'users',user.uid),{
-        name: isAdmin?'Admin':user.email.split('@')[0],
-        username: isAdmin?'admin':user.email.split('@')[0],
-        password: isAdmin?'admin1234':'',
-        email: user.email,
-        role: isAdmin?'admin':'student',
-        teacherId: null,
-        createdAt: serverTimestamp()
+        name:isAdmin?'Admin':user.email.split('@')[0],
+        username:isAdmin?'admin':user.email.split('@')[0],
+        password:isAdmin?'admin1234':'',
+        email:user.email,
+        role:isAdmin?'admin':'student',
+        teacherId:null,
+        createdAt:serverTimestamp()
       });
       snap=await getDoc(doc(db,'users',user.uid));
-    } else if(isAdmin && snap.data().role!=='admin'){
-      await setDoc(doc(db,'users',user.uid),{
-        name:'Admin',username:'admin',password:'admin1234',
-        email:user.email,role:'admin',teacherId:null,
-        createdAt:snap.data().createdAt
-      });
+    } else if(isAdmin&&snap.data().role!=='admin'){
+      await setDoc(doc(db,'users',user.uid),{name:'Admin',username:'admin',password:'admin1234',email:user.email,role:'admin',teacherId:null,createdAt:snap.data().createdAt});
       snap=await getDoc(doc(db,'users',user.uid));
     }
     CP=snap.data();
-    // Önce loading'i gizle, sonra uygulamayı göster
     if(loadEl)loadEl.style.display='none';
+    // Role göre yönlendir
+    if(CP.role==='teacher'){window.location.href='ogretmen.html';return;}
+    if(CP.role==='admin'){window.location.href='admin.html';return;}
+    // Öğrenci paneli
     await showApp();
   }else{
-    // Oturum yok — loading gizle, login göster
     if(loadEl)loadEl.style.display='none';
     showScr('sLogin');
   }
@@ -536,9 +351,6 @@ async function showApp(){
   showScr('sApp');
   $('hav').textContent=ini(CP.name);
   $('hnm').textContent=CP.name;
-  const rl=$('hrl');
-  rl.textContent={admin:'Admin',teacher:'Öğretmen',student:'Öğrenci'}[CP.role]||CP.role;
-  rl.className='hrl '+CP.role;
   buildTabs();
   await renderFas();
   actTab('tFas');
@@ -546,21 +358,15 @@ async function showApp(){
 
 function buildTabs(){
   const nav=$('tnav');nav.innerHTML='';
-  [{id:'tFas',l:'📚 Fasiküller',ro:['admin','teacher','student']},
-   {id:'tBen',l:'📊 Benim İstatistiklerim',ro:['admin','teacher','student']},
-   {id:'tOgr',l:'👨‍🎓 Öğrenci İstatistikleri',ro:['admin','teacher']},
-   {id:'tOgt',l:'👨‍🏫 Öğretmen İstatistikleri',ro:['admin']},
-   {id:'tYon',l:'⚙️ Yönetim',ro:['admin']},
+  [
+    {id:'tFas',l:'📚 Fasiküller'},
+    {id:'tBen',l:'📊 İstatistiklerim'},
   ].forEach(t=>{
-    if(!t.ro.includes(CP.role))return;
     const b=document.createElement('button');
     b.className='tb';b.textContent=t.l;b.dataset.tab=t.id;
     b.onclick=async()=>{
       actTab(t.id);
-      if(t.id==='tBen'){ld('tBen');await renderSts(CU.uid,'tBen');}
-      if(t.id==='tOgr')await renderOgr();
-      if(t.id==='tOgt')await renderOgt();
-      if(t.id==='tYon')await renderYon();
+      if(t.id==='tBen'){ld('tBen');await renderSts();}
     };
     nav.appendChild(b);
   });
@@ -570,15 +376,13 @@ async function renderFas(){
   const g=$('fgrid');g.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
   const [statsSnap,userSnap]=await Promise.all([getDoc(doc(db,'stats',CU.uid)),getDoc(doc(db,'users',CU.uid))]);
   const us=statsSnap.exists()?statsSnap.data():{};
-  const allowed=CP.role==='admin'?null:(userSnap.exists()&&userSnap.data().allowedFasikul?userSnap.data().allowedFasikul:null);
+  const allowed=userSnap.exists()&&userSnap.data().allowedFasikul?userSnap.data().allowedFasikul:null;
   const visibleFas=allowed?FASIKUL.filter(f=>allowed.includes(f.id)):FASIKUL;
   g.innerHTML='';
   if(visibleFas.length===0){g.innerHTML='<div class="es" style="grid-column:1/-1"><div class="ic">📚</div><p>Erişebileceğiniz fasikül bulunmuyor.</p></div>';return;}
   visibleFas.forEach(f=>{
     const fs=us[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
-    const started=c||w||m;
-    const total=c+w;
-    const pct=total?Math.round(c/total*100):0;
+    const started=c||w||m,total=c+w,pct=total?Math.round(c/total*100):0;
     const numPad=f.n.toString().padStart(2,'0');
     const card=document.createElement('div');
     card.className='fc';
@@ -591,450 +395,75 @@ async function renderFas(){
       '<div class="ftit">'+f.t+'</div>'+
       '<div class="fsub">'+f.s+'</div>'+
       '<div class="fc-meta">'+
-        (c||w?'<div class="fc-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="opacity:.6"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+c+' Doğru · '+w+' Yanlış</div>':'')+
-        (m?'<div class="fc-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="opacity:.6"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+fmt(m)+'</div>':'')+
+        (c||w?'<div class="fc-meta-item">✓ '+c+' Doğru · '+w+' Yanlış</div>':'')+
+        (m?'<div class="fc-meta-item">⏱ '+fmt(m)+'</div>':'')+
         (!started?'<div class="fc-meta-item" style="color:var(--mu);font-style:italic;">Henüz başlanmadı</div>':'')+
       '</div>'+
       '<div class="fc-footer">'+
         '<div class="fc-progress-track">'+
           '<div class="fc-progress-fill'+(started?(total>0?' partial':''):' none')+'" style="width:'+(started?(total>0?pct:8):100)+'%"></div>'+
         '</div>'+
-        '<button class="fc-btn">'+
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>'+
-          (started?'Devam Et':'Başla')+
-        '</button>'+
+        '<button class="fc-btn">▶ '+(started?'Devam Et':'Başla')+'</button>'+
       '</div>';
     card.onclick=()=>{
       sessionStorage.setItem('dd_uid',CU.uid);
       sessionStorage.setItem('dd_name',CP.name);
-      sessionStorage.setItem('dd_role',CP.role);
+      sessionStorage.setItem('dd_role','student');
       sessionStorage.setItem('dd_fid',f.id);
       sessionStorage.setItem('dd_tid',CP.teacherId||'');
       sessionStorage.setItem('dd_username',CP.username||'');
       sessionStorage.setItem('dd_password',CP.password||'');
-      openFrame(f.f, f.t);
+      openFrame(f.f,f.t);
     };
     g.appendChild(card);
   });
 }
 
-function buildStsHTML(data, panelId){
-  // Aggregate all-time totals from fasikul data
-  let tcAll=0,twAll=0,tmAll=0,tsAll=0;
-  FASIKUL.forEach(f=>{
-    const fs=data[f.id]||{};
-    tcAll+=fs.correct||0; twAll+=fs.wrong||0; tmAll+=fs.minutes||0; tsAll+=fs.solutionViews||0;
-  });
+async function renderSts(){
+  const snap=await getDoc(doc(db,'stats',CU.uid));
+  const data=snap.exists()?snap.data():{};
+  let tc=0,tw=0,tm=0;
+  FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+  const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
 
-  // daily map: data.daily = { "2025-04-13": {minutes,questions,pages} }
-  const daily = data.daily || {};
-
-  const heatColors=['#e7e0eb','#d0bef5','#a78bfa','#7c3aed','#461599'];
-
-  function getDateStr(d){ return d.toISOString().slice(0,10); }
-
-  function buildHeatmap(mode){
-    const now=new Date();
-    let startDate;
-    if(mode==='week'){ startDate=new Date(now); startDate.setDate(now.getDate()-6); }
-    else if(mode==='month'){ startDate=new Date(now.getFullYear(),now.getMonth(),1); }
-    else { startDate=new Date(now.getFullYear(),now.getMonth()-8,1); }
-
-    const dates=[];
-    const cur=new Date(startDate);
-    while(cur<=now){ dates.push(getDateStr(new Date(cur))); cur.setDate(cur.getDate()+1); }
-
-    let maxVal=0;
-    dates.forEach(dt=>{
-      const v=daily[dt]||{};
-      const score=(v.minutes||0)+(v.questions||0)*2+(v.pages||0);
-      if(score>maxVal) maxVal=score;
-    });
-
-    function getColor(dt){
-      const v=daily[dt]||{};
-      const score=(v.minutes||0)+(v.questions||0)*2+(v.pages||0);
-      if(!score) return heatColors[0];
-      if(maxVal===0) return heatColors[0];
-      const r=score/maxVal;
-      if(r<0.2) return heatColors[1];
-      if(r<0.4) return heatColors[2];
-      if(r<0.7) return heatColors[3];
-      return heatColors[4];
-    }
-
-    let totalMin=0,totalQ=0,activeDays=0;
-    let cells='';
-    dates.forEach(dt=>{
-      const v=daily[dt]||{};
-      const mins=v.minutes||0, qs=v.questions||0, pg=v.pages||0;
-      totalMin+=mins; totalQ+=qs;
-      if(mins||qs||pg) activeDays++;
-      const tip=`${dt}: ${mins}dk, ${qs} soru${pg?' '+pg+' sayfa':''}`;
-      cells+=`<div title="${tip}" style="height:18px;border-radius:3px;background:${getColor(dt)};cursor:default;"></div>`;
-    });
-
-    // month labels for year view
-    let monthLabels='';
-    if(mode==='year'){
-      const mNames=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-      const seen=new Set(); const lbls=[];
-      dates.forEach(dt=>{ const m=parseInt(dt.slice(5,7))-1; if(!seen.has(m)){seen.add(m);lbls.push(mNames[m]);} });
-      monthLabels=`<div style="display:flex;justify-content:space-between;padding:0 2px;margin-bottom:6px;">${lbls.map(m=>`<span style="font-size:10px;font-weight:700;color:#7b7484;text-transform:uppercase;">${m}</span>`).join('')}</div>`;
-    }
-
-    const cols=mode==='week'?7:mode==='month'?Math.ceil(dates.length/4)||7:30;
-    const label=mode==='week'?'Bu Hafta':mode==='month'?'Bu Ay':'Yıllık';
-    return {cells,monthLabels,cols,totalMin,totalQ,activeDays,label};
-  }
-
-  function filteredTotals(mode){
-    const now=new Date();
-    let startStr;
-    if(mode==='week'){ const s=new Date(now); s.setDate(now.getDate()-6); startStr=getDateStr(s); }
-    else if(mode==='month'){ startStr=getDateStr(new Date(now.getFullYear(),now.getMonth(),1)); }
-    else { startStr=getDateStr(new Date(now.getFullYear(),0,1)); }
-
-    let tm=0,tq=0,days=0;
-    Object.entries(daily).forEach(([dt,v])=>{
-      if(dt>=startStr){ tm+=(v.minutes||0); tq+=(v.questions||0); if(v.minutes||v.questions||v.pages) days++; }
-    });
-    // for year fallback to fasikul totals
-    const tc=mode==='year'?tcAll:(tq||tcAll);
-    const tw=mode==='year'?twAll:twAll;
-    const finalTm=mode==='year'?tmAll:(tm||tmAll);
-    const tot=tc+tw, pct=tot?Math.round(tc/tot*100):0;
-    const avg=days>0?Math.round(finalTm/days):0;
-    return {tc,tw,tm:finalTm,ts:tsAll,tot,pct,avg,days};
-  }
-
-  function renderContent(mode){
-    const T=filteredTotals(mode);
-    const hm=buildHeatmap(mode);
-
-    const bigStats=[
-      {l:'Toplam Soru',v:T.tot||0},
-      {l:'Doğru Cevap',v:T.tc||0},
-      {l:'Günlük Ort.',v:(T.avg||0)+'dk'},
-      {l:'Çalışılan Gün',v:T.days||0},
-    ];
-    const qStats=[
-      {l:'Toplam Soru',v:T.tot||0,c:'#461599'},
-      {l:'Doğru',v:T.tc||0,c:'#16a34a'},
-      {l:'Yanlış',v:T.tw||'—',c:'#dc2626'},
-      {l:'Başarı',v:T.tot?T.pct+'%':'—',c:'#e07020'},
-      {l:'Süre',v:fmt(T.tm)||'0dk',c:'#461599'},
-      {l:'Çözüm Görme',v:T.ts||0,c:'#e07020'},
-    ];
-
-    return `
+  $('tBen').innerHTML=`
+  <div style="max-width:800px;margin:0 auto;">
+    <h2 style="font-family:'Manrope',sans-serif;font-size:22px;font-weight:800;color:var(--tx);margin-bottom:20px;">📊 İstatistiklerim</h2>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
-      ${bigStats.map(s=>`<div style="background:#fff;border-radius:14px;padding:20px 14px;text-align:center;box-shadow:0 8px 24px rgba(70,21,153,0.05);transition:background .2s;" onmouseover="this.style.background='#eaddff'" onmouseout="this.style.background='#fff'">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:#494453;margin-bottom:8px;">${s.l}</div>
-        <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:800;color:#461599;line-height:1;">${s.v}</div>
+      ${[
+        {l:'Toplam Soru',v:tc+tw,c:'var(--p)'},
+        {l:'Doğru',v:tc,c:'var(--g)'},
+        {l:'Yanlış',v:tw,c:'var(--r)'},
+        {l:'Süre',v:fmt(tm),c:'var(--p)'}
+      ].map(s=>`<div style="background:#fff;border-radius:14px;padding:20px 14px;text-align:center;box-shadow:0 4px 16px rgba(70,21,153,.06);">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:8px;">${s.l}</div>
+        <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:800;color:${s.c};line-height:1;">${s.v}</div>
       </div>`).join('')}
     </div>
-    <div style="background:#f8f1fc;border-radius:24px;padding:24px;margin-bottom:24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <h3 style="font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;color:#1d1a22;margin:0;">${hm.label} Aktivite</h3>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:11px;color:#494453;">Az</span>
-          ${heatColors.map(c=>`<div style="width:12px;height:12px;border-radius:3px;background:${c};"></div>`).join('')}
-          <span style="font-size:11px;color:#494453;">Çok</span>
-        </div>
-      </div>
-      <div style="overflow-x:auto;">
-        <div style="min-width:${mode==='week'?220:500}px;">
-          ${hm.monthLabels}
-          <div style="display:grid;grid-template-columns:repeat(${hm.cols},1fr);gap:4px;">${hm.cells}</div>
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:14px;">
-        <p style="font-size:13px;color:#494453;font-style:italic;">${hm.label} <strong>${hm.totalMin}</strong> dk çalışıldı · <strong>${hm.totalQ}</strong> soru çözüldü · <strong>${hm.activeDays}</strong> aktif gün</p>
-      </div>
+    <div style="background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(70,21,153,.06);margin-bottom:20px;">
+      <h3 style="font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:var(--tx);margin-bottom:16px;">Fasikül Bazlı Performans</h3>
+      ${FASIKUL.map(f=>{
+        const fs=data[f.id]||{},c=fs.correct||0,w=fs.wrong||0,total=c+w,p=total?Math.round(c/total*100):0;
+        return`<div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:700;color:var(--tx);">${f.t}</span>
+            <span style="font-size:13px;font-weight:800;color:var(--p);">${total?'%'+p:'—'}</span>
+          </div>
+          <div style="height:8px;background:var(--s-high);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--pl));width:${p}%;transition:width .5s;"></div>
+          </div>
+        </div>`;
+      }).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
-      <div style="background:#f2ebf7;border-radius:24px;padding:24px;display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <h4 style="font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;color:#1d1a22;margin:0 0 8px 0;">Başarı Rozeti</h4>
-          <p style="font-size:13px;color:#494453;margin:0;">Toplam ${tcAll} doğru cevap ile harika gidiyorsunuz!</p>
-        </div>
-        <div style="width:72px;height:72px;background:rgba(101,86,135,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span style="font-size:36px;">🏆</span>
-        </div>
+    ${tc+tw?`<div style="background:linear-gradient(135deg,var(--p),var(--pl));border-radius:16px;padding:20px 24px;color:#fff;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:'Manrope',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px;">Genel Başarı</div>
+        <div style="font-size:13px;opacity:.8;">${tc} doğru / ${tc+tw} toplam soru</div>
       </div>
-      <div style="background:linear-gradient(135deg,#461599,#5e35b1);border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;">
-        <span style="font-size:26px;">📈</span>
-        <div style="margin-top:16px;">
-          <h4 style="font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;margin:0 0 4px 0;">Verimlilik</h4>
-          <p style="font-size:12px;opacity:.8;margin:0;">Toplam ${Math.round(tcAll/(tcAll+twAll||1)*100)||0}% başarı oranı</p>
-        </div>
-      </div>
-    </div>
-`;
-  }
-
-  // unique id per panel
-  const pid='sp'+(Date.now()%99999);
-  window._spData=window._spData||{};
-  window._spData[pid]={data,renderContent};
-
-  const btnStyle=(active)=>`padding:8px 24px;border-radius:99px;border:none;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;background:${active?'#461599':'transparent'};color:${active?'#fff':'#494453'};font-weight:${active?'600':'500'};`;
-
-  return `<div style="max-width:860px;margin:0 auto;font-family:'Inter',sans-serif;">
-    <div style="display:flex;justify-content:center;margin-bottom:28px;">
-      <div style="display:inline-flex;gap:4px;padding:4px;background:#f8f1fc;border-radius:99px;">
-        <button id="${pid}y" style="${btnStyle(true)}" onclick="spSwitch('${pid}','year')">Bu Yıl</button>
-        <button id="${pid}m" style="${btnStyle(false)}" onclick="spSwitch('${pid}','month')">Bu Ay</button>
-        <button id="${pid}w" style="${btnStyle(false)}" onclick="spSwitch('${pid}','week')">Bu Hafta</button>
-      </div>
-    </div>
-    <div id="${pid}c">${renderContent('year')}</div>
+      <div style="font-family:'Manrope',sans-serif;font-size:48px;font-weight:900;">%${pct}</div>
+    </div>`:''}
   </div>`;
 }
-
-window.spSwitch=function(pid,mode){
-  const d=window._spData&&window._spData[pid];
-  if(!d) return;
-  document.getElementById(pid+'c').innerHTML=d.renderContent(mode);
-  ['y','m','w'].forEach(k=>{
-    const btn=document.getElementById(pid+k);
-    if(!btn) return;
-    const active=(k==='y'&&mode==='year')||(k==='m'&&mode==='month')||(k==='w'&&mode==='week');
-    btn.style.background=active?'#461599':'transparent';
-    btn.style.color=active?'#fff':'#494453';
-    btn.style.fontWeight=active?'600':'500';
-  });
-};
-
-
-async function renderSts(uid,panelId){
-  const snap=await getDoc(doc(db,'stats',uid));
-  $(panelId).innerHTML=buildStsHTML(snap.exists()?snap.data():{},panelId);
-}
-
-async function renderOgr(){
-  const el=$('tOgr');ld('tOgr');
-  const q=CP.role==='admin'?query(collection(db,'users'),where('role','==','student')):query(collection(db,'users'),where('role','==','student'),where('teacherId','==',CU.uid));
-  const snap=await getDocs(q);
-  if(snap.empty){el.innerHTML='<div class="es"><div class="ic">👨‍🎓</div><p>Henüz öğrenci yok.</p></div>';return;}
-
-  /* Her öğrenci için RTDB'den canlı durum dinleyicisi başlat */
-  const liveStatus={};
-  const liveUnsubs=[];
-
-  let h='';
-  for(const ud of snap.docs){
-    const u=ud.data();
-    const ss=await getDoc(doc(db,'stats',ud.id));
-    /* Canlı izle butonları — her fasikül için */
-    const watchBtns=FASIKUL.map(f=>`
-      <button onclick="openLiveWatch('${ud.id}','${f.f}','${f.t}','${ud.id}')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;border:1.5px solid #f59e0b;background:#fffbeb;color:#92400e;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;"
-        onmouseover="this.style.background='#f59e0b';this.style.color='#fff';"
-        onmouseout="this.style.background='#fffbeb';this.style.color='#92400e';">
-        👁 ${f.n}. ${f.t.length>18?f.t.slice(0,18)+'…':f.t}
-      </button>`).join('');
-    h+=`<div class="sts-wrap">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="uav student">${ini(u.name)}</div>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:15px;font-weight:800;">${u.name}</span>
-              <span id="live-dot-${ud.id}" style="display:none;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:#d1fae5;border:1.5px solid #10b981;font-size:10px;font-weight:800;color:#065f46;">
-                <span style="width:6px;height:6px;border-radius:50%;background:#10b981;animation:livePulse 1.2s ease-in-out infinite;display:inline-block;"></span>CANLI
-              </span>
-              <span id="live-page-${ud.id}" style="display:none;font-size:10px;font-weight:700;color:#7c3aed;"></span>
-            </div>
-            <div style="font-size:11px;color:var(--mu);font-weight:600;">@${u.username}</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          ${CP.role==='admin'?`<button class="btn da" onclick="askReset('${ud.id}','${u.name}')">🗑 Sıfırla</button>`:''}
-        </div>
-      </div>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:8px;">🎓 Canlı İzle</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">${watchBtns}</div>
-      </div>
-      ${buildStsHTML(ss.exists()?ss.data():{})}
-    </div><hr class="sdiv">`;
-  }
-  el.innerHTML=h;
-
-  /* Canlı durum animasyon CSS (bir kez ekle) */
-  if(!document.getElementById('livePulseStyle')){
-    const s=document.createElement('style');
-    s.id='livePulseStyle';
-    s.textContent='@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}';
-    document.head.appendChild(s);
-  }
-
-  /* Her öğrenci için RTDB meta dinleyicisi */
-  snap.docs.forEach(ud=>{
-    const metaRef=rtRef(rtdb,`drawings/${ud.id}/meta`);
-    const unsub=onValue(metaRef,snap2=>{
-      const dotEl=document.getElementById(`live-dot-${ud.id}`);
-      const pgEl=document.getElementById(`live-page-${ud.id}`);
-      if(!dotEl) return;
-      if(snap2.exists()){
-        const d=snap2.val();
-        const age=Date.now()-(d.ts||0);
-        if(age<90000){ /* 90 saniye içinde aktif */
-          dotEl.style.display='inline-flex';
-          if(pgEl&&d.page){ pgEl.style.display='inline'; pgEl.textContent='Sayfa '+d.page; }
-        } else {
-          dotEl.style.display='none';
-          if(pgEl) pgEl.style.display='none';
-        }
-      } else {
-        dotEl.style.display='none';
-        if(pgEl) pgEl.style.display='none';
-      }
-    });
-    liveUnsubs.push(unsub);
-  });
-}
-
-async function renderOgt(){
-  const el=$('tOgt');ld('tOgt');
-  const snap=await getDocs(query(collection(db,'users'),where('role','==','teacher')));
-  if(snap.empty){el.innerHTML='<div class="es"><div class="ic">👨‍🏫</div><p>Henüz öğretmen yok.</p></div>';return;}
-  let h='';
-  for(const ud of snap.docs){
-    const u=ud.data();
-    const ss=await getDoc(doc(db,'stats',ud.id));
-    h+=`<div class="sts-wrap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><div class="uav teacher">${ini(u.name)}</div><div><div style="font-size:15px;font-weight:800;">${u.name}</div><div style="font-size:11px;color:var(--mu);font-weight:600;">@${u.username}</div></div></div><button class="btn da" onclick="askReset('${ud.id}','${u.name}')">🗑 Sıfırla</button></div>${buildStsHTML(ss.exists()?ss.data():{})}</div><hr class="sdiv">`;
-  }
-  el.innerHTML=h;
-}
-
-async function renderYon(){
-  const el=$('tYon');ld('tYon');
-  const snap=await getDocs(query(collection(db,'users'),where('role','!=','admin')));
-  const users=snap.docs.map(d=>({id:d.id,...d.data()}));
-  const tMap={};users.filter(u=>u.role==='teacher').forEach(t=>tMap[t.id]=t.name);
-  el.innerHTML=`<div class="yon-wrap"><div class="ul"><div class="ulh"><h3>👥 Kullanıcılar (${users.length})</h3><button class="btn su" onclick="openAddUser()">➕ Kullanıcı Ekle</button></div>${users.length?users.map(u=>{const fasCount=u.allowedFasikul?u.allowedFasikul.length:FASIKUL.length;return`<div class="ur"><div class="uav ${u.role}">${ini(u.name)}</div><div class="ui"><div class="un">${u.name}</div><div class="um">@${u.username} · ${u.role==='teacher'?'Öğretmen':'Öğrenci'}${u.teacherId&&tMap[u.teacherId]?` · 👨‍🏫 ${tMap[u.teacherId]}`:u.role==='student'?' · <span style="color:var(--r)">Öğretmen atanmadı</span>':''} · <span style="color:#0891b2;">📚 ${fasCount}/${FASIKUL.length} fasikül</span></div></div><div class="ua"><button class="btn gh" onclick="showCred('${u.username}','${u.password}','${u.name}')">📋</button>${u.role==='student'?`<button class="btn pr" onclick="openAssign('${u.id}','${u.name}','${u.teacherId||''}')">👨‍🏫 Ata</button>`:''}<button class="btn" style="background:#0891b2;color:#fff;" onclick="openFasAssign('${u.id}','${u.name}')">📚 Fasiküller</button><button class="btn da" onclick="askReset('${u.id}','${u.name}')">🗑</button><button class="btn dl" onclick="delUser('${u.id}','${u.name}')">✕ Sil</button></div></div>`;}).join(''):'<div style="padding:28px;text-align:center;color:var(--mu);font-weight:600;">Kullanıcı yok.</div>'}</div></div>`;
-}
-
-window.openAddUser=async()=>{
-  $('nn').value='';$('nu').value='';$('np').value='';$('nr').value='student';toggleTA();
-  const snap=await getDocs(query(collection(db,'users'),where('role','==','teacher')));
-  const sel=$('nt');sel.innerHTML='<option value="">-- Öğretmen seç --</option>';
-  snap.docs.forEach(d=>{const t=d.data();sel.innerHTML+=`<option value="${d.id}">${t.name}</option>`;});
-  oModal('mAdd');
-};
-
-window.toggleTA=()=>{$('tag').style.display=$('nr').value==='student'?'block':'none';};
-
-window.saveUser=async()=>{
-  const name=$('nn').value.trim(),uname=$('nu').value.trim().toLowerCase(),pass=$('np').value.trim(),role=$('nr').value,tid=$('nt').value;
-  if(!name||!uname||!pass){alert('Tüm alanları doldurun.');return;}
-  const btn=$('sbtn');btn.disabled=true;btn.textContent='Kaydediliyor...';
-  try{
-    const email=uname+'@dijital-defter.app';
-    const cred=await createUserWithEmailAndPassword(auth,email,pass);
-    await setDoc(doc(db,'users',cred.user.uid),{name,username:uname,password:pass,role,teacherId:role==='student'?(tid||null):null,createdAt:serverTimestamp()});
-    await signInWithEmailAndPassword(auth,CU.email,CP.password);
-    closeModal('mAdd');await renderYon();
-    alert(`✅ ${name} eklendi.\nKullanıcı: ${uname}\nŞifre: ${pass}`);
-  }catch(e){
-    if(e.code==='auth/email-already-in-use')alert('Bu kullanıcı adı zaten kayıtlı. Farklı bir kullanıcı adı seçin.');
-    else alert('Hata: '+e.message);
-  }
-  btn.disabled=false;btn.textContent='Kaydet';
-};
-
-window.delUser=async(uid,name)=>{
-  if(!confirm(`"${name}" silinsin mi?`))return;
-  await deleteDoc(doc(db,'users',uid));
-  await deleteDoc(doc(db,'stats',uid)).catch(()=>{});
-  await renderYon();
-};
-
-window.showCred=(u,p,name)=>{
-  cpTxt=`Kullanıcı: ${u}\nŞifre: ${p}`;
-  $('credbox').innerHTML=`<b>Ad:</b> ${name}<br><b>Kullanıcı:</b> ${u}<br><b>Şifre:</b> ${p}`;
-  oModal('mCred');
-};
-window.doCopy=()=>navigator.clipboard.writeText(cpTxt).then(()=>alert('Kopyalandı!')).catch(()=>alert(cpTxt));
-
-let fasAssignUID=null;
-window.openFasAssign=async(uid,name)=>{
-  fasAssignUID=uid;
-  $('fasAssignTxt').textContent=`"${name}" için erişilebilir fasikülleri seçin. Hiç seçilmezse tüm fasiküllere erişebilir.`;
-  const snap=await getDoc(doc(db,'users',uid));
-  const allowed=snap.exists()&&snap.data().allowedFasikul?snap.data().allowedFasikul:null;
-  const list=$('fasCheckList');
-  list.innerHTML=FASIKUL.map(f=>{
-    const checked=!allowed||allowed.includes(f.id);
-    return `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--pb);border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;">
-      <input type="checkbox" id="fc_${f.id}" value="${f.id}" ${checked?'checked':''} style="width:16px;height:16px;accent-color:var(--p);cursor:pointer;">
-      <span style="flex:1;">${f.n}. ${f.t}</span>
-      <span style="font-size:11px;color:var(--mu);font-weight:600;">${f.s}</span>
-    </label>`;
-  }).join('');
-  oModal('mFasAssign');
-};
-window.fasToggleAll=(val)=>{
-  FASIKUL.forEach(f=>{const cb=$('fc_'+f.id);if(cb)cb.checked=val;});
-};
-window.doFasAssign=async()=>{
-  if(!fasAssignUID)return;
-  const selected=FASIKUL.map(f=>$('fc_'+f.id)).filter(cb=>cb&&cb.checked).map(cb=>cb.value);
-  const allSelected=selected.length===FASIKUL.length;
-  const btn=$('fasAssignBtn');
-  btn.disabled=true;btn.textContent='Kaydediliyor...';
-  try{
-    await setDoc(doc(db,'users',fasAssignUID),{allowedFasikul:allSelected?null:selected},{merge:true});
-    closeModal('mFasAssign');
-    await renderYon();
-  }catch(e){alert('Hata: '+e.message);}
-  btn.disabled=false;btn.textContent='💾 Kaydet';
-  fasAssignUID=null;
-};
-
-let assignUID=null;
-window.openAssign=async(uid,name,currentTid)=>{
-  assignUID=uid;
-  $('assignTxt').textContent=`"${name}" adlı öğrenciye öğretmen atanıyor.`;
-  const snap=await getDocs(query(collection(db,'users'),where('role','==','teacher')));
-  const sel=$('assignSel');
-  sel.innerHTML='<option value="">-- Öğretmen seçin (boş = kaldır) --</option>';
-  snap.docs.forEach(d=>{
-    const t=d.data();
-    sel.innerHTML+=`<option value="${d.id}"${d.id===currentTid?' selected':''}>${t.name} (@${t.username})</option>`;
-  });
-  oModal('mAssign');
-};
-window.doAssign=async()=>{
-  if(!assignUID)return;
-  const tid=$('assignSel').value||null;
-  const btn=$('assignBtn');
-  btn.disabled=true;btn.textContent='Kaydediliyor...';
-  try{
-    await setDoc(doc(db,'users',assignUID),{teacherId:tid},{merge:true});
-    closeModal('mAssign');
-    await renderYon();
-  }catch(e){alert('Hata: '+e.message);}
-  btn.disabled=false;btn.textContent='💾 Kaydet';
-  assignUID=null;
-};
-
-window.askReset=(uid,name)=>{rUID=uid;$('rtxt').textContent=`"${name}" adlı kullanıcının tüm istatistikleri silinecek. Emin misiniz?`;oModal('mReset');};
-window.doReset=async()=>{
-  if(!rUID)return;
-  await deleteDoc(doc(db,'stats',rUID)).catch(()=>{});
-  closeModal('mReset');rUID=null;
-  const at=document.querySelector('.tb.on')?.dataset?.tab;
-  if(at==='tOgr')await renderOgr();
-  if(at==='tOgt')await renderOgt();
-  if(at==='tBen'){ld('tBen');await renderSts(CU.uid,'tBen');}
-  await renderFas();
-};
-
-document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
 
 // İlk kurulum: Admin hesabı
 (async()=>{
@@ -1050,15 +479,5 @@ document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.
   }
 })();
 </script>
-
-<!-- Fasikül iframe overlay -->
-<div id="frmOverlay">
-  <div id="frmBar">
-    <button onclick="closeFrame()">← Ana Sayfa</button>
-    <span class="ftitle" id="frmTitle"></span>
-  </div>
-  <iframe id="fasikülFrame" src="" allowfullscreen></iframe>
-</div>
-
 </body>
 </html>

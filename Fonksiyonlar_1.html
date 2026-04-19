@@ -209,18 +209,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 </head>
 <body class="light">
 
-<div class="hdr">
-  <div class="hdr-l">
-    <span style="font-size:1.4rem">📐</span>
-    <h1>TYT/AYT Fonksiyonlar</h1>
-    <span class="badge-hdr" id="badgeHdr">Yeni Başlayan</span>
-  </div>
-  <div class="hdr-r">
-    <div class="str-d">🔥 <span id="strVal">0</span></div>
-    <div class="xp-d">⚡ <span id="xpVal">0</span> XP</div>
-    <button class="thm-btn" onclick="toggleTheme()">☀️</button>
-  </div>
-</div>
+
+
 
 <div class="main">
 
@@ -237,6 +227,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     </div>
     <div class="xp-sec">
       <div class="xp-sec-t">
+        <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🏠 Anasayfa</button>
         <span>⚡ <strong id="xpTxt">0 XP</strong> — <span id="bdgTxt">Yeni Başlayan</span></span>
         <span id="nextBdg">500 XP'e kadar</span>
       </div>
@@ -1955,12 +1946,12 @@ window.addEventListener('load', init);
     const { getFirestore, doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
     const FB_CFG = {
-      apiKey: "AIzaSyAHpqHca8a4DHsa5rbtnWPJ0KRUPCLBRdg",
-      authDomain: "dijital-defter-50c06.firebaseapp.com",
-      projectId: "dijital-defter-50c06",
-      storageBucket: "dijital-defter-50c06.firebasestorage.app",
-      messagingSenderId: "989908182887",
-      appId: "1:989908182887:web:eec6c1ad6c9cf09dbfb1c2"
+      apiKey: "AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",
+      authDomain: "dijital-fasikul.firebaseapp.com",
+      projectId: "dijital-fasikul",
+      storageBucket: "dijital-fasikul.firebasestorage.app",
+      messagingSenderId: "127715156463",
+      appId: "1:127715156463:web:b69b4dc29b6762dc69561a"
     };
     const apps = getApps();
     const app = apps.find(a => a.name === 'fn1-sts') || initializeApp(FB_CFG, 'fn1-sts');

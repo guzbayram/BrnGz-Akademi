@@ -488,14 +488,6 @@
 })();
 </script>
 <div id="upload-screen" class="fixed inset-0 z-50 flex flex-col">
-  <header class="h-16 flex items-center justify-between px-8 bg-primary flex-shrink-0">
-    <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;margin-right:12px;flex-shrink:0;">🏠 Ana Sayfa</button>
-    <div>
-      <div class="font-extrabold text-white text-lg italic tracking-tight" style="font-family:'Manrope',sans-serif;">PDF Kanvas</div>
-      <div class="text-[10px] font-black text-white/60 uppercase tracking-[.2em]">Matematik Çalışma Alanı</div>
-    </div>
-    <div class="flex items-center gap-3"></div>
-  </header>
   <div class="flex-grow flex items-center justify-center bg-[#f0f0f5] cursor-pointer"
     ondragover="event.preventDefault()"
     ondrop="event.preventDefault();PDFKV.loadPdfFile({files:event.dataTransfer.files})"
@@ -551,12 +543,6 @@
       <div style="padding:0 36px 28px;">
         <div style="font-family:'Manrope',sans-serif;font-size:11px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#94a3b8;margin-bottom:14px;">Konu Bazli Performans</div>
         <div id="karne-topic-rows" style="display:flex;flex-direction:column;gap:10px;"></div>
-      </div>
-      <!-- Not -->
-      <div style="padding:0 36px 24px;">
-        <div style="background:#f8f5ff;border:1.5px solid #ddd6fe;border-radius:14px;padding:14px 18px;font-size:12px;color:#7c3aed;font-weight:600;line-height:1.6;">
-          Bu karne yalnizca bu oturumdaki verilerinizi yansitir. Veriler tarayiciyi kapatinca sifirlanir.
-        </div>
       </div>
       <!-- Kapat -->
       <div style="padding:0 36px 32px;display:flex;justify-content:center;">
@@ -615,9 +601,12 @@
 
     <!-- Tool Row (drawing tools) -->
     <div id="main-toolbar" class="px-6 py-3 flex items-center justify-between flex-shrink-0 border-b border-slate-50">
-      <div class="flex items-center gap-2 text-slate-400">
-        <span class="material-symbols-outlined text-base text-primary/40">menu_book</span>
-        <span class="text-[11px] font-bold uppercase tracking-widest text-slate-300">PDF Kanvas</span>
+      <div class="flex items-center gap-3">
+        <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:linear-gradient(135deg,#503397,#7c3aed);border:none;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0;">🏠 Anasayfa</button>
+        <div class="flex items-center gap-2 text-slate-400">
+          <span class="material-symbols-outlined text-base text-primary/40">menu_book</span>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-300">PDF Kanvas</span>
+        </div>
       </div>
       <!-- Drawing Tools -->
       <div class="flex items-center gap-3">
@@ -650,20 +639,21 @@
 
     <!-- Öğretmen izleme banner'ı — JS tarafından doldurulur -->
     <div id="teacher-viewer-bar" style="display:none;align-items:center;justify-content:space-between;
-      padding:10px 24px;background:linear-gradient(90deg,#1e3a5f,#2563eb);
-      color:#fff;flex-shrink:0;gap:12px;flex-wrap:wrap;">
+      padding:10px 24px;background:linear-gradient(90deg,#c2410c,#ea580c);
+      color:#fff;flex-shrink:0;gap:12px;flex-wrap:wrap;border-bottom:3px solid #fb923c;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="width:8px;height:8px;border-radius:50%;background:#facc15;
-          animation:livePulse 1.2s ease-in-out infinite;display:inline-block;flex-shrink:0;"></span>
-        <span style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;letter-spacing:.02em;">
-          🎓 ÖĞRETMEN GÖRÜNÜMÜ — Canlı İzleme
+        <span style="width:10px;height:10px;border-radius:50%;background:#fde047;
+          animation:livePulse 1.2s ease-in-out infinite;display:inline-block;flex-shrink:0;
+          box-shadow:0 0 8px #fde047;"></span>
+        <span style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:900;letter-spacing:.03em;">
+          🎓 ÖĞRETMEN — Canlı İzleme
         </span>
-        <span id="viewer-student-label" style="background:rgba(255,255,255,.15);border-radius:99px;
-          padding:2px 12px;font-size:11px;font-weight:700;letter-spacing:.05em;"></span>
+        <span id="viewer-student-label" style="background:rgba(255,255,255,.2);border-radius:99px;
+          padding:3px 14px;font-size:12px;font-weight:700;letter-spacing:.05em;border:1px solid rgba(255,255,255,.3);"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;opacity:.85;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;background:rgba(0,0,0,.15);padding:4px 12px;border-radius:99px;">
         <span class="material-symbols-outlined" style="font-size:14px;">visibility</span>
-        Salt izleme modu — çizim devre dışı
+        Salt izleme — çizim kapalı
       </div>
     </div>
 
@@ -1062,7 +1052,9 @@ var PDFKV = (function(){
       if(state.autoFit){
         state.scale=computeFitScale(page);
       }
-      var vp=page.getViewport({scale:state.scale});
+      /* ── DPR düzeltmesi: Retina/HiDPI ekranlarda keskin render ── */
+      var dpr=window.devicePixelRatio||1;
+      var vp=page.getViewport({scale:state.scale*dpr});
       /* Resize canvases off-screen then paint — prevents mid-render blank flash */
       var offscreen=document.createElement('canvas');
       offscreen.width=vp.width; offscreen.height=vp.height;
@@ -1071,9 +1063,16 @@ var PDFKV = (function(){
         /* Swap in one frame */
         requestAnimationFrame(function(){
           canvas.width=vp.width; canvas.height=vp.height;
+          /* CSS boyutu DPR'sız sabitle — görsel boyut aynı kalır, fiziksel piksel artar */
+          canvas.style.width=(vp.width/dpr)+'px';
+          canvas.style.height=(vp.height/dpr)+'px';
           ctx.drawImage(offscreen,0,0);
           var dc=el('draw-canvas');
-          if(dc){dc.width=vp.width;dc.height=vp.height;}
+          if(dc){
+            dc.width=vp.width; dc.height=vp.height;
+            dc.style.width=(vp.width/dpr)+'px';
+            dc.style.height=(vp.height/dpr)+'px';
+          }
           if(pc) pc.classList.remove('rendering');
           /* Reset CSS zoom on page change */
           state.cssScale=1;
@@ -2528,7 +2527,7 @@ var PDFKV = (function(){
     }
   }
 
-  /* ── PDF URL'DEN OTOMATİK YÜKLEME ── */
+  /* ── PDF URL'DEN OTOMATIİK YÜKLEME ── */
   function loadPdfFromData(data){
     pdfjsLib.getDocument({data:data}).promise.then(function(doc){
       state.pdfDoc=doc;state.totalPages=doc.numPages;state.currentPage=1;
@@ -2711,6 +2710,64 @@ var PDFKV = (function(){
     /* Fasikül kapatılırken gönder */
     window.addEventListener('beforeunload', _sendActivity);
 
+    /* ── Kaydedilmiş karne + çizimleri yükle ── */
+    if (!isViewer) {
+      try {
+        const savedSnap = await getDoc(doc(db, 'stats', ddUid));
+        if (savedSnap.exists()) {
+          const saved = savedSnap.data();
+          /* Karne: sectionStates geri yükle */
+          const statesJson = saved[ddFid + '_states'];
+          if (statesJson) {
+            try {
+              const loaded = JSON.parse(statesJson);
+              PDFKV._restoreSectionStates(loaded);
+              console.log('[Karne] Önceki oturum yüklendi:', Object.keys(loaded).length, 'bölüm');
+            } catch(e) { console.warn('[Karne] Yükleme hatası:', e); }
+          }
+          /* Aggregate doğru/yanlış'ı da geri yükle */
+          const prevFas = saved[ddFid] || {};
+          if (prevFas.correct || prevFas.wrong) {
+            PDFKV._restoreAggregate(prevFas.correct || 0, prevFas.wrong || 0);
+          }
+        }
+      } catch(e) { console.warn('[Karne] Firestore okuma hatası:', e); }
+
+      /* Kalıcı çizimleri yükle (sayfa açıldığında) */
+      const savedDrawRef = rtRef(rtdb, `savedDrawings/${ddUid}/${ddFid}`);
+      window._loadSavedDrawings = async function(pageNum) {
+        try {
+          const { get } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+          const snap = await get(savedDrawRef);
+          if (!snap.exists()) return;
+          const c = document.getElementById('draw-canvas');
+          if (!c || c.width === 0) return;
+          const ctx = c.getContext('2d');
+          ctx.clearRect(0, 0, c.width, c.height);
+          snap.forEach(child => {
+            const s = child.val();
+            if (s.page !== pageNum) return;
+            if (!s.pts || s.pts.length < 2) return;
+            const sx = c.width / (s.cw || c.width), sy = c.height / (s.ch || c.height);
+            ctx.beginPath();
+            ctx.moveTo(s.pts[0].x * sx, s.pts[0].y * sy);
+            for (let i = 1; i < s.pts.length; i++) ctx.lineTo(s.pts[i].x * sx, s.pts[i].y * sy);
+            ctx.globalCompositeOperation = s.tool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.lineWidth = s.tool === 'eraser' ? (s.size || 2) * 6 : (s.size || 2);
+            ctx.strokeStyle = s.tool === 'eraser' ? 'rgba(0,0,0,1)' : (s.color || '#000');
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.stroke();
+          });
+          console.log('[Çizim] Sayfa', pageNum, 'kaydedilmiş çizimler yüklendi');
+        } catch(e) { console.warn('[Çizim] Yükleme hatası:', e); }
+      };
+
+      /* Sayfa değişiminde kaydedilmiş çizimleri yükle */
+      document.addEventListener('pdfPageChanged', function(e) {
+        setTimeout(() => { if (typeof window._loadSavedDrawings === 'function') window._loadSavedDrawings(e.detail.page); }, 120);
+      });
+    }
+
     let _saveTimer = null;
     window._scheduleStatsSave = function() {
       clearTimeout(_saveTimer);
@@ -2748,6 +2805,10 @@ var PDFKV = (function(){
             }
           };
 
+          /* Detaylı soru durumlarını da kaydet */
+          let statesJson = '{}';
+          try { statesJson = JSON.stringify(PDFKV._getSectionStates()); } catch(e) {}
+
           await setDoc(ref, {
             ...existing,
             daily: newDaily,
@@ -2756,7 +2817,8 @@ var PDFKV = (function(){
               wrong:   PDFKV._getTotalWrong(),
               minutes: newMins,
               sections: sectionMap
-            }
+            },
+            [ddFid + '_states']: statesJson
           });
 
           /* index.html'e de bildir */
@@ -2802,21 +2864,29 @@ var PDFKV = (function(){
         };
       }
 
+      /* Kalıcı çizim path */
+      const savedDrawWriteRef = rtRef(rtdb, `savedDrawings/${ddUid}/${ddFid}`);
+
       /* Stroke kaydet — throttle ile saniyede max 25 paket */
       const _doSendStroke = async function(stroke) {
         if (!stroke || !stroke.pts || stroke.pts.length < 2) return;
+        const strokeData = {
+          page:  stroke.page,
+          tool:  stroke.tool,
+          color: stroke.color,
+          size:  stroke.size,
+          cw:    stroke.cw,
+          ch:    stroke.ch,
+          pts:   stroke.pts,
+          ts:    Date.now()
+        };
         try {
+          /* Canlı senkron için geçici path */
           const strokeRef = rtPush(strokesWriteRef);
-          await rtSet(strokeRef, {
-            page:  stroke.page,
-            tool:  stroke.tool,
-            color: stroke.color,
-            size:  stroke.size,
-            cw:    stroke.cw,
-            ch:    stroke.ch,
-            pts:   stroke.pts,
-            ts:    Date.now()
-          });
+          await rtSet(strokeRef, strokeData);
+          /* Kalıcı depolama */
+          const savedRef = rtPush(savedDrawWriteRef);
+          rtSet(savedRef, strokeData).catch(() => {});
           /* Mevcut sayfayı da meta'da güncelle */
           await rtUpdate(metaWriteRef, { page: stroke.page, ts: Date.now() });
         } catch(e) { console.warn('RTDB draw save error:', e); }
@@ -2864,6 +2934,7 @@ var PDFKV = (function(){
        Realtime Database onValue ile anlık dinleme
     ══════════════════════════════════════════ */
     if (isViewer) {
+      console.log('[VIEWER] Mod aktif. İzlenen öğrenci UID:', targetUid);
       showLiveBadge('viewer');
 
       /* Stroke'ları canvas'a çiz */
@@ -2898,12 +2969,33 @@ var PDFKV = (function(){
       let lastClearedPage  = null;
       let knownStrokeKeys  = new Set();
       let viewerInited     = false;
+      let lastStrokesSnap  = null;  /* son snapshot — sayfa render sonrası yeniden çizmek için */
+
+      /* Saklanan stroke'ları canvas'a uygula */
+      function redrawViewerStrokes() {
+        if (!lastStrokesSnap) return;
+        const c = document.getElementById('draw-canvas');
+        if (!c || c.width === 0 || c.height === 0) return;
+        c.getContext('2d').clearRect(0, 0, c.width, c.height);
+        lastStrokesSnap.forEach(function(child) {
+          const stroke = child.val();
+          if (currentWatchPage === null || stroke.page === currentWatchPage) {
+            applyStroke(stroke);
+          }
+        });
+      }
+
+      /* PDF sayfa render tamamlandığında stroke'ları yeniden çiz */
+      document.addEventListener('pdfPageChanged', function() {
+        setTimeout(redrawViewerStrokes, 80);
+      });
 
       /* Meta dinleyici: sayfa değişimi + temizleme sinyali */
       const metaReadRef = rtRef(rtdb, `drawings/${targetUid}/meta`);
       onValue(metaReadRef, function(snap) {
-        if (!snap.exists()) return;
+        if (!snap.exists()) { console.log('[VIEWER] Meta yok'); return; }
         const data = snap.val();
+        console.log('[VIEWER] Meta geldi:', data);
 
         /* Temizleme sinyali */
         if (data.cleared && data.cleared !== lastClearedPage) {
@@ -2917,7 +3009,6 @@ var PDFKV = (function(){
         /* Sayfa değişimi → PDF sayfasını senkronize et */
         if (data.page && data.page !== currentWatchPage) {
           currentWatchPage = data.page;
-          /* Canvas'ı temizle (yeni sayfa) */
           const c = document.getElementById('draw-canvas');
           if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
           if (typeof PDFKV !== 'undefined' && PDFKV.jumpToPage) {
@@ -2926,20 +3017,23 @@ var PDFKV = (function(){
         }
       });
 
-      /* Stroke'ları dinle: onValue ile tam liste, yeni eklenenler çizilir */
+      /* Stroke'ları dinle: her değişimde snapshot sakla ve yeniden çiz */
       const strokesReadRef = rtRef(rtdb, `drawings/${targetUid}/strokes`);
       onValue(strokesReadRef, function(snap) {
-        if (!snap.exists()) return;
-        /* Her onValue tetiklendiğinde canvas'ı temizle ve tüm stroke'ları yeniden çiz */
         const c = document.getElementById('draw-canvas');
-        if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
-        snap.forEach(function(child) {
-          const stroke = child.val();
-          /* Sadece şu anki sayfaya ait stroke'ları çiz */
-          if (currentWatchPage === null || stroke.page === currentWatchPage) {
-            applyStroke(stroke);
-          }
-        });
+        if (!snap.exists()) {
+          lastStrokesSnap = null;
+          console.log('[VIEWER] Stroke yok / silindi');
+          return;
+        }
+        let count = 0; snap.forEach(() => count++);
+        console.log('[VIEWER] Stroke geldi:', count, 'adet | canvas:', c ? c.width+'x'+c.height : 'YOK');
+        lastStrokesSnap = snap;
+        if (!c || c.width === 0 || c.height === 0) {
+          console.log('[VIEWER] Canvas hazır değil, pdfPageChanged bekleniyor');
+          return;
+        }
+        redrawViewerStrokes();
         viewerInited = true;
       });
     }
@@ -2979,23 +3073,42 @@ var PDFKV = (function(){
         if (qPanel) qPanel.style.display = 'none';
 
       } else {
-        /* ── ÖĞRENCİ GÖRÜNÜMÜ ── */
+        /* ── ÖĞRENCİ / ÖĞRETMEN NORMAL GÖRÜNÜM ── */
+        const ddRole = sessionStorage.getItem('dd_role');
+        const isTeacher = ddRole === 'teacher' || ddRole === 'admin';
         const existing = document.getElementById('live-badge');
         if (existing) existing.remove();
         const badge = document.createElement('div');
         badge.id = 'live-badge';
-        badge.style.cssText = [
-          'display:flex','align-items:center','gap:5px',
-          'padding:4px 10px','border-radius:99px',
-          'font-size:10px','font-weight:800','letter-spacing:.04em',
-          'font-family:Inter,sans-serif','pointer-events:none',
-          'box-shadow:0 1px 8px rgba(0,0,0,.12)','white-space:nowrap','flex-shrink:0',
-          'background:#d1fae5;color:#065f46;border:1.5px solid #10b981;'
-        ].join(';');
-        const dot = document.createElement('span');
-        dot.style.cssText = 'width:6px;height:6px;border-radius:50%;animation:livePulse 1.2s ease-in-out infinite;display:inline-block;flex-shrink:0;background:#10b981';
-        badge.appendChild(dot);
-        badge.appendChild(document.createTextNode('🟢 Canlı Yayın'));
+        if (isTeacher) {
+          /* Öğretmen normal modu — turuncu */
+          badge.style.cssText = [
+            'display:flex','align-items:center','gap:5px',
+            'padding:4px 12px','border-radius:99px',
+            'font-size:10px','font-weight:800','letter-spacing:.04em',
+            'font-family:Inter,sans-serif','pointer-events:none',
+            'box-shadow:0 1px 8px rgba(0,0,0,.15)','white-space:nowrap','flex-shrink:0',
+            'background:#fff7ed;color:#9a3412;border:1.5px solid #ea580c;'
+          ].join(';');
+          const dot = document.createElement('span');
+          dot.style.cssText = 'width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;background:#ea580c';
+          badge.appendChild(dot);
+          badge.appendChild(document.createTextNode('🔶 Öğretmen'));
+        } else {
+          /* Öğrenci modu — yeşil */
+          badge.style.cssText = [
+            'display:flex','align-items:center','gap:5px',
+            'padding:4px 10px','border-radius:99px',
+            'font-size:10px','font-weight:800','letter-spacing:.04em',
+            'font-family:Inter,sans-serif','pointer-events:none',
+            'box-shadow:0 1px 8px rgba(0,0,0,.12)','white-space:nowrap','flex-shrink:0',
+            'background:#d1fae5;color:#065f46;border:1.5px solid #10b981;'
+          ].join(';');
+          const dot = document.createElement('span');
+          dot.style.cssText = 'width:6px;height:6px;border-radius:50%;animation:livePulse 1.2s ease-in-out infinite;display:inline-block;flex-shrink:0;background:#10b981';
+          badge.appendChild(dot);
+          badge.appendChild(document.createTextNode('🟢 Öğrenci - Canlı'));
+        }
         const slot = document.getElementById('live-badge-slot');
         if (slot) slot.appendChild(badge);
         else { badge.style.cssText += ';position:fixed;bottom:80px;right:16px;z-index:9999;'; document.body.appendChild(badge); }
@@ -3006,5 +3119,44 @@ var PDFKV = (function(){
 })();
 </script>
 
+
+<script>
+/* ── OTOMATİK PDF YÜKLEMESİ (Netlify) ── */
+(function(){
+  var PDF_URL='https://lively-mousse-c4b810.netlify.app/Temel_Matematik/Temel_Matematik.pdf';
+  var us=document.getElementById('upload-screen');
+  
+  /* Önce sessizce fetch dene */
+  function tryAutoLoad(){
+    if(typeof pdfjsLib==='undefined'||typeof PDFKV==='undefined'){
+      setTimeout(tryAutoLoad,200); return;
+    }
+    /* Spinner göster */
+    if(us){
+      us._origHTML=us.innerHTML;
+      us.style.pointerEvents='none';
+      us.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0f0f5;gap:16px;">'
+        +'<div style="width:52px;height:52px;border-radius:50%;border:5px solid #e9ddff;border-top-color:#503397;animation:pdfAutoSpin 0.8s linear infinite;"></div>'
+        +'<div style="font-family:Manrope,sans-serif;font-weight:800;font-size:15px;color:#503397;letter-spacing:.02em;">PDF yükleniyor…</div>'
+        +'<style>@keyframes pdfAutoSpin{to{transform:rotate(360deg);}}</style>'
+        +'</div>';
+    }
+    fetch(PDF_URL).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.arrayBuffer();
+    }).then(function(buf){
+      PDFKV.loadPdfFromData(new Uint8Array(buf));
+    }).catch(function(){
+      /* Hata: orijinal upload ekranını geri getir */
+      if(us&&us._origHTML){
+        us.innerHTML=us._origHTML;
+        us.style.pointerEvents='';
+      }
+    });
+  }
+  
+  window.addEventListener('load', tryAutoLoad);
+})();
+</script>
 </body>
 </html>

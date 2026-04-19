@@ -276,15 +276,9 @@ footer span { color:var(--accent); font-weight:700; }
 </head>
 <body>
 
-<header>
-  <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;position:absolute;top:12px;left:12px;z-index:99;">🏠 Ana Sayfa</button>
-  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Aydınlık Mod</button>
-  <div class="badge">TYT · AYT · 11. Sınıf · Fizik</div>
-  <h1>İş – Güç – Enerji</h1>
-  <p>Formüller, interaktif simülasyon ve 50 soruluk test</p>
-</header>
 
 <nav>
+  <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" class="nav-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-color:transparent;">🏠 Anasayfa</button>
   <button class="nav-btn active" onclick="showSec('kavram',this)">⚡ Kavramlar</button>
   <button class="nav-btn" onclick="showSec('formul',this)">🧮 Formüller</button>
   <button class="nav-btn" onclick="showSec('simul',this)">🎮 Simülasyon</button>
@@ -1069,7 +1063,7 @@ function selectAns(idx) {
   opts.forEach(b=>b.disabled=true);
   opts[q.ans].classList.add('correct');
   const correct = idx===q.ans;
-  if(!reviewMode) { if(correct)correctCount++; else wrongCount++; }
+  if(!reviewMode) { if(correct)correctCount++; else wrongCount++; if(window._scheduleFbSave) window._scheduleFbSave(correctCount, wrongCount, null); }
   if(!reviewMode) { if(correct) playCorrect(); else playWrong(); }
   opts[idx].classList.add(correct?'correct':'wrong');
 
@@ -1464,5 +1458,91 @@ function filterCards(cat, btn) {
 buildCards('hepsi');
 
 </script>
+
+<script type="module">
+/* ══════════════════════════════════════════════════════════
+   FİREBASE İSTATİSTİK ENTEGRASYONU — f7
+   stats/{uid}/{fid} = {{ correct, wrong, minutes, sections }}
+══════════════════════════════════════════════════════════ */
+import{{initializeApp,getApps}}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{{getFirestore,doc,getDoc,setDoc}}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{{getAuth,signInWithEmailAndPassword,signInAnonymously}}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const _FB={{
+  apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",
+  authDomain:"dijital-fasikul.firebaseapp.com",
+  projectId:"dijital-fasikul",
+  storageBucket:"dijital-fasikul.firebasestorage.app",
+  messagingSenderId:"127715156463",
+  appId:"1:127715156463:web:b69b4dc29b6762dc69561a"
+}};
+const _app2=getApps().find(a=>a.name==='_stats2')||initializeApp(_FB,'_stats2');
+const _db2=getFirestore(_app2);
+const _auth2=getAuth(_app2);
+
+const _UID=sessionStorage.getItem('dd_uid');
+const _FID=sessionStorage.getItem('dd_fid')||'f7';
+const _uname=sessionStorage.getItem('dd_username')||'';
+const _pass=sessionStorage.getItem('dd_password')||'';
+const _startMs=Date.now();
+let _authReady=false;
+
+(async()=>{{
+  if(_uname&&_pass){{
+    for(const s of['@dijital-defter.app','@dijital-fasikul.com']){{
+      try{{await signInWithEmailAndPassword(_auth2,_uname+s,_pass);_authReady=true;break;}}catch(e){{}}
+    }}
+  }}
+  if(!_authReady){{try{{await signInAnonymously(_auth2);}}catch(e){{}}}}
+}})();
+
+let _saveTimer=null;
+window._scheduleFbSave=function(correct,wrong,sectionName){{
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(async()=>{{
+    if(!_UID)return;
+    try{{
+      const mins=Math.max(1,Math.round((Date.now()-_startMs)/60000));
+      const ref=doc(_db2,'stats',_UID);
+      const snap=await getDoc(ref);
+      const existing=snap.exists()?snap.data():{{}};
+      const prev=existing[_FID]||{{correct:0,wrong:0,minutes:0,sections:{{}}}};
+      const sections={{...( prev.sections||{{}})}};
+      if(sectionName){{
+        const ps=sections[sectionName]||{{correct:0,wrong:0}};
+        sections[sectionName]={{correct:ps.correct+(correct?1:0),wrong:ps.wrong+(wrong?1:0)}};
+      }}
+      await setDoc(ref,{{
+        ...existing,
+        [_FID]:{{
+          correct:Math.max(prev.correct||0,typeof correct==='number'?correct:(prev.correct||0)),
+          wrong:Math.max(prev.wrong||0,typeof wrong==='number'?wrong:(prev.wrong||0)),
+          minutes:Math.max(prev.minutes||0,mins),
+          sections
+        }}
+      }});
+    }}catch(e){{console.warn('FB save err:',e);}}
+  }},2000);
+}};
+
+// Sayfa kapanınca kaydet
+window.addEventListener('beforeunload',()=>{{
+  if(!_UID)return;
+  const mins=Math.max(1,Math.round((Date.now()-_startMs)/60000));
+  if(window.correctCount!==undefined||window.state!==undefined){{
+    const c=window.correctCount||window.state?.correct||0;
+    const w=window.wrongCount||window.state?.wrong||0;
+    window._scheduleFbSave(c,w,null);
+  }}
+}});
+
+// Her dakika otomatik kaydet
+setInterval(()=>{{
+  const c=window.correctCount||window.state?.correct||0;
+  const w=window.wrongCount||window.state?.wrong||0;
+  window._scheduleFbSave(c,w,null);
+}},60000);
+</script>
+
 </body>
 </html>

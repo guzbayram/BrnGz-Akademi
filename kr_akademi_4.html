@@ -1064,35 +1064,10 @@ if(!sessionStorage.getItem('dd_fid')) sessionStorage.setItem('dd_fid','f4');
 if(!sessionStorage.getItem('dd_uid')) sessionStorage.setItem('dd_uid','local_user');
 </script>
 
-
-<!-- BAŞLIK ÇUBUĞU -->
-<div id="toolbar">
-  <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:5px 12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-right:12px;">🏠 Ana Sayfa</button>
-  <span class="tb-title">📐 TYT Matematik Defteri — Fasikül 4</span>
+<div style="display:flex;align-items:center;padding:6px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);position:sticky;top:0;z-index:1000;">
+  <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🏠 Anasayfa</button>
 </div>
 
-<!-- İSTATİSTİK ÇUBUĞU -->
-<div id="stats-bar">
-  <div class="stat-group"><span class="stat-icon">📊</span><span class="stat-label">Toplam:</span><span class="stat-val" id="stat-total">0</span></div>
-  <div class="stat-group correct-group"><span class="stat-icon">✅</span><span class="stat-label">Doğru:</span><span class="stat-val" id="stat-correct">0</span></div>
-  <div class="stat-group wrong-group"><span class="stat-icon">❌</span><span class="stat-label">Yanlış:</span><span class="stat-val" id="stat-wrong">0</span></div>
-  <div class="stat-group"><span class="stat-icon">📈</span><span class="stat-label">Başarı:</span><span class="stat-val" id="stat-pct">—</span></div>
-  <div id="stat-bar-wrap"><div id="stat-bar-fill"></div></div>
-  <!-- Navigasyon -->
-  <button id="nav-prev" onclick="navStep(-1)" title="Önceki bölüm (←)" style="background:#ede8fb;border:1.5px solid #c9b8ea;color:#3d2a80;border-radius:6px;padding:3px 8px;font-size:13px;font-weight:700;cursor:pointer;">◀</button>
-  <input id="nav-input" type="text" value="sf.0" title="Sayfa ID gir, Enter ile git" onkeydown="if(event.key==='Enter')navGo(this.value)" style="width:54px;border:1.5px solid #c9b8ea;border-radius:6px;padding:2px 5px;font-size:11px;text-align:center;background:#fff;color:#3d2a80;font-weight:700;">
-  <button id="nav-go" onclick="navGo(document.getElementById('nav-input').value)" title="Git" style="background:#6B4FBB;border:none;color:white;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">Git</button>
-  <button id="nav-next" onclick="navStep(+1)" title="Sonraki bölüm (→)" style="background:#ede8fb;border:1.5px solid #c9b8ea;color:#3d2a80;border-radius:6px;padding:3px 8px;font-size:13px;font-weight:700;cursor:pointer;">▶</button>
-  <button class="stat-reset-btn" onclick="resetAll()">🔄 Sıfırla</button>
-  <button id="page-zoom-out" onclick="pageZoom(-0.1)" title="Sayfayı küçült (Ctrl+−)" style="background:#ede8fb;border:1.5px solid #c9b8ea;color:#3d2a80;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">🔍−</button>
-  <span id="page-zoom-label" style="font-size:11px;min-width:36px;text-align:center;color:#555;font-weight:700;">100%</span>
-  <button id="page-zoom-in"  onclick="pageZoom(+0.1)" title="Sayfayı büyüt (Ctrl++)" style="background:#ede8fb;border:1.5px solid #c9b8ea;color:#3d2a80;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">🔍+</button>
-  <button id="page-zoom-reset" onclick="pageZoomReset()" title="Sayfa zoom sıfırla (Ctrl+0)" style="background:#ede8fb;border:1.5px solid #c9b8ea;color:#3d2a80;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">⊙</button>
-  <button id="sketchpad-btn" onclick="toggleSketchpad()">✏️ Tahta</button>
-</div>
-
-
-<div id="sketchpad-overlay" onclick="toggleSketchpad()"></div>
 <div id="split-view"><div id="main-area">
 
 <!-- BİLDİRİM TOSTU -->
@@ -11824,7 +11799,7 @@ document.addEventListener('keydown', (e) => {
 import{initializeApp,getApps}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getFirestore,doc,getDoc,setDoc,updateDoc,increment,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const _FB_CFG={apiKey:"AIzaSyAHpqHca8a4DHsa5rbtnWPJ0KRUPCLBRdg",authDomain:"dijital-defter-50c06.firebaseapp.com",projectId:"dijital-defter-50c06",storageBucket:"dijital-defter-50c06.firebasestorage.app",messagingSenderId:"989908182887",appId:"1:989908182887:web:eec6c1ad6c9cf09dbfb1c2"};
+const _FB_CFG={apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a"};
 const _fbApp=getApps().length?getApps()[0]:initializeApp(_FB_CFG);
 const _db=getFirestore(_fbApp);
 
@@ -11875,7 +11850,7 @@ setInterval(async()=>{
 <script type="module">
 import{initializeApp,getApps}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-const _FC={apiKey:"AIzaSyAHpqHca8a4DHsa5rbtnWPJ0KRUPCLBRdg",authDomain:"dijital-defter-50c06.firebaseapp.com",projectId:"dijital-defter-50c06",storageBucket:"dijital-defter-50c06.firebasestorage.app",messagingSenderId:"989908182887",appId:"1:989908182887:web:eec6c1ad6c9cf09dbfb1c2"};
+const _FC={apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a"};
 const _app=getApps().length?getApps()[0]:initializeApp(_FC);
 const _auth=getAuth(_app);
 // Kullanıcı oturumunu sessionStorage'a yaz - index.html'e dönünce kullanılır

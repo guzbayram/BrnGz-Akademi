@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="tr" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrnGz Akademi — Öğretmen Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#461599;--pd:#3a1180;--pl:#6c45c0;--pb:#eaddff;--pb2:#d1bcff;
+  --bg:#fef7ff;--s-low:#f8f1fc;--s-cnt:#f2ebf7;--s-high:#ede6f1;--s-highest:#e7e0eb;--s-lowest:#fff;
+  --tx:#1d1a22;--mu:#494453;--br:#cbc3d5;
+  --g:#16a34a;--r:#dc2626;--o:#e07020;--amb:#d97706;
+  --shadow-p:rgba(70,21,153,.08);
+  --shadow-lg:0 8px 24px rgba(70,21,153,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;display:inline-block;line-height:1;}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:256px;flex-shrink:0;height:100vh;position:sticky;top:0;
+  background:var(--s-low);
+  display:flex;flex-direction:column;
+  padding:28px 16px 0;gap:0;
+  border-right:1px solid rgba(203,195,213,.2);
+  overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-track{background:transparent;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--s-highest);border-radius:99px;}
+.sb-brand{padding:0 12px;margin-bottom:32px;}
+.sb-brand h1{font-family:'Manrope',sans-serif;font-size:18px;font-weight:900;color:var(--p);letter-spacing:-.02em;}
+.sb-brand p{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.15em;margin-top:2px;}
+
+.sb-profile{display:flex;align-items:center;gap:12px;padding:12px;background:var(--s-lowest);border-radius:16px;margin-bottom:24px;box-shadow:0 2px 8px rgba(70,21,153,.05);}
+.sb-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--pl),var(--p));display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;}
+.sb-info h3{font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);line-height:1.2;}
+.sb-info p{font-size:10px;color:var(--mu);font-weight:600;margin-top:2px;}
+.sb-role{display:inline-block;padding:2px 8px;background:#f0fdf4;color:var(--g);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;border-radius:99px;margin-top:3px;}
+
+.sb-nav{display:flex;flex-direction:column;gap:4px;flex:1;}
+.sb-section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--mu);padding:8px 12px 4px;margin-top:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:none;background:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;width:100%;text-align:left;text-decoration:none;}
+.nav-item:hover{background:var(--s-cnt);color:var(--tx);}
+.nav-item.active{background:var(--pb);color:var(--p);}
+.nav-item .material-symbols-outlined{font-size:18px;}
+.nav-item .badge{margin-left:auto;background:var(--p);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:800;}
+
+.sb-footer{margin-top:auto;padding-top:16px;border-top:1px solid rgba(203,195,213,.3);}
+.sb-logout{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:none;background:none;color:var(--mu);font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .15s;}
+.sb-logout:hover{background:#fef2f2;color:var(--r);}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;height:100vh;}
+
+/* ── Topbar ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(254,247,255,.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(203,195,213,.2);
+  padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-title{font-family:'Manrope',sans-serif;font-size:18px;font-weight:800;color:var(--tx);}
+.topbar-sub{font-size:12px;color:var(--mu);font-weight:500;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s;}
+.icon-btn:hover{background:var(--s-cnt);color:var(--p);}
+
+/* ── Content ── */
+.content{padding:20px 24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;}
+.tp{display:none;}.tp.on{display:flex;flex-direction:column;height:100%;}
+/* Öğrencilerim içeriği dikeyde ortala */
+#tOgr-inner{justify-content:center;}
+
+/* ── Section Header ── */
+.sec-hdr{display:flex;align-items:flex-end;justify-content:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;text-align:center;}
+.sec-title{font-family:'Manrope',sans-serif;font-size:24px;font-weight:900;color:var(--tx);letter-spacing:-.02em;}
+.sec-sub{font-size:13px;color:var(--mu);font-weight:500;margin-top:4px;}
+.sec-actions{display:flex;gap:8px;}
+
+/* ── Buttons ── */
+.btn-primary{background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border:none;border-radius:99px;padding:9px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;box-shadow:0 4px 12px rgba(70,21,153,.25);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(70,21,153,.35);}
+.btn-ghost{background:transparent;border:1.5px solid rgba(203,195,213,.6);color:var(--p);border-radius:99px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+.btn-ghost:hover{background:var(--pb);border-color:var(--pb);}
+
+/* ── Stat Cards ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.stat-card{background:var(--s-lowest);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow-lg);transition:all .2s;cursor:default;}
+.stat-card:hover{background:var(--pb);transform:translateY(-2px);box-shadow:0 12px 32px rgba(70,21,153,.12);}
+.stat-icon{width:36px;height:36px;border-radius:10px;background:rgba(216,198,254,.25);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.stat-icon .material-symbols-outlined{font-size:22px;color:var(--p);}
+.stat-val{font-family:'Manrope',sans-serif;font-size:26px;font-weight:900;color:var(--tx);line-height:1;margin-bottom:4px;}
+.stat-label{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;}
+.stat-delta{font-size:11px;font-weight:700;color:var(--g);margin-top:6px;}
+
+/* ── Student Scroll ── */
+.student-row{display:flex;gap:24px;overflow-x:auto;padding:8px 0 16px;margin-bottom:16px;scrollbar-width:none;justify-content:center;flex-wrap:wrap;}
+.student-row::-webkit-scrollbar{display:none;}
+.student-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s;}
+.student-chip .avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:20px;border:3px solid transparent;transition:all .2s;background:var(--s-high);color:var(--p);}
+.student-chip.active .avatar{border-color:var(--p);background:var(--pb);box-shadow:0 0 0 3px rgba(70,21,153,.1);}
+.student-chip:hover .avatar{border-color:var(--pb2);}
+.student-chip .name{font-size:11px;font-weight:700;color:var(--mu);transition:color .15s;}
+.student-chip.active .name{color:var(--p);}
+.student-chip .live-dot{width:10px;height:10px;border-radius:50%;background:var(--g);border:2px solid #fff;position:absolute;bottom:2px;right:2px;}
+.student-chip .av-wrap{position:relative;}
+
+/* ── Performance Section ── */
+.perf-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px;}
+.card{background:var(--s-lowest);border-radius:20px;padding:20px 24px;box-shadow:var(--shadow-lg);overflow-y:auto;height:40vh;min-height:280px;}
+.card-title{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:var(--tx);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.card-title .material-symbols-outlined{font-size:18px;color:var(--p);}
+
+/* Progress bars */
+.subject-row{margin-bottom:18px;}
+.subject-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.subject-name{font-size:13px;font-weight:700;color:var(--tx);}
+.subject-pct{font-size:13px;font-weight:800;color:var(--p);}
+.prog-track{height:8px;background:var(--s-high);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--pl));transition:width .7s cubic-bezier(.4,0,.2,1);}
+
+/* ── Fasikül Status ── */
+.fas-list{display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.fas-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s-low);border-radius:14px;transition:all .15s;}
+.fas-item:hover{background:var(--s-cnt);}
+.fas-item.active{border-left:3px solid var(--p);}
+.fas-icon{width:40px;height:40px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fas-icon .material-symbols-outlined{font-size:18px;color:var(--p);}
+.fas-name{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--tx);line-height:1.3;}
+.fas-sub{font-size:11px;color:var(--mu);font-weight:500;margin-top:2px;}
+.fas-status{margin-left:auto;flex-shrink:0;}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
+.pill.done{background:#d1fae5;color:#065f46;}
+.pill.active{background:var(--pb);color:var(--p);}
+.pill.locked{background:var(--s-high);color:var(--mu);}
+.watch-btn{padding:5px 12px;border-radius:99px;border:1.5px solid #f59e0b;background:#fffbeb;color:#92400e;font-size:11px;font-weight:800;cursor:pointer;transition:all .15s;margin-left:8px;}
+.watch-btn:hover{background:#f59e0b;color:#fff;border-color:#f59e0b;}
+
+/* ── Student List (full) ── */
+.student-table{width:100%;border-collapse:collapse;}
+.student-table th{background:var(--s-low);color:var(--p);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:12px 16px;text-align:left;}
+.student-table td{padding:14px 16px;font-size:13px;border-top:1px solid rgba(203,195,213,.15);}
+.student-table tr:hover td{background:var(--s-low);}
+.student-table .av{width:36px;height:36px;border-radius:50%;background:var(--pb);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--p);}
+
+/* ── Insight Card ── */
+.insight-card{background:linear-gradient(135deg,rgba(70,21,153,.05),rgba(108,69,192,.08));border:1px solid rgba(70,21,153,.08);border-radius:16px;padding:18px 20px;display:flex;align-items:flex-start;gap:14px;margin-top:20px;}
+.insight-icon{width:40px;height:40px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.insight-text{font-size:13px;color:var(--mu);line-height:1.6;font-style:italic;}
+.insight-text strong{color:var(--tx);font-style:normal;}
+
+/* ── Loading / Empty ── */
+.ld{text-align:center;padding:60px;color:var(--mu);}
+.sp{width:32px;height:32px;border:3px solid var(--s-high);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.es{text-align:center;padding:60px 24px;color:var(--mu);}
+.es .ic{font-size:40px;margin-bottom:12px;}
+
+/* ── Heatmap ── */
+.heatmap-card{background:var(--s-low);border-radius:20px;padding:24px;margin-bottom:20px;}
+.heatmap-grid{display:grid;gap:4px;}
+.heat-cell{height:14px;border-radius:3px;cursor:default;}
+
+/* ── Mobile ── */
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .main{width:100%;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .perf-grid{grid-template-columns:1fr;}
+  .content{padding:20px 16px;}
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.tp.on > *{animation:fadeUp .3s ease both;}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <h1>BrnGz Akademi</h1>
+    <p>Öğretmen Paneli</p>
+  </div>
+
+  <div class="sb-profile" id="sb-profile">
+    <div class="sb-av" id="sb-av">?</div>
+    <div class="sb-info">
+      <h3 id="sb-name">Yükleniyor...</h3>
+      <p id="sb-email">—</p>
+      <span class="sb-role">Öğretmen</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section-label">Ana Menü</div>
+    <button class="nav-item active" onclick="switchTab('tOgr',this)">
+      <span class="material-symbols-outlined">group</span>
+      Öğrencilerim
+      <span class="badge" id="student-count-badge">—</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('tFas',this)">
+      <span class="material-symbols-outlined">auto_stories</span>
+      Fasiküller
+    </button>
+
+  </nav>
+
+  <div class="sb-footer" style="flex-shrink:0;margin-top:auto;padding:16px 0;">
+    <button class="sb-logout" id="logout-btn">
+      <span class="material-symbols-outlined">logout</span>
+      Çıkış Yap
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-title" id="topbar-title">Öğrencilerim</div>
+        <div class="topbar-sub" id="topbar-sub">Öğrenci performanslarını izle</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" title="Bildirimler">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Öğrencilerim Tab -->
+    <div class="tp on" id="tOgr" style="justify-content:center;">
+      <div id="tOgr-inner" style="display:flex;flex-direction:column;width:100%;">
+        <div class="ld"><div class="sp"></div>Yükleniyor...</div>
+      </div>
+    </div>
+
+    <!-- Fasiküller Tab -->
+    <div class="tp" id="tFas" style="overflow-y:auto;justify-content:center;align-items:center;flex-direction:column;">
+      <div class="sec-hdr" style="width:100%;">
+        <div>
+          <h2 class="sec-title">Fasiküller</h2>
+          <p class="sec-sub">Müfredattaki tüm fasiküllerinizi buradan yönetin.</p>
+        </div>
+      </div>
+      <div id="fas-grid" class="ld" style="justify-content:center;"><div class="sp"></div>Yükleniyor...</div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Fasikül Karne Modal -->
+<div id="karneModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:4000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:24px;padding:28px;max-width:580px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 64px rgba(70,21,153,.2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div>
+        <div id="km-title" style="font-family:'Manrope',sans-serif;font-size:18px;font-weight:900;color:var(--p);"></div>
+        <div id="km-sub" style="font-size:12px;color:var(--mu);margin-top:2px;"></div>
+      </div>
+      <button onclick="closeKarne()" style="background:var(--s-high);border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:18px;">✕</button>
+    </div>
+    <!-- Özet stat kutuları -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="km-stats"></div>
+    <!-- Section / konu bazlı tablo -->
+    <div id="km-sections"></div>
+    <!-- Canlı izle butonu -->
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button id="km-watch-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border:none;border-radius:12px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        👁 Canlı İzle
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Watch Overlay -->
+<div id="frmOverlay" style="display:none;position:fixed;inset:0;z-index:5000;background:var(--p);flex-direction:column;">
+  <iframe id="fasikülFrame" src="" allowfullscreen style="flex:1;border:none;width:100%;height:100%;"></iframe>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,setDoc,collection,getDocs,query,where,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getDatabase,ref as rtRef,onValue}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
+const auth=getAuth(FB),db=getFirestore(FB),rtdb=getDatabase(FB);
+
+const FASIKUL=[
+  {id:'f1',t:'Fonksiyonlar 1',s:'Matematik',f:'Fonksiyonlar_1.html',n:'1'},
+  {id:'f2',t:'Temel Kavramlar',s:'Matematik',f:'Matematik_Temel_Kavramlar.html',n:'2'},
+  {id:'f3',t:'Bilge Fizikçiler',s:'Fizik 10. Sınıf',f:'BilgeFizikciler.html',n:'3'},
+  {id:'f4',t:'Oran Orantı & Yüzde',s:'Matematik TYT',f:'kr_akademi_4.html',n:'4'},
+  {id:'f5',t:'Kâr-Zarar Problemleri',s:'Matematik 10.',f:'kr_akademi_5.html',n:'5'},
+  {id:'f6',t:'Hareket',s:'Fizik 10. Sınıf',f:'duzgun-dogrusal-hareket.html',n:'6'},
+  {id:'f7',t:'İş-Güç-Enerji',s:'Fizik 10. Sınıf',f:'is-guc-enerji.html',n:'7'},
+  {id:'f8',t:'Temel Matematik',s:'Matematik 10.',f:'Temel_Matematik.html',n:'8'}
+];
+
+const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
+const ini=n=>(n||'?').charAt(0).toUpperCase();
+const $=id=>document.getElementById(id);
+
+let CU=null,CP=null,activeStudentUid=null,liveUnsubs=[];
+
+window.switchTab=(id,el)=>{
+  document.querySelectorAll('.tp').forEach(t=>t.classList.remove('on'));
+  $(id).classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={tOgr:['Öğrencilerim','Öğrenci performanslarını izle'],tFas:['Fasiküller','Müfredatı yönet']};
+  if(titles[id]){$('topbar-title').textContent=titles[id][0];$('topbar-sub').textContent=titles[id][1];}
+  if(id==='tFas') renderFas();
+};
+
+window.openFrame=(url,title)=>{
+  $('fasikülFrame').src=url;
+  $('frmOverlay').style.display='flex';
+};
+window.openLiveWatch=(studentUid,fasUrl,fasTitle)=>{
+  sessionStorage.setItem('dd_uid',CU.uid);
+  sessionStorage.setItem('dd_name',CP.name);
+  sessionStorage.setItem('dd_role',CP.role);
+  sessionStorage.setItem('dd_fid','watch');
+  sessionStorage.setItem('dd_tid','');
+  sessionStorage.setItem('dd_username',CP.username||'');
+  sessionStorage.setItem('dd_password',CP.password||'');
+  openFrame(fasUrl+'?watch='+encodeURIComponent(studentUid), '👁 Canlı: '+fasTitle);
+};
+window.closeFrame=()=>{$('frmOverlay').style.display='none';$('fasikülFrame').src='';};
+
+$('logout-btn').onclick=async()=>{await signOut(auth);location.href='index.html';};
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){location.href='index.html';return;}
+  CU=user;
+  const snap=await getDoc(doc(db,'users',user.uid));
+  if(!snap.exists()||snap.data().role!=='teacher'){location.href='index.html';return;}
+  CP=snap.data();
+  $('sb-av').textContent=ini(CP.name);
+  $('sb-name').textContent=CP.name;
+  $('sb-email').textContent=CP.username?'@'+CP.username:'';
+  await renderOgr();
+});
+
+/* ── Öğrenciler Tab ── */
+async function renderOgr(){
+  const el=$('tOgr-inner');
+  el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+
+  const snap=await getDocs(query(collection(db,'users'),where('role','==','student'),where('teacherId','==',CU.uid)));
+  $('student-count-badge').textContent=snap.size;
+
+  if(snap.empty){
+    el.innerHTML='<div class="es"><div class="ic">👨‍🎓</div><p>Henüz atanmış öğrenciniz yok.</p></div>';
+    $('sb-students-section').style.display='none';
+    return;
+  }
+
+  const students=[];
+  for(const ud of snap.docs){
+    const u=ud.data();
+    const ss=await getDoc(doc(db,'stats',ud.id));
+    const stats=ss.exists()?ss.data():{};
+    let tc=0,tw=0,tm=0;
+    FASIKUL.forEach(f=>{const fs=stats[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+    students.push({uid:ud.id,...u,tc,tw,tm,pct:tc+tw?Math.round(tc/(tc+tw)*100):0,stats});
+  }
+
+  if(!activeStudentUid) activeStudentUid=students[0]?.uid;
+  window._allStudents = students;
+
+  // ── Özet stat kartlar ──
+  const totalStudents=students.length;
+  const avgPct=students.length?Math.round(students.reduce((a,s)=>a+s.pct,0)/students.length):0;
+  const totalQ=students.reduce((a,s)=>a+s.tc+s.tw,0);
+  const totalMin=students.reduce((a,s)=>a+s.tm,0);
+
+  const statsHTML=`
+  <div class="stat-grid" style="flex-shrink:0;">
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-symbols-outlined">group</span></div>
+      <div class="stat-val">${totalStudents}</div>
+      <div class="stat-label">Toplam Öğrenci</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></div>
+      <div class="stat-val">%${avgPct}</div>
+      <div class="stat-label">Ortalama Başarı</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-symbols-outlined">quiz</span></div>
+      <div class="stat-val">${totalQ.toLocaleString('tr')}</div>
+      <div class="stat-label">Toplam Soru</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><span class="material-symbols-outlined">schedule</span></div>
+      <div class="stat-val">${fmt(totalMin)}</div>
+      <div class="stat-label">Toplam Süre</div>
+    </div>
+  </div>`;
+
+  const studentSelectorHTML=`
+  <div style="margin-bottom:16px;">
+    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--mu);margin-bottom:12px;">ÖĞRENCİ SEÇ</div>
+    <div class="student-row" id="student-chip-row">
+      ${students.map(s=>`
+        <div class="student-chip${s.uid===activeStudentUid?' active':''}" onclick="selectStudent('${s.uid}')" id="chip-${s.uid}">
+          <div class="av-wrap">
+            <div class="avatar">${ini(s.name)}</div>
+            <span class="live-dot" id="live-dot-${s.uid}" style="display:none;"></span>
+          </div>
+          <span class="name">${s.name.split(' ')[0]}</span>
+          <span style="font-size:10px;font-weight:800;color:var(--p);">%${s.pct}</span>
+        </div>`).join('')}
+    </div>
+  </div>`;
+
+  el.innerHTML=statsHTML+studentSelectorHTML+'<div id="student-detail" style="flex:1;min-height:0;display:flex;flex-direction:column;"></div>';
+
+  // ── Canlı dinleyiciler ──
+  liveUnsubs.forEach(u=>u());liveUnsubs=[];
+  students.forEach(s=>{
+    const r=rtRef(rtdb,`drawings/${s.uid}/meta`);
+    const unsub=onValue(r,snap=>{
+      const dot=$('live-dot-'+s.uid);
+      if(dot) dot.style.display=snap.exists()?'block':'none';
+    });
+    liveUnsubs.push(unsub);
+  });
+
+  window.selectStudent=async(uid)=>{
+    activeStudentUid=uid;
+    document.querySelectorAll('.student-chip').forEach(c=>c.classList.remove('active'));
+    const chip=$('chip-'+uid);if(chip) chip.classList.add('active');
+    const s=students.find(x=>x.uid===uid);
+    if(!s) return;
+    renderStudentDetail(s);
+  };
+
+  renderStudentDetail(students.find(s=>s.uid===activeStudentUid)||students[0]);
+}
+
+function renderStudentDetail(s){
+  const el=$('student-detail');
+  if(!el) return;
+
+  // Per-fasikul stats
+  const fasStats=FASIKUL.map(f=>{
+    const fs=s.stats[f.id]||{};
+    const c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
+    const total=c+w;
+    return{...f,c,w,m,total,pct:total?Math.round(c/total*100):0,started:!!(c||w||m)};
+  });
+
+  const subjects=['Matematik','Fizik'];
+  const subjectStats=subjects.map(sub=>{
+    const fs=fasStats.filter(f=>f.s.toLowerCase().includes(sub.toLowerCase()));
+    const c=fs.reduce((a,x)=>a+x.c,0),w=fs.reduce((a,x)=>a+x.w,0);
+    const total=c+w;
+    return{name:sub,pct:total?Math.round(c/total*100):0};
+  });
+
+  el.innerHTML=`
+  <div class="perf-grid">
+    <!-- Performans -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="card-title" style="flex-shrink:0;">
+        <span class="material-symbols-outlined">monitoring</span>
+        <span>${s.name} — Performans</span>
+      </div>
+      ${subjectStats.map(sub=>`
+      <div class="subject-row">
+        <div class="subject-top">
+          <span class="subject-name">${sub.name}</span>
+          <span class="subject-pct">%${sub.pct}</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${sub.pct}%"></div></div>
+      </div>`).join('')}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(203,195,213,.2);">
+        <div style="text-align:center;">
+          <div style="font-family:'Manrope',sans-serif;font-size:24px;font-weight:900;color:var(--g);">${s.tc}</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--mu);letter-spacing:.08em;margin-top:4px;">Doğru</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Manrope',sans-serif;font-size:24px;font-weight:900;color:var(--r);">${s.tw}</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--mu);letter-spacing:.08em;margin-top:4px;">Yanlış</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Manrope',sans-serif;font-size:24px;font-weight:900;color:var(--p);">${fmt(s.tm)}</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--mu);letter-spacing:.08em;margin-top:4px;">Süre</div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon"><span class="material-symbols-outlined" style="color:var(--p);">lightbulb</span></div>
+        <p class="insight-text">
+          <strong>${s.name}</strong> toplam <strong>${s.tc+s.tw}</strong> soru çözdü. 
+          Başarı oranı <strong>%${s.pct}</strong>. 
+          ${s.pct>=80?'Harika bir performans! 🎉':s.pct>=50?'İyi gidiyor, devam!':'Desteğe ihtiyacı olabilir.'}
+        </p>
+      </div>
+    </div>
+
+    <!-- Fasikül Durumu -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="card-title" style="flex-shrink:0;">
+        <span class="material-symbols-outlined">auto_stories</span>
+        Fasikül Durumu
+      </div>
+      <div class="fas-list" style="flex:1;overflow-y:auto;">
+        ${fasStats.map(f=>`
+        <div class="fas-item${f.started?' active':''}">
+          <div class="fas-icon"><span class="material-symbols-outlined">menu_book</span></div>
+          <div style="flex:1;min-width:0;">
+            <div class="fas-name">${f.t}</div>
+            <div class="fas-sub">${f.s}${f.total?' · '+f.c+'/'+f.total+' ✓':''}</div>
+          </div>
+          <div class="fas-status">
+            ${f.started?`<span class="pill done">%${f.pct}</span>`:'<span class="pill locked">Başlanmadı</span>'}
+          </div>
+          <button class="watch-btn" onclick="openKarne('${s.uid}','${f.id}','${f.t}','${f.s}')">📋 Karne</button>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── Fasiküller Tab ── */
+async function renderFas(){
+  const el=$('fas-grid');
+  el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+  const ss=await getDoc(doc(db,'stats',CU.uid));
+  const stats=ss.exists()?ss.data():{};
+
+  el.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:16px;';
+  el.innerHTML=FASIKUL.map(f=>{
+    const fs=stats[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
+    const started=!!(c||w||m),total=c+w,pct=total?Math.round(c/total*100):0;
+    return`<div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 16px rgba(70,21,153,.06);cursor:pointer;transition:all .2s;width:240px;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(70,21,153,.12)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(70,21,153,.06)'" onclick="(()=>{sessionStorage.setItem('dd_uid','${CU.uid}');sessionStorage.setItem('dd_name','${CP.name}');sessionStorage.setItem('dd_role','${CP.role}');sessionStorage.setItem('dd_fid','${f.id}');sessionStorage.setItem('dd_username','${CP.username||''}');sessionStorage.setItem('dd_password','${CP.password||''}');openFrame('${f.f}','${f.t}')})()">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:16px;color:var(--p);">${f.n}</div>
+        <span style="padding:4px 10px;border-radius:99px;font-size:10px;font-weight:800;background:${started?'#d1fae5':'var(--s-high)'};color:${started?'#065f46':'var(--mu)'};">${started?'Başlandı':'Yeni'}</span>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:rgba(70,21,153,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Fasikül #${f.n.padStart(2,'0')}</div>
+      <div style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;color:var(--tx);margin-bottom:4px;line-height:1.3;">${f.t}</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:16px;">${f.s}</div>
+      <div style="height:6px;background:var(--s-high);border-radius:99px;overflow:hidden;margin-bottom:8px;">
+        <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--pl));width:${started&&total?pct:started?8:100}%;"></div>
+      </div>
+      ${started?`<div style="font-size:11px;font-weight:700;color:var(--mu);">${c} Doğru · ${w} Yanlış · %${pct}</div>`:'<div style="font-size:11px;color:var(--mu);font-style:italic;">Henüz başlanmadı</div>'}
+    </div>`;
+  }).join('');
+}
+
+window.addEventListener('message',e=>{if(e.data==='closeFrame')closeFrame();});
+
+window.openKarne = function(studentUid, fasId, fasTitle, fasSubject) {
+  const modal = $('karneModal');
+  modal.style.display = 'flex';
+
+  $('km-title').textContent = '📋 ' + fasTitle;
+  $('km-sub').textContent = fasSubject + ' · Karne & İstatistik';
+
+  // Find student stats
+  const allStudents = window._allStudents || [];
+  const s = allStudents.find(x => x.uid === studentUid);
+  if (!s) { $('km-stats').innerHTML = '<p style="color:var(--mu)">Veri bulunamadı.</p>'; return; }
+
+  const fs = s.stats[fasId] || {};
+  const c = fs.correct || 0;
+  const w = fs.wrong || 0;
+  const m = fs.minutes || 0;
+  const total = c + w;
+  const pct = total ? Math.round(c / total * 100) : 0;
+  const sv = fs.solutionViews || 0;
+
+  // Stat boxes
+  $('km-stats').innerHTML = `
+    <div style="background:var(--s-low);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;color:var(--g);">${c}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Doğru</div>
+    </div>
+    <div style="background:var(--s-low);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;color:var(--r);">${w}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Yanlış</div>
+    </div>
+    <div style="background:var(--s-low);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;color:var(--p);">${pct}%</div>
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Başarı</div>
+    </div>
+    <div style="background:var(--s-low);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;color:var(--tx);">${m}<span style="font-size:14px;font-weight:700;">dk</span></div>
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Süre</div>
+    </div>
+    <div style="background:var(--s-low);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;color:var(--amb);">${sv}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Çözüm Görme</div>
+    </div>
+    <div style="background:${pct>=70?'#f0fdf4':pct>=40?'var(--pb)':'#fef2f2'};border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:4px;">${pct>=80?'🌟':pct>=60?'👍':pct>=40?'📚':'⚠️'}</div>
+      <div style="font-size:11px;font-weight:700;color:${pct>=70?'var(--g)':pct>=40?'var(--p)':'var(--r)'};">${pct>=80?'Mükemmel':pct>=60?'İyi':'Başlangıç'}</div>
+    </div>
+  `;
+
+  // Sections breakdown
+  const sections = fs.sections || {};
+  const secKeys = Object.keys(sections);
+  if (secKeys.length > 0) {
+    $('km-sections').innerHTML = `
+      <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);margin-bottom:12px;">📊 Konu Bazlı Performans</div>
+      ${secKeys.map(k => {
+        const sec = sections[k];
+        const sc = sec.correct || 0, sw = sec.wrong || 0, stotal = sc + sw;
+        const spct = stotal ? Math.round(sc / stotal * 100) : 0;
+        return `<div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:12px;font-weight:700;color:var(--tx);">${k}</span>
+            <span style="font-size:12px;font-weight:800;color:var(--p);">${stotal ? spct + '%' : '—'}</span>
+          </div>
+          <div style="height:7px;background:var(--s-high);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;border-radius:99px;background:${spct>=70?'var(--g)':spct>=40?'var(--p)':'var(--r)'};width:${spct}%;transition:width .6s;"></div>
+          </div>
+          <div style="font-size:10px;color:var(--mu);margin-top:3px;">${sc} doğru · ${sw} yanlış</div>
+        </div>`;
+      }).join('')}
+    `;
+  } else {
+    const started = c > 0 || w > 0 || m > 0;
+    $('km-sections').innerHTML = started
+      ? '<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px;">Konu detayı bu fasikülde mevcut değil.</div>'
+      : '<div style="text-align:center;padding:30px;color:var(--mu);"><div style="font-size:32px;margin-bottom:8px;">📖</div><div style="font-size:13px;">Bu fasikül henüz başlanmamış.</div></div>';
+  }
+
+  // Live watch button
+  const fasObj = FASIKUL.find(f => f.id === fasId);
+  $('km-watch-btn').onclick = () => {
+    closeKarne();
+    if (fasObj) openLiveWatch(studentUid, fasObj.f, fasObj.t);
+  };
+};
+
+window.closeKarne = function() {
+  $('karneModal').style.display = 'none';
+};
+
+</script>
+</body>
+</html>

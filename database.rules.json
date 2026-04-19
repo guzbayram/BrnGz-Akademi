@@ -13,6 +13,16 @@
           }
         }
       }
+    },
+    "savedDrawings": {
+      "$uid": {
+        ".read": true,
+        "$fid": {
+          "$strokeId": {
+            ".write": "auth != null && auth.uid == $uid"
+          }
+        }
+      }
     }
   }
 }
