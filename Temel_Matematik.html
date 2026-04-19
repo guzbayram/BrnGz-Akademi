@@ -392,9 +392,25 @@
   #q-panel {
     box-sizing: border-box;
     width: 100%;
+    flex-shrink: 0 !important;
   }
   #q-panel.flex {
     display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    flex-shrink: 0 !important;
+  }
+  #q-panel > div {
+    width: 100%;
+    max-width: 72rem;
+    background: #fff;
+    border-radius: 1.5rem;
+    padding: 16px 32px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,.02), 0 20px 60px rgba(0,0,0,.08);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   /* ── MOBİL RESPONSIVE ── */
@@ -597,7 +613,7 @@
   </aside>
 
   <!-- ═══ MAIN CONTENT ═══ -->
-  <main class="flex-grow flex flex-col relative bg-white" style="overflow:visible;min-width:0;">
+  <main class="flex-grow flex flex-col relative bg-white" style="overflow:hidden;min-width:0;min-height:0;">
 
     <!-- Tool Row (drawing tools) -->
     <div id="main-toolbar" class="px-6 py-3 flex items-center justify-between flex-shrink-0 border-b border-slate-50">
@@ -657,7 +673,7 @@
       </div>
     </div>
 
-    <div id="viewer-section" class="hidden flex-col min-h-0 relative" style="flex:1 1 0%;overflow:hidden;">
+    <div id="viewer-section" class="hidden flex-col min-h-0 relative" style="flex:1 1 0%;min-height:0;overflow:hidden;">
 
     <!-- ── KONU KARTLARI PANEL (grain overlay) ── -->
     <div id="konu-kartlari-panel" class="hidden">
@@ -702,9 +718,9 @@
     <div id="q-panel" class="hidden z-30 justify-center pb-2 pt-0 flex-shrink-0" style="padding:0 8px 8px 8px;">
       <div class="w-full max-w-6xl bg-white rounded-[1.5rem] md:rounded-[2.5rem] px-4 md:px-8 py-4 md:py-6 shadow-[0_-10px_40px_rgba(0,0,0,0.02),0_20px_60px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col gap-3 md:gap-5">
         <!-- R2 -->
-        <div class="flex flex-col gap-3">
+        <div style="display:flex; flex-direction:column; gap:12px;">
           <!-- MCQ options (shown for MCQ type) -->
-          <div id="mcq-opts" class="hidden items-center gap-3 flex-shrink-0">
+          <div id="mcq-opts" style="display:none; align-items:center; gap:8px; flex-shrink:0;">
             <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="A" onclick="PDFKV.selectMcq(this)">A</button>
             <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="B" onclick="PDFKV.selectMcq(this)">B</button>
             <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="C" onclick="PDFKV.selectMcq(this)">C</button>
@@ -712,7 +728,7 @@
             <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="E" onclick="PDFKV.selectMcq(this)">E</button>
           </div>
           <!-- Text answer row -->
-          <div id="ans-text" class="hidden w-full" style="display:none; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div id="ans-text" style="display:none; width:100%; align-items:center; gap:8px; flex-wrap:wrap;">
             <!-- Question number badge -->
             <div id="q-num" style="flex-shrink:0; width:32px; height:32px; border-radius:50%; background:#503397; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:11px;">S1</div>
             <!-- Question text -->
@@ -751,29 +767,29 @@
           </div>
         </div>
         <!-- R3 -->
-        <div class="flex items-center gap-3 flex-wrap">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
           <!-- Stats -->
-          <div class="flex gap-2 flex-shrink-0">
-            <div class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-[11px] font-black"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Doğru <span id="acc-correct">0</span></div>
-            <div class="flex items-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-full text-[11px] font-black"><span class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0\"></span>Yanlış <span id="acc-wrong">0</span></div>
-            <div class="flex items-center gap-1.5 bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full text-[11px] font-black"><span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span>Toplam <span id="acc-total">0</span></div>
+          <div style="display:flex; gap:8px; flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:6px;background:#ecfdf5;color:#059669;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:900;"><span style="width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;display:inline-block;"></span>Doğru <span id="acc-correct">0</span></div>
+            <div style="display:flex;align-items:center;gap:6px;background:#fff1f2;color:#e11d48;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:900;"><span style="width:8px;height:8px;border-radius:50%;background:#f43f5e;flex-shrink:0;display:inline-block;"></span>Yanlış <span id="acc-wrong">0</span></div>
+            <div style="display:flex;align-items:center;gap:6px;background:#f1f5f9;color:#64748b;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:900;"><span style="width:8px;height:8px;border-radius:50%;background:#cbd5e1;flex-shrink:0;display:inline-block;"></span>Toplam <span id="acc-total">0</span></div>
           </div>
           <!-- Circles -->
-          <div class="flex-1 flex items-center gap-2 overflow-hidden min-w-0">
-            <div id="q-circles" class="flex items-center gap-[5px] flex-wrap overflow-hidden max-h-[28px]"></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px;overflow:hidden;min-width:0;">
+            <div id="q-circles" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;overflow:hidden;max-height:28px;"></div>
           </div>
           <span id="acc-pct" class="text-[13px] font-black text-slate-600 whitespace-nowrap flex-shrink-0">0/0</span>
-          <span id="att-status" class="text-[11px] font-bold text-slate-400 whitespace-nowrap flex-shrink-0"></span>
+          <span id="att-status" style="font-size:11px;font-weight:700;color:#94a3b8;white-space:nowrap;flex-shrink:0;"></span>
           <!-- Divider -->
-          <div class="w-px h-5 bg-slate-200 flex-shrink-0 mx-1"></div>
-          <!-- Page Navigation (moved here from top bar) -->
-          <div class="flex items-center gap-2 flex-shrink-0">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Git:</span>
-            <input id="page-jump" type="number" min="1" value="1" onkeydown="if(event.key==='Enter')PDFKV.jumpToPage(this.value)" class="w-16 h-7 rounded-lg bg-white border border-slate-200 text-xs font-bold text-center outline-none focus:ring-2 focus:ring-primary/10">
-            <div class="w-px h-4 bg-slate-200 mx-0.5"></div>
-            <button id="prev-page" onclick="PDFKV.goPage(-1)" class="p-1 text-slate-400 hover:text-primary transition-colors disabled:opacity-30"><span class="material-symbols-outlined text-base">chevron_left</span></button>
-            <span id="page-info" class="text-xs font-bold text-slate-600 whitespace-nowrap">Sayfa 1 / 1</span>
-            <button id="next-page" onclick="PDFKV.goPage(1)" class="p-1 text-slate-400 hover:text-primary transition-colors disabled:opacity-30"><span class="material-symbols-outlined text-base">chevron_right</span></button>
+          <div style="width:1px;height:20px;background:#e2e8f0;flex-shrink:0;"></div>
+          <!-- Page Navigation -->
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Git:</span>
+            <input id="page-jump" type="number" min="1" value="1" onkeydown="if(event.key==='Enter')PDFKV.jumpToPage(this.value)" style="width:56px;height:28px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;font-size:12px;font-weight:700;text-align:center;outline:none;">
+            <div style="width:1px;height:16px;background:#e2e8f0;"></div>
+            <button id="prev-page" onclick="PDFKV.goPage(-1)" style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;"><span class="material-symbols-outlined" style="font-size:18px;">chevron_left</span></button>
+            <span id="page-info" style="font-size:12px;font-weight:700;color:#475569;white-space:nowrap;">Sayfa 1 / 1</span>
+            <button id="next-page" onclick="PDFKV.goPage(1)" style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;"><span class="material-symbols-outlined" style="font-size:18px;">chevron_right</span></button>
           </div>
         </div>
       </div>
@@ -2566,6 +2582,23 @@ var PDFKV = (function(){
     closeKarne:closeKarne,
     _getSections:function(){ return (state.sections.hocan||[]).concat(state.sections.ara||[]).concat(state.sections.test||[]); },
     _getSectionState:function(id){ return state.sectionStates[id]||null; },
+    _getSectionStates:function(){ return state.sectionStates; },
+    _restoreSectionStates:function(loaded){
+      if(!loaded||typeof loaded!=='object')return;
+      Object.keys(loaded).forEach(function(id){ state.sectionStates[id]=loaded[id]; });
+      /* Aggregate yeniden hesapla */
+      var tc=0,tw=0;
+      Object.keys(state.sectionStates).forEach(function(id){
+        var st=state.sectionStates[id];
+        tc+=Object.keys(st.correct||{}).filter(function(k){return st.correct[k];}).length;
+        Object.keys(st.attempts||{}).forEach(function(k){
+          tw+=(st.attempts[k]||[]).filter(function(v){return !v;}).length;
+        });
+      });
+      state.totalCorrect=tc; state.totalWrong=tw; state.totalAnswered=tc;
+      updateStats();
+    },
+    _restoreAggregate:function(c,w){ state.totalCorrect=c; state.totalWrong=w; state.totalAnswered=c; updateStats(); },
     _getTotalCorrect:function(){ return state.totalCorrect; },
     _getTotalWrong:function(){ return state.totalWrong; },
     changePdf:function(){
@@ -2903,17 +2936,26 @@ var PDFKV = (function(){
       /* Temizle butonu → RTDB'deki stroke'ları sil + cleared sinyali gönder */
       window._liveClearPage = async function(pageNum) {
         try {
-          /* Tüm stroke'ları çek, sayfaya ait olanları sil */
           const { get } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+          /* Geçici (canlı) stroke'ları sil */
           const snap = await get(strokesWriteRef);
           if (snap.exists()) {
             const delPromises = [];
             snap.forEach(child => {
-              if (child.val().page === pageNum) {
+              if (child.val().page === pageNum)
                 delPromises.push(rtRemove(rtRef(rtdb, `drawings/${ddUid}/strokes/${child.key}`)));
-              }
             });
             await Promise.all(delPromises);
+          }
+          /* Kalıcı stroke'ları da sil */
+          const savedSnap = await get(savedDrawWriteRef);
+          if (savedSnap.exists()) {
+            const delP2 = [];
+            savedSnap.forEach(child => {
+              if (child.val().page === pageNum)
+                delP2.push(rtRemove(rtRef(rtdb, `savedDrawings/${ddUid}/${ddFid}/${child.key}`)));
+            });
+            await Promise.all(delP2);
           }
           /* Temizleme sinyali */
           await rtUpdate(metaWriteRef, { cleared: pageNum, ts: Date.now() });
