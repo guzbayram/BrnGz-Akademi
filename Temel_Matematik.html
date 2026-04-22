@@ -462,9 +462,12 @@
       font-size: 11px !important;
     }
     .acc-mcq-btn {
-      width: 38px !important;
-      height: 38px !important;
+      width: 44px !important;
+      height: 44px !important;
       font-size: 13px !important;
+      cursor: pointer !important;
+      -webkit-tap-highlight-color: rgba(80,51,151,.15) !important;
+      touch-action: manipulation !important;
     }
     /* Stats row küçült */
     #acc-correct, #acc-wrong, #acc-total {
@@ -490,7 +493,7 @@
   }
 </style>
 </head>
-<body class="bg-[#f8f9fc] text-on-surface overflow-hidden">
+<body class="bg-[#f8f9fc] text-on-surface overflow-hidden" style="overscroll-behavior:none;">
 <!-- ══ UPLOAD OVERLAY (shown first) ══ -->
 <!-- GitHub Pages'de upload ekranı gizlenir; sadece local/desktop'ta görünür -->
 <script>
@@ -560,8 +563,11 @@
         <div style="font-family:'Manrope',sans-serif;font-size:11px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#94a3b8;margin-bottom:14px;">Konu Bazli Performans</div>
         <div id="karne-topic-rows" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
-      <!-- Kapat -->
-      <div style="padding:0 36px 32px;display:flex;justify-content:center;">
+      <!-- Kapat + Sıfırla -->
+      <div style="padding:0 36px 32px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        <button onclick="PDFKV.resetStats()" style="background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;border-radius:14px;padding:14px 28px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;" onmouseover="this.style.background='#fecdd3'" onmouseout="this.style.background='#fff1f2'">
+          <span style="font-size:16px;">🔄</span> İstatistikleri Sıfırla
+        </button>
         <button onclick="PDFKV.closeKarne()" style="background:linear-gradient(135deg,#503397,#7c3aed);color:#fff;border:none;border-radius:14px;padding:14px 48px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(80,51,151,.3);transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='';">Kapat</button>
       </div>
     </div>
@@ -654,10 +660,34 @@
     </div>
 
     <!-- Öğretmen izleme banner'ı — JS tarafından doldurulur -->
+    <!-- Arşiv görüntüleme banner'ı -->
+    <div id="archive-viewer-bar" style="display:none;align-items:center;justify-content:space-between;
+      padding:10px 24px;background:linear-gradient(90deg,#0f766e,#0d9488);
+      color:#fff;flex-shrink:0;gap:12px;flex-wrap:wrap;border-bottom:3px solid #2dd4bf;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">🏠 Anasayfa</button>
+        <span style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:900;letter-spacing:.03em;">
+          📚 GEÇMİŞ ÇALIŞMA — Arşiv Görüntüleme
+        </span>
+        <span id="archive-student-label" style="background:rgba(255,255,255,.2);border-radius:99px;
+          padding:3px 14px;font-size:12px;font-weight:700;letter-spacing:.05em;border:1px solid rgba(255,255,255,.3);"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="downloadCurrentPagePng()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
+          <span class="material-symbols-outlined" style="font-size:14px;">download</span>Sayfayı İndir
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;background:rgba(0,0,0,.15);padding:4px 12px;border-radius:99px;">
+          <span class="material-symbols-outlined" style="font-size:14px;">history</span>
+          Salt görüntüleme — çizim kapalı
+        </div>
+      </div>
+    </div>
+
     <div id="teacher-viewer-bar" style="display:none;align-items:center;justify-content:space-between;
       padding:10px 24px;background:linear-gradient(90deg,#c2410c,#ea580c);
       color:#fff;flex-shrink:0;gap:12px;flex-wrap:wrap;border-bottom:3px solid #fb923c;">
       <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="if(window.parent!==window){window.parent.postMessage('closeFrame','*');}else{window.location.href='index.html';}" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">🏠 Anasayfa</button>
         <span style="width:10px;height:10px;border-radius:50%;background:#fde047;
           animation:livePulse 1.2s ease-in-out infinite;display:inline-block;flex-shrink:0;
           box-shadow:0 0 8px #fde047;"></span>
@@ -694,21 +724,15 @@
 
     <!-- Main Canvas (Scrollable + Zoomable area) -->
     <div class="flex-grow bg-[#f4f6fa] overflow-hidden relative" id="pdf-scroll"
-         style="touch-action:none;">
+         style="touch-action:none;overscroll-behavior:none;">
 
-      <!-- Zoom wrapper: CSS transform handles focal-point zoom -->
-      <div id="zoom-wrapper" style="
-        position:absolute; top:0; left:0; width:100%; height:100%;
-        display:flex; flex-direction:column; align-items:center;
-        overflow:auto; scrollbar-width:none; -ms-overflow-style:none;
-        padding: 24px 40px 40px 40px; box-sizing:border-box;
-      ">
-        <style>#zoom-wrapper::-webkit-scrollbar{display:none;}</style>
+      <!-- Zoom wrapper -->
+      <div id="zoom-wrapper" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;touch-action:none;overscroll-behavior:none;">
         <!-- PDF Page -->
-        <div id="page-container" class="relative bg-white rounded-sm shadow-[0_8px_40px_rgba(0,0,0,0.04)] border-t-[6px] border-primary overflow-hidden flex-shrink-0"
-             style="transform-origin:top center; transition:transform 0.05s ease-out;">
+        <div id="page-container" class="bg-white rounded-sm shadow-[0_8px_40px_rgba(0,0,0,0.04)] border-t-[6px] border-primary overflow-hidden"
+             style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;">
           <canvas id="pdf-canvas" class="block"></canvas>
-          <canvas id="draw-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:all;cursor:crosshair;z-index:10;"></canvas>
+          <canvas id="draw-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:all;cursor:crosshair;z-index:10;touch-action:none;"></canvas>
         </div>
       </div>
     </div>
@@ -721,23 +745,23 @@
         <div style="display:flex; flex-direction:column; gap:12px;">
           <!-- MCQ options (shown for MCQ type) -->
           <div id="mcq-opts" style="display:none; align-items:center; gap:8px; flex-shrink:0;">
-            <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="A" onclick="PDFKV.selectMcq(this)">A</button>
-            <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="B" onclick="PDFKV.selectMcq(this)">B</button>
-            <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="C" onclick="PDFKV.selectMcq(this)">C</button>
-            <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="D" onclick="PDFKV.selectMcq(this)">D</button>
-            <button class="acc-mcq-btn w-14 h-14 rounded-full border-2 border-slate-100 flex items-center justify-center font-extrabold text-lg text-slate-400 hover:border-primary hover:text-primary transition-all" data-opt="E" onclick="PDFKV.selectMcq(this)">E</button>
+            <button class="acc-mcq-btn" data-opt="A" onclick="PDFKV.selectMcq(this)" style="width:48px;height:48px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#94a3b8;background:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(80,51,151,.15);transition:all .15s;flex-shrink:0;">A</button>
+            <button class="acc-mcq-btn" data-opt="B" onclick="PDFKV.selectMcq(this)" style="width:48px;height:48px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#94a3b8;background:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(80,51,151,.15);transition:all .15s;flex-shrink:0;">B</button>
+            <button class="acc-mcq-btn" data-opt="C" onclick="PDFKV.selectMcq(this)" style="width:48px;height:48px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#94a3b8;background:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(80,51,151,.15);transition:all .15s;flex-shrink:0;">C</button>
+            <button class="acc-mcq-btn" data-opt="D" onclick="PDFKV.selectMcq(this)" style="width:48px;height:48px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#94a3b8;background:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(80,51,151,.15);transition:all .15s;flex-shrink:0;">D</button>
+            <button class="acc-mcq-btn" data-opt="E" onclick="PDFKV.selectMcq(this)" style="width:48px;height:48px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#94a3b8;background:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(80,51,151,.15);transition:all .15s;flex-shrink:0;">E</button>
           </div>
           <!-- Text answer row -->
-          <div id="ans-text" style="display:none; width:100%; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div id="ans-text" style="display:none; width:100%; align-items:center; gap:10px; flex-wrap:nowrap; overflow:hidden;">
             <!-- Question number badge -->
             <div id="q-num" style="flex-shrink:0; width:32px; height:32px; border-radius:50%; background:#503397; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:11px;">S1</div>
-            <!-- Question text -->
-            <div id="q-label" style="font-family:'Manrope',sans-serif; font-weight:700; font-style:italic; color:#334155; font-size:13px; line-height:1.4; min-width:0; flex-shrink:1; max-width:360px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"></div>
-            <!-- Equals sign -->
-            <span style="flex-shrink:0; color:#94a3b8; font-weight:700; font-size:18px;">=</span>
-            <!-- Input -->
+            <!-- Question text — sabit genişlik, overflow ellipsis -->
+            <div id="q-label" style="font-family:'Manrope',sans-serif; font-weight:700; font-style:italic; color:#334155; font-size:13px; line-height:1.4; flex-shrink:1; min-width:0; max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+            <!-- Equals sign — sağa kaydırıldı -->
+            <span style="flex-shrink:0; color:#94a3b8; font-weight:700; font-size:18px; margin-left:8px;">=</span>
+            <!-- Input — genişletildi -->
             <input id="ans-input" type="text" placeholder="Cevabınızı yazın..."
-              style="flex-shrink:0; width:120px; max-width:200px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:10px 16px; font-size:14px; font-weight:500; color:#1e293b; outline:none; transition:border-color .2s, background .2s;"
+              style="flex:1; min-width:150px; max-width:280px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:10px 16px; font-size:14px; font-weight:500; color:#1e293b; outline:none; transition:border-color .2s, background .2s;"
               autocomplete="off"
               onfocus="this.style.borderColor='#503397';this.style.background='#fff';"
               onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc';"
@@ -1047,12 +1071,9 @@ var PDFKV = (function(){
 
   function computeFitScale(page){
     var scrollEl=el('zoom-wrapper');if(!scrollEl)return state.scale;
-    var availW=scrollEl.clientWidth - 80;
-    var availH=scrollEl.clientHeight - 80;
+    var availW=scrollEl.clientWidth;
     var naturalVp=page.getViewport({scale:1});
-    var scaleW=availW/naturalVp.width;
-    var scaleH=availH/naturalVp.height;
-    return Math.min(scaleW, scaleH, 2);
+    return Math.min(availW/naturalVp.width, 3);
   }
 
   function renderPage(num){
@@ -1090,11 +1111,10 @@ var PDFKV = (function(){
             dc.style.height=(vp.height/dpr)+'px';
           }
           if(pc) pc.classList.remove('rendering');
-          /* Reset CSS zoom on page change */
-          state.cssScale=1;
-          if(pc){pc.style.transform='scale(1)';pc.style.marginBottom='0';}
-          /* Scroll to top */
-          var zw=el('zoom-wrapper');if(zw)zw.scrollTop=0;
+          /* Reset zoom/pan on page change */
+          state.cssScale=1; state.panX=0; state.panY=0;
+          if(typeof applyTransform==='function') setTimeout(applyTransform,30);
+          else if(pc){pc.style.transform='translate(0,0) scale(1)';}
           state.rendering=false; state.currentPage=num;
           updatePageNav(); restoreDrawing(num);
           /* Canlı izleme: sayfa değişimini bildir */
@@ -1176,135 +1196,185 @@ var PDFKV = (function(){
       state._liveStroke=[];
     }
 
-    /* ── CSS zoom state ── */
+    /* ══ Pan / Zoom ══
+       page-container is position:absolute inside zoom-wrapper (overflow:hidden)
+       all positioning done via transform: translate(panX,panY) scale(scale)
+       transform-origin: 0 0  →  focal-point math is straightforward
+    */
     state.cssScale = state.cssScale || 1;
-    state.cssOffsetX = state.cssOffsetX || 0;
-    state.cssOffsetY = state.cssOffsetY || 0;
+    state.panX = state.panX || 0;
+    state.panY = state.panY || 0;
 
-    function applyTransform(){
-      if(pageContainer){
-        pageContainer.style.transform='scale('+state.cssScale+')';
-        pageContainer.style.transformOrigin='top center';
-        pageContainer.style.marginBottom = ((state.cssScale - 1) * pageContainer.offsetHeight / 2) + 'px';
-      }
+    var zoomWrapper = el('zoom-wrapper');
+
+    function _ww(){ return zoomWrapper ? zoomWrapper.clientWidth : window.innerWidth; }
+    function _wh(){ return zoomWrapper ? zoomWrapper.clientHeight : window.innerHeight; }
+
+    /* Clamp pan so page never floats free of the viewport */
+    function clampPan(){
+      if(!pageContainer) return;
+      var ww=_ww(), wh=_wh();
+      var sw=pageContainer.offsetWidth * state.cssScale;
+      var sh=pageContainer.offsetHeight * state.cssScale;
+      /* X: center when smaller, clamp when larger */
+      if(sw <= ww){ state.panX=(ww-sw)/2; }
+      else{ state.panX=Math.max(ww-sw, Math.min(0, state.panX)); }
+      /* Y: top when taller, center when smaller */
+      if(sh <= wh){ state.panY=(wh-sh)/2; }
+      else{ state.panY=Math.max(wh-sh, Math.min(0, state.panY)); }
     }
 
+    function applyTransform(){
+      if(!pageContainer) return;
+      clampPan();
+      pageContainer.style.transform='translate('+Math.round(state.panX)+'px,'+Math.round(state.panY)+'px) scale('+state.cssScale+')';
+    }
+
+    /* Reset to fit-width, top of page */
     function resetCssZoom(){
       state.cssScale=1;
+      state.panX=0; state.panY=0;   /* clampPan will center */
       applyTransform();
     }
 
-    /* ── Mouse drawing ── */
-    c.addEventListener('mousedown',function(e){if(!state.drawEnabled)return;e.preventDefault();var p=pos(e);state.isDrawing=true;state.lastX=p.x;state.lastY=p.y;});
-    c.addEventListener('mousemove',function(e){if(state.drawEnabled)e.preventDefault();draw(e);});
-    c.addEventListener('mouseup',function(){onStrokeEnd();});
-    c.addEventListener('mouseleave',function(){onStrokeEnd();});
+    /* Called after each PDF page renders so centering reflects real dimensions */
+    window._centerAfterRender = function(){
+      state.panX=0; state.panY=0;
+      applyTransform();
+    };
+    setTimeout(window._centerAfterRender, 80);
 
-    /* ── Touch handling ── */
-    var pinch={active:false,startDist:0,startScale:1,midX:0,midY:0};
-    var swipe={startY:0,startX:0,startTime:0,active:false};
+    /* ── Mouse drawing + pan ── */
+    var mousePan={active:false,x0:0,y0:0,px0:0,py0:0};
+    c.addEventListener('mousedown',function(e){
+      if(state.drawEnabled){
+        e.preventDefault();var p=pos(e);state.isDrawing=true;state.lastX=p.x;state.lastY=p.y;
+      } else {
+        e.preventDefault();
+        mousePan.active=true; mousePan.x0=e.clientX; mousePan.y0=e.clientY;
+        mousePan.px0=state.panX; mousePan.py0=state.panY;
+        c.style.cursor='grabbing';
+      }
+    });
+    c.addEventListener('mousemove',function(e){
+      if(state.drawEnabled){ e.preventDefault(); draw(e); }
+      else if(mousePan.active){
+        state.panX=mousePan.px0+(e.clientX-mousePan.x0);
+        state.panY=mousePan.py0+(e.clientY-mousePan.y0);
+        applyTransform();
+      }
+    });
+    c.addEventListener('mouseup',function(){
+      onStrokeEnd(); mousePan.active=false;
+      c.style.cursor=state.drawEnabled?'crosshair':'grab';
+    });
+    c.addEventListener('mouseleave',function(){
+      onStrokeEnd(); mousePan.active=false;
+      c.style.cursor=state.drawEnabled?'crosshair':'grab';
+    });
 
-    function touchMid(e){
-      return{
-        x:(e.touches[0].clientX+e.touches[1].clientX)/2,
-        y:(e.touches[0].clientY+e.touches[1].clientY)/2
-      };
-    }
-    function touchDist(e){
-      var dx=e.touches[0].clientX-e.touches[1].clientX;
-      var dy=e.touches[0].clientY-e.touches[1].clientY;
-      return Math.sqrt(dx*dx+dy*dy);
-    }
+    /* ── Touch ── */
+    var pinch={active:false,dist0:0,scale0:1,logX:0,logY:0,mRX:0,mRY:0};
+    var swipe={active:false,x0:0,y0:0,t0:0,px0:0,py0:0};
+    var pinchJustEnded=false;  // false double-tap algılamasını engeller
 
-    c.addEventListener('touchstart',function(e){
+    function tMid(e){ return{x:(e.touches[0].clientX+e.touches[1].clientX)/2, y:(e.touches[0].clientY+e.touches[1].clientY)/2}; }
+    function tDist(e){ var dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY; return Math.sqrt(dx*dx+dy*dy); }
+
+    var tt = zoomWrapper || c;
+
+    tt.addEventListener('touchstart',function(e){
       if(e.touches.length===2){
         e.preventDefault();
         state.isDrawing=false; swipe.active=false;
-        pinch.active=true;
-        pinch.startDist=touchDist(e);
-        pinch.startScale=state.cssScale;
-        var m=touchMid(e); pinch.midX=m.x; pinch.midY=m.y;
+        pinch.active=true; pinch.dist0=tDist(e); pinch.scale0=state.cssScale;
+        var wr=tt.getBoundingClientRect(), m=tMid(e);
+        pinch.wrLeft=wr.left; pinch.wrTop=wr.top;
+        pinch.mRX=m.x-wr.left; pinch.mRY=m.y-wr.top;
+        /* page coords under pinch midpoint */
+        pinch.logX=(pinch.mRX-state.panX)/state.cssScale;
+        pinch.logY=(pinch.mRY-state.panY)/state.cssScale;
       } else if(e.touches.length===1){
+        swipe.x0=e.touches[0].clientX; swipe.y0=e.touches[0].clientY;
+        swipe.t0=Date.now(); swipe.px0=state.panX; swipe.py0=state.panY;
         if(state.drawEnabled){
           e.preventDefault();
-          var p=pos(e);state.isDrawing=true;state.lastX=p.x;state.lastY=p.y;
+          var p=pos(e); state.isDrawing=true; state.lastX=p.x; state.lastY=p.y;
           swipe.active=false;
-        } else {
-          /* swipe to scroll / page-flip */
-          swipe.active=true;
-          swipe.startY=e.touches[0].clientY;
-          swipe.startX=e.touches[0].clientX;
-          swipe.startTime=Date.now();
-          swipe.startScrollTop=scrollEl?scrollEl.scrollTop:0;
-        }
+        } else { swipe.active=true; }
       }
     },{passive:false});
 
-    c.addEventListener('touchmove',function(e){
+    tt.addEventListener('touchmove',function(e){
       if(e.touches.length===2&&pinch.active){
         e.preventDefault();
-        var dist=touchDist(e);
-        var ratio=dist/pinch.startDist;
-        var newScale=Math.min(2, Math.max(0.5, pinch.startScale*ratio));
-        state.cssScale=newScale;
-        applyTransform();
-        showScaleHint(newScale);
+        var ns=Math.min(4,Math.max(0.5,pinch.scale0*tDist(e)/pinch.dist0));
+        state.cssScale=ns;
+        /* Use current midpoint so 2-finger pan + zoom both work */
+        var m2=tMid(e);
+        var curMRX=m2.x-pinch.wrLeft, curMRY=m2.y-pinch.wrTop;
+        state.panX=curMRX-pinch.logX*ns;
+        state.panY=curMRY-pinch.logY*ns;
+        applyTransform(); showScaleHint(ns);
       } else if(e.touches.length===1){
-        if(state.drawEnabled&&state.isDrawing){
-          e.preventDefault(); draw(e);
-        } else if(swipe.active){
+        if(state.drawEnabled&&state.isDrawing){ e.preventDefault(); draw(e); }
+        else if(swipe.active){
           e.preventDefault();
-          var dy=swipe.startY - e.touches[0].clientY;
-          if(scrollEl) scrollEl.scrollTop = swipe.startScrollTop + dy;
+          var dx=e.touches[0].clientX-swipe.x0, dy=e.touches[0].clientY-swipe.y0;
+          state.panX=swipe.px0+dx; state.panY=swipe.py0+dy;
+          applyTransform();
         }
       }
     },{passive:false});
 
-    c.addEventListener('touchend',function(e){
-      if(e.touches.length<2){
-        if(pinch.active){
-          pinch.active=false;
-          /* snap back if too small */
-          if(state.cssScale<0.6){ state.cssScale=1; applyTransform(); }
-        }
+    tt.addEventListener('touchend',function(e){
+      if(e.touches.length<2&&pinch.active){
+        pinch.active=false;
+        pinchJustEnded=true;
+        setTimeout(function(){ pinchJustEnded=false; },400);
+        if(state.cssScale<0.3) resetCssZoom();  // sadece aşırı zoom-out'ta sıfırla
       }
       if(e.touches.length===0){
-        /* Detect fast swipe for page flip (when not zoomed) */
-        if(swipe.active && state.cssScale<=1.05){
-          var elapsed=Date.now()-swipe.startTime;
-          var dy=swipe.startY - (e.changedTouches[0]?e.changedTouches[0].clientY:swipe.startY);
-          var dx=swipe.startX - (e.changedTouches[0]?e.changedTouches[0].clientX:swipe.startX);
-          /* Fast vertical swipe and mostly vertical */
-          if(elapsed<400 && Math.abs(dy)>60 && Math.abs(dy)>Math.abs(dx)*1.5){
-            /* check if at scroll boundary */
-            var atBottom=scrollEl&&(scrollEl.scrollTop+scrollEl.clientHeight>=scrollEl.scrollHeight-10);
-            var atTop=scrollEl&&scrollEl.scrollTop<=5;
-            if(dy>0&&atBottom){ goPage(1); }
-            else if(dy<0&&atTop){ goPage(-1); }
+        if(swipe.active&&state.cssScale<=1.05){
+          var elapsed=Date.now()-swipe.t0;
+          var t0=e.changedTouches[0];
+          var dy=swipe.y0-(t0?t0.clientY:swipe.y0), dx=swipe.x0-(t0?t0.clientX:swipe.x0);
+          if(elapsed<400&&Math.abs(dy)>60&&Math.abs(dy)>Math.abs(dx)*1.5){
+            var sh2=pageContainer?pageContainer.offsetHeight*state.cssScale:0;
+            var atBottom=(state.panY<=_wh()-sh2+10), atTop=(state.panY>=-5);
+            if(dy>0&&atBottom){ resetCssZoom(); goPage(1); }
+            else if(dy<0&&atTop){ resetCssZoom(); goPage(-1); }
           }
         }
         onStrokeEnd(); swipe.active=false;
       }
     },{passive:false});
 
-    /* ── Mouse wheel: plain scroll or Ctrl+wheel zoom ── */
+    /* ── Mouse wheel: Ctrl → zoom at cursor, plain → pan X+Y ── */
     var pdfScrollParent=el('pdf-scroll');
-    if(pdfScrollParent){
-      pdfScrollParent.addEventListener('wheel',function(e){
-        if(e.ctrlKey||e.metaKey){
-          e.preventDefault();
-          var delta=e.deltaY>0?-0.01:0.01;
-          state.cssScale=Math.min(2,Math.max(0.5,Math.round((state.cssScale+delta)*100)/100));
-          applyTransform();
-          showScaleHint(state.cssScale);
-        }
-        /* plain wheel → let zoom-wrapper scroll naturally */
-      },{passive:false});
+    function onWheel(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if(pinch.active) return;  // touch pinch ile wheel çakışmasını engelle (iPadOS)
+      if(e.ctrlKey||e.metaKey){
+        var wr=zoomWrapper?zoomWrapper.getBoundingClientRect():(pdfScrollParent?pdfScrollParent.getBoundingClientRect():{left:0,top:0});
+        var mx=e.clientX-wr.left, my=e.clientY-wr.top;
+        var lx=(mx-state.panX)/state.cssScale, ly=(my-state.panY)/state.cssScale;
+        var ns=Math.min(4,Math.max(0.5,state.cssScale+(e.deltaY>0?-0.1:0.1)));
+        state.cssScale=ns; state.panX=mx-lx*ns; state.panY=my-ly*ns;
+      } else {
+        state.panX-=e.deltaX;
+        state.panY-=e.deltaY;
+      }
+      applyTransform(); showScaleHint(state.cssScale);
     }
+    if(zoomWrapper) zoomWrapper.addEventListener('wheel',onWheel,{passive:false});
+    if(pdfScrollParent) pdfScrollParent.addEventListener('wheel',onWheel,{passive:false});
 
     /* Double-tap to reset zoom */
     var lastTap=0;
     c.addEventListener('touchend',function(e){
+      if(pinchJustEnded) return;  // pinch'ten kalkan parmaklar double-tap sayılmasın
       var now=Date.now();
       if(now-lastTap<300&&e.changedTouches.length===1){
         state.cssScale=1; applyTransform();
@@ -1359,7 +1429,7 @@ var PDFKV = (function(){
     var btn=el('draw-toggle');
     if(btn){var ic=btn.querySelector('.material-symbols-outlined');if(ic)ic.textContent=state.drawEnabled?'lock_open':'lock';}
     var c=el('draw-canvas');
-    if(c)c.style.cursor=state.drawEnabled?'crosshair':'default';
+    if(c)c.style.cursor=state.drawEnabled?'crosshair':'grab';
   }
 
   /* ── SECTIONS & TABS ── */
@@ -1607,7 +1677,7 @@ var PDFKV = (function(){
       state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
     // Navigate to page in PDF
     if(sec.page&&state.pdfDoc)renderPage(sec.page);
-    var qp=el('q-panel');if(qp){qp.classList.remove('hidden');qp.classList.add('flex');}
+    var qp=el('q-panel');if(qp){qp.style.display='flex';qp.classList.remove('hidden');}
     var lbl=el('current-sec-label');if(lbl)lbl.textContent=sec.name;
     // Open this topic
     var curTopic=extractTopic(sec.sub);
@@ -1632,12 +1702,12 @@ var PDFKV = (function(){
       el('q-label').textContent='PDF\'den çalış — sorular yüklenemedi';
       el('q-num').textContent='—';
       el('ans-text').style.display='none';
-      el('mcq-opts').classList.add('hidden');el('mcq-opts').classList.remove('flex');
+      el('mcq-opts').style.display='none';
       el('dot-nav').innerHTML='';
       var qc=el('q-circles');if(qc)qc.innerHTML='';
       return;
     }
-    el('mcq-opts').classList.add('hidden');el('mcq-opts').classList.remove('flex');
+    el('mcq-opts').style.display='none';
     el('ans-text').style.display='flex';
     renderTextQ(sec,st);
   }
@@ -1660,7 +1730,7 @@ var PDFKV = (function(){
   function renderMcqSection(sec){
     var st=state.sectionStates[sec.id];
     el('ans-text').style.display='none';
-    el('mcq-opts').classList.remove('hidden');el('mcq-opts').classList.add('flex');
+    el('mcq-opts').style.display='flex';
     renderMcqQ(sec,st);
   }
   function renderMcqQ(sec,st){
@@ -2543,22 +2613,44 @@ var PDFKV = (function(){
     }
   }
 
-  /* ── PDF URL'DEN OTOMATIİK YÜKLEME ── */
+  /* ── PDF URL'DEN OTOMATİK YÜKLEME (streaming) ── */
+  function _afterPdfLoaded(doc){
+    state.pdfDoc=doc;state.totalPages=doc.numPages;state.currentPage=1;
+    el('upload-screen').style.display='none';
+    var vs=el('viewer-section');if(vs){vs.classList.remove('hidden');vs.classList.add('flex');}
+    var sta=el('sb-tabs-area');if(sta){sta.classList.remove('hidden');sta.classList.add('flex');}
+    var sdt=el('sb-default-tree');if(sdt)sdt.classList.add('hidden');
+    var cpb=el('btn-change-pdf');if(cpb)cpb.style.display='';
+    initSections();renderPage(1);initDrawCanvas();updatePageNav();renderTopicTree();renderProgressCard();
+  }
+  function loadPdfFromUrl(url){
+    if(state._pdfStarted) return;
+    state._pdfStarted = true;
+    /* Range-request streaming: sayfa 1 tam indirmeden önce render edilir */
+    pdfjsLib.getDocument({
+      url: url,
+      rangeChunkSize: 65536,
+      disableAutoFetch: false,
+      disableStream: false
+    }).promise.then(_afterPdfLoaded).catch(function(err){
+      state._pdfStarted = false;
+      console.warn('PDF url-load error:',err);
+    });
+  }
   function loadPdfFromData(data){
-    pdfjsLib.getDocument({data:data}).promise.then(function(doc){
-      state.pdfDoc=doc;state.totalPages=doc.numPages;state.currentPage=1;
-      el('upload-screen').style.display='none';
-      var vs=el('viewer-section');if(vs){vs.classList.remove('hidden');vs.classList.add('flex');}
-      var sta=el('sb-tabs-area');if(sta){sta.classList.remove('hidden');sta.classList.add('flex');}
-      var sdt=el('sb-default-tree');if(sdt)sdt.classList.add('hidden');
-      var cpb=el('btn-change-pdf');if(cpb)cpb.style.display='';
-      initSections();renderPage(1);initDrawCanvas();updatePageNav();renderTopicTree();renderProgressCard();
-    }).catch(function(err){console.warn('PDF auto-load error:',err);});
+    if(state._pdfStarted) return;
+    state._pdfStarted = true;
+    pdfjsLib.getDocument({data:data}).promise.then(_afterPdfLoaded)
+      .catch(function(err){
+        state._pdfStarted = false;
+        console.warn('PDF data-load error:',err);
+      });
   }
 
   /* ── PUBLIC API ── */
   return {
     loadPdfFile:loadPdfFile,
+    loadPdfFromUrl:loadPdfFromUrl,
     loadPdfFromData:loadPdfFromData,
     loadJsonFile:loadJsonFile,
     goPage:goPage,
@@ -2599,6 +2691,14 @@ var PDFKV = (function(){
       updateStats();
     },
     _restoreAggregate:function(c,w){ state.totalCorrect=c; state.totalWrong=w; state.totalAnswered=c; updateStats(); },
+    resetStats:function(){
+      if(!confirm('Tüm istatistikler sıfırlanacak. Emin misiniz?')) return;
+      state.sectionStates={};
+      state.totalCorrect=0; state.totalWrong=0; state.totalAnswered=0; state.gunStats={};
+      updateStats();
+      renderKarne();
+      if(typeof window._resetStatsFirebase==='function') window._resetStatsFirebase();
+    },
     _getTotalCorrect:function(){ return state.totalCorrect; },
     _getTotalWrong:function(){ return state.totalWrong; },
     changePdf:function(){
@@ -2636,22 +2736,17 @@ var PDFKV = (function(){
   const ddTid  = sessionStorage.getItem('dd_tid');   // öğrencinin öğretmeni (boş olabilir)
   if (!ddUid || !ddFid) return;
 
-  /* ── Hedef UID: izleme modunda öğrencinin UID'si, normal modda kendi UID'i ── */
-  /* Eğer öğretmen rolüyse ve URL'de ?watch=STUDENT_UID varsa o öğrenciyi izle */
+  /* ── Mod tespiti ── */
   const urlParams   = new URLSearchParams(location.search);
-  const watchUid    = urlParams.get('watch') || null;
-  const isViewer    = !!watchUid;          // salt izleyici mi?
-  const targetUid   = watchUid || ddUid;   // kimin çizimi takip ediyoruz
+  const watchUid    = urlParams.get('watch') || null;   // canlı izleme
+  const viewUid     = urlParams.get('view')  || null;   // geçmiş arşiv görüntüleme
+  const isViewer    = !!watchUid;                       // canlı izleyici mi?
+  const isArchive   = !!viewUid;                        // arşiv görüntüleyici mi?
+  const targetUid   = watchUid || viewUid || ddUid;     // kimin verisine bakıyoruz
 
-  /* ── PDF OTOMATİK YÜKLEME ── */
-  try {
-    const PDF_URL = 'https://lively-mousse-c4b810.netlify.app/Temel_Matematik/Temel_Matematik.pdf';
-    const res = await fetch(PDF_URL);
-    if (res.ok) {
-      const buf = await res.arrayBuffer();
-      PDFKV.loadPdfFromData(new Uint8Array(buf));
-    }
-  } catch(e) { console.warn('PDF auto-load error:', e); }
+  /* ── PDF OTOMATİK YÜKLEME (streaming — tam indirmeyi beklemez) ── */
+  const PDF_URL = 'https://lively-mousse-c4b810.netlify.app/Temel_Matematik/Temel_Matematik.pdf';
+  PDFKV.loadPdfFromUrl(PDF_URL);   // fire-and-forget; sayfa 1 ilk chunk'ta render edilir
 
   /* ── FİREBASE BAŞLAT ── */
   const FB_CFG = {
@@ -2661,27 +2756,25 @@ var PDFKV = (function(){
     storageBucket: "dijital-fasikul.firebasestorage.app",
     messagingSenderId: "127715156463",
     appId: "1:127715156463:web:b69b4dc29b6762dc69561a",
-    databaseURL: (() => {
-      /* Firebase Console → Realtime Database URL'nizi buraya yazın.
-         EU bölgesi için: https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app
-         US bölgesi için: https://dijital-fasikul-default-rtdb.firebaseio.com            */
-      return 'https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app';
-    })()
+    databaseURL: 'https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app'
   };
 
   try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    /* Tüm Firebase modüllerini paralel indir */
+    const [fbApp, fbFS, fbRTDB, fbAuth] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js')
+    ]);
+    const { initializeApp, getApps, deleteApp } = fbApp;
     const { getFirestore, doc, getDoc, setDoc, addDoc, collection,
-            onSnapshot, deleteDoc, serverTimestamp, query, orderBy, limit }
-          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+            onSnapshot, deleteDoc, serverTimestamp, query, orderBy, limit } = fbFS;
     const { getDatabase, ref: rtRef, set: rtSet, update: rtUpdate,
-            onValue, remove: rtRemove, push: rtPush, serverTimestamp: rtTS }
-          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-    const { getAuth, signInWithEmailAndPassword, signInAnonymously }
-          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+            onValue, remove: rtRemove, push: rtPush, serverTimestamp: rtTS } = fbRTDB;
+    const { getAuth, signInWithEmailAndPassword, signInAnonymously } = fbAuth;
 
     /* EU databaseURL — her seferinde yeni benzersiz app kur, eski instance'ları temizle */
-    const { deleteApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     for (const a of getApps()) {
       if (a.name && a.name.startsWith('tm-rtdb-')) { try { await deleteApp(a); } catch(e) {} }
     }
@@ -2699,12 +2792,17 @@ var PDFKV = (function(){
        (database.rules.json'da okuma public yapıldı, yazma için auth gerekiyor) */
     let authOk = false;
     if (ddUsername && ddPassword) {
-      const emailSuffixes = ['@dijital-fasikul.com', '@dijital-defter.app', '@brngs.com', '@admin.com'];
+      const allSuffixes = ['@dijital-fasikul.com', '@dijital-defter.app', '@brngs.com', '@admin.com'];
+      /* Daha önce başarılı olan suffix'i öne al */
+      const cachedSuffix = sessionStorage.getItem('dd_auth_suffix');
+      const emailSuffixes = cachedSuffix
+        ? [cachedSuffix, ...allSuffixes.filter(s => s !== cachedSuffix)]
+        : allSuffixes;
       for (const suffix of emailSuffixes) {
         try {
           await signInWithEmailAndPassword(auth, ddUsername + suffix, ddPassword);
           authOk = true;
-          console.log('[FB] Auth OK:', ddUsername + suffix);
+          sessionStorage.setItem('dd_auth_suffix', suffix);
           break;
         } catch(e) { /* dene */ }
       }
@@ -2743,8 +2841,23 @@ var PDFKV = (function(){
     /* Fasikül kapatılırken gönder */
     window.addEventListener('beforeunload', _sendActivity);
 
+    /* İstatistik sıfırlama — Firestore'dan sil */
+    window._resetStatsFirebase = async function() {
+      try {
+        const ref = doc(db, 'stats', ddUid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return;
+        const existing = snap.data();
+        const updated = {...existing};
+        delete updated[ddFid];
+        delete updated[ddFid + '_states'];
+        await setDoc(ref, updated);
+        console.log('[Reset] İstatistikler Firestore\'dan silindi:', ddFid);
+      } catch(e) { console.warn('[Reset] Hata:', e); }
+    };
+
     /* ── Kaydedilmiş karne + çizimleri yükle ── */
-    if (!isViewer) {
+    if (!isViewer && !isArchive) {
       try {
         const savedSnap = await getDoc(doc(db, 'stats', ddUid));
         if (savedSnap.exists()) {
@@ -2866,7 +2979,7 @@ var PDFKV = (function(){
                                drawings/{uid}/strokes → push ile eklenir
        Throttle: saniyede maks 25 paket (40ms)
     ══════════════════════════════════════════ */
-    if (!isViewer) {
+    if (!isViewer && !isArchive) {
       const metaWriteRef   = rtRef(rtdb, `drawings/${ddUid}/meta`);
       const strokesWriteRef = rtRef(rtdb, `drawings/${ddUid}/strokes`);
 
@@ -3080,6 +3193,83 @@ var PDFKV = (function(){
       });
     }
 
+    /* ══════════════════════════════════════════
+       BÖLÜM D — ARŞİV GÖRÜNTÜLEME (öğretmen geçmiş çalışma)
+       URL: Temel_Matematik.html?view=STUDENT_UID
+    ══════════════════════════════════════════ */
+    if (isArchive) {
+      console.log('[ARŞİV] Mod aktif. Öğrenci UID:', targetUid);
+
+      /* Banner göster */
+      const archiveBar = document.getElementById('archive-viewer-bar');
+      if (archiveBar) archiveBar.style.display = 'flex';
+      const lbl = document.getElementById('archive-student-label');
+      if (lbl) lbl.textContent = '👤 ' + targetUid;
+
+      /* Toolbar gizle, canvas salt-okunur yap */
+      const toolbar = document.getElementById('main-toolbar');
+      if (toolbar) toolbar.style.display = 'none';
+      const canvas = document.getElementById('draw-canvas');
+      if (canvas) { canvas.style.pointerEvents = 'none'; canvas.classList.remove('active'); }
+
+      /* Kaydedilmiş çizimleri yükle */
+      const { get } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+      const archiveRef = rtRef(rtdb, `savedDrawings/${targetUid}/${ddFid}`);
+
+      async function loadArchiveDrawings(pageNum) {
+        const c = document.getElementById('draw-canvas');
+        if (!c || c.width === 0) return;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+        try {
+          const snap = await get(archiveRef);
+          if (!snap.exists()) return;
+          snap.forEach(child => {
+            const s = child.val();
+            if (s.page !== pageNum || !s.pts || s.pts.length < 2) return;
+            const sx = c.width / (s.cw || c.width), sy = c.height / (s.ch || c.height);
+            ctx.beginPath();
+            ctx.moveTo(s.pts[0].x * sx, s.pts[0].y * sy);
+            for (let i = 1; i < s.pts.length; i++) ctx.lineTo(s.pts[i].x * sx, s.pts[i].y * sy);
+            ctx.globalCompositeOperation = s.tool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.lineWidth = s.tool === 'eraser' ? (s.size || 2) * 6 : (s.size || 2);
+            ctx.strokeStyle = s.tool === 'eraser' ? 'rgba(0,0,0,1)' : (s.color || '#000');
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.stroke();
+          });
+          console.log('[ARŞİV] Sayfa', pageNum, 'çizimleri yüklendi');
+        } catch(e) { console.warn('[ARŞİV] Çizim yükleme hatası:', e); }
+      }
+
+      /* Sayfa değişiminde yeniden yükle */
+      document.addEventListener('pdfPageChanged', function(e) {
+        setTimeout(() => loadArchiveDrawings(e.detail.page), 120);
+      });
+
+      /* Karne istatistiklerini yükle ve göster */
+      try {
+        const statsSnap = await getDoc(doc(db, 'stats', targetUid));
+        if (statsSnap.exists()) {
+          const data = statsSnap.data();
+          const fas = data[ddFid] || {};
+          const statesJson = data[ddFid + '_states'];
+          if (statesJson) {
+            try {
+              PDFKV._restoreSectionStates(JSON.parse(statesJson));
+              console.log('[ARŞİV] Karne istatistikleri yüklendi');
+            } catch(e) {}
+          }
+          if (fas.correct || fas.wrong) {
+            PDFKV._restoreAggregate(fas.correct || 0, fas.wrong || 0);
+          }
+        }
+      } catch(e) { console.warn('[ARŞİV] Karne yükleme hatası:', e); }
+
+      /* q-panel göster (istatistikleri görülebilsin) */
+      const qp = document.getElementById('q-panel');
+      if (qp) { qp.classList.remove('hidden'); qp.classList.add('flex'); }
+    }
+
     /* ── Canlı durum rozeti ── */
     function showLiveBadge(mode) {
       /* Animasyon keyframe */
@@ -3173,9 +3363,10 @@ var PDFKV = (function(){
     if(typeof pdfjsLib==='undefined'||typeof PDFKV==='undefined'){
       setTimeout(tryAutoLoad,200); return;
     }
+    /* Firebase zaten yüklediyse atla */
+    if(us && us.style.display==='none') return;
     /* Spinner göster */
     if(us){
-      us._origHTML=us.innerHTML;
       us.style.pointerEvents='none';
       us.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0f0f5;gap:16px;">'
         +'<div style="width:52px;height:52px;border-radius:50%;border:5px solid #e9ddff;border-top-color:#503397;animation:pdfAutoSpin 0.8s linear infinite;"></div>'
@@ -3183,22 +3374,29 @@ var PDFKV = (function(){
         +'<style>@keyframes pdfAutoSpin{to{transform:rotate(360deg);}}</style>'
         +'</div>';
     }
-    fetch(PDF_URL).then(function(res){
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.arrayBuffer();
-    }).then(function(buf){
-      PDFKV.loadPdfFromData(new Uint8Array(buf));
-    }).catch(function(){
-      /* Hata: orijinal upload ekranını geri getir */
-      if(us&&us._origHTML){
-        us.innerHTML=us._origHTML;
-        us.style.pointerEvents='';
-      }
-    });
+    PDFKV.loadPdfFromUrl(PDF_URL);
   }
   
   window.addEventListener('load', tryAutoLoad);
 })();
+</script>
+
+<script>
+/* PDF canvas + çizim canvas birleştirip PNG olarak indir */
+window.downloadCurrentPagePng = function() {
+  const pdfC = document.getElementById('pdf-canvas');
+  const drawC = document.getElementById('draw-canvas');
+  if (!pdfC) { alert('Sayfa henüz yüklenmedi.'); return; }
+  const merged = document.createElement('canvas');
+  merged.width = pdfC.width; merged.height = pdfC.height;
+  const ctx = merged.getContext('2d');
+  ctx.drawImage(pdfC, 0, 0);
+  if (drawC && drawC.width > 0) ctx.drawImage(drawC, 0, 0);
+  const a = document.createElement('a');
+  a.download = 'sayfa_' + (document.getElementById('float-page-num')?.textContent || '1') + '.png';
+  a.href = merged.toDataURL('image/png');
+  a.click();
+};
 </script>
 </body>
 </html>

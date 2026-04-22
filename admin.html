@@ -21,34 +21,34 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 /* ── Sidebar ── */
 .sidebar{
   width:260px;flex-shrink:0;height:100vh;position:sticky;top:0;
-  background:var(--tx);
+  background:var(--s-low);
   display:flex;flex-direction:column;
   padding:28px 16px;
+  border-right:1px solid rgba(203,195,213,.2);
+  overflow-y:auto;
 }
-.sb-brand{padding:0 12px;margin-bottom:32px;display:flex;align-items:center;gap:10px;}
-.sb-brand .logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pl),var(--p));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.sb-brand .logo-mark .material-symbols-outlined{color:#fff;font-size:18px;}
-.sb-brand h1{font-family:'Manrope',sans-serif;font-size:16px;font-weight:900;color:#fff;letter-spacing:-.02em;}
-.sb-brand p{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;}
+.sb-brand{padding:0 12px;margin-bottom:32px;}
+.sb-brand h1{font-family:'Manrope',sans-serif;font-size:18px;font-weight:900;color:var(--p);letter-spacing:-.02em;}
+.sb-brand p{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.15em;margin-top:2px;}
 
-.sb-profile{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.06);border-radius:14px;margin-bottom:24px;border:1px solid rgba(255,255,255,.08);}
-.sb-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#e07020);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:15px;color:#fff;flex-shrink:0;}
-.sb-info h3{font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:#fff;}
-.sb-info p{font-size:10px;color:rgba(255,255,255,.5);font-weight:600;margin-top:2px;}
-.sb-role{display:inline-block;padding:2px 8px;background:rgba(240,138,58,.2);color:#f59e0b;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;border-radius:99px;margin-top:3px;border:1px solid rgba(240,138,58,.3);}
+.sb-profile{display:flex;align-items:center;gap:12px;padding:12px;background:var(--s-lowest);border-radius:16px;margin-bottom:24px;box-shadow:0 2px 8px rgba(70,21,153,.05);}
+.sb-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--pl),var(--p));display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;}
+.sb-info h3{font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);line-height:1.2;}
+.sb-info p{font-size:10px;color:var(--mu);font-weight:600;margin-top:2px;}
+.sb-role{display:inline-block;padding:2px 8px;background:#fef3e8;color:var(--o);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;border-radius:99px;margin-top:3px;}
 
-.sb-section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.3);padding:10px 12px 4px;margin-top:8px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:none;background:none;color:rgba(255,255,255,.55);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;width:100%;text-align:left;text-decoration:none;}
-.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-.nav-item.active{background:rgba(70,21,153,.8);color:#fff;}
-.nav-item.active .material-symbols-outlined{color:var(--pb2);}
+.sb-section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--mu);padding:8px 12px 4px;margin-top:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:none;background:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;width:100%;text-align:left;text-decoration:none;}
+.nav-item:hover{background:var(--s-cnt);color:var(--tx);}
+.nav-item.active{background:var(--pb);color:var(--p);}
+.nav-item.active .material-symbols-outlined{color:var(--p);}
 .nav-item .material-symbols-outlined{font-size:18px;}
-.nav-item .badge{margin-left:auto;background:rgba(255,255,255,.15);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:800;}
-.nav-item.danger:hover{background:rgba(220,38,38,.2);color:#fca5a5;}
+.nav-item .badge{margin-left:auto;background:var(--p);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:800;}
+.nav-item.danger:hover{background:#fef2f2;color:var(--r);}
 
-.sb-footer{margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);}
-.sb-logout{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:none;background:none;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .15s;}
-.sb-logout:hover{background:rgba(220,38,38,.15);color:#fca5a5;}
+.sb-footer{margin-top:auto;padding-top:16px;border-top:1px solid rgba(203,195,213,.3);}
+.sb-logout{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:none;background:none;color:var(--mu);font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .15s;}
+.sb-logout:hover{background:#fef2f2;color:var(--r);}
 
 /* ── Main ── */
 .main{flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto;}
@@ -200,13 +200,11 @@ tbody tr:hover td{background:var(--s-low);}
     </div>
   </div>
 
-  <div class="sb-section-label">Dashboard</div>
+  <div class="sb-section-label">Menü</div>
   <button class="nav-item active" onclick="switchTab('tGenel',this)">
-    <span class="material-symbols-outlined">dashboard</span>
-    Genel Bakış
+    <span class="material-symbols-outlined">home</span>
+    Anasayfa
   </button>
-
-  <div class="sb-section-label">Yönetim</div>
   <button class="nav-item" onclick="switchTab('tKullanici',this)">
     <span class="material-symbols-outlined">manage_accounts</span>
     Kullanıcılar
@@ -215,10 +213,6 @@ tbody tr:hover td{background:var(--s-low);}
   <button class="nav-item" onclick="switchTab('tOgr',this)">
     <span class="material-symbols-outlined">groups</span>
     Öğrenci İstatistikleri
-  </button>
-  <button class="nav-item" onclick="switchTab('tOgt',this)">
-    <span class="material-symbols-outlined">supervisor_account</span>
-    Öğretmen İstatistikleri
   </button>
   <button class="nav-item" onclick="switchTab('tFas',this)">
     <span class="material-symbols-outlined">auto_stories</span>
@@ -244,7 +238,13 @@ tbody tr:hover td{background:var(--s-low);}
       <div class="topbar-sub" id="topbar-sub">Sistem genelindeki duruma bakın</div>
     </div>
     <div class="topbar-right">
+      <button id="add-user-btn" onclick="openAddUser()" style="display:none;align-items:center;gap:6px;padding:7px 16px;border-radius:99px;background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(70,21,153,.25);transition:all .2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>Kullanıcı Ekle
+      </button>
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <button onclick="document.getElementById('logout-btn').click()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:1.5px solid rgba(203,195,213,.6);background:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='#fef2f2';this.style.color='var(--r)';this.style.borderColor='#fecaca'" onmouseout="this.style.background='none';this.style.color='var(--mu)';this.style.borderColor='rgba(203,195,213,.6)'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Çıkış Yap
+      </button>
 
     </div>
   </header>
@@ -258,51 +258,21 @@ tbody tr:hover td{background:var(--s-low);}
 
     <!-- Kullanıcılar -->
     <div class="tp" id="tKullanici">
-      <div class="sec-hdr">
-        <div>
-          <h2 class="sec-title">Kullanıcı Yönetimi</h2>
-          <p class="sec-sub">Tüm öğrenci, öğretmen ve admin hesapları</p>
-        </div>
-        <div class="sec-actions">
-          <button class="btn-primary" onclick="openAddUser()">
-            <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
-            Kullanıcı Ekle
-          </button>
-        </div>
-      </div>
       <div id="tKullanici-inner" class="ld"><div class="sp"></div>Yükleniyor...</div>
     </div>
 
     <!-- Öğrenci İstatistikleri -->
     <div class="tp" id="tOgr">
-      <div class="sec-hdr">
-        <div>
-          <h2 class="sec-title">Öğrenci İstatistikleri</h2>
-          <p class="sec-sub">Tüm öğrencilerin performans özeti</p>
-        </div>
-      </div>
       <div id="tOgr-inner" class="ld"><div class="sp"></div>Yükleniyor...</div>
     </div>
 
     <!-- Öğretmen İstatistikleri -->
     <div class="tp" id="tOgt">
-      <div class="sec-hdr">
-        <div>
-          <h2 class="sec-title">Öğretmen İstatistikleri</h2>
-          <p class="sec-sub">Öğretmenlerin sınıf ve fasikül durumları</p>
-        </div>
-      </div>
       <div id="tOgt-inner" class="ld"><div class="sp"></div>Yükleniyor...</div>
     </div>
 
     <!-- Fasiküller -->
     <div class="tp" id="tFas">
-      <div class="sec-hdr">
-        <div>
-          <h2 class="sec-title">Fasikül Yönetimi</h2>
-          <p class="sec-sub">Mevcut fasiküller ve erişim istatistikleri</p>
-        </div>
-      </div>
       <div id="tFas-inner"></div>
     </div>
 
@@ -417,7 +387,9 @@ window.switchTab=(id,el)=>{
   $(id).classList.add('on');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active');
-  const titles={tGenel:['Genel Bakış','Sistem geneli özet'],tKullanici:['Kullanıcılar','Hesap yönetimi'],tOgr:['Öğrenci İstatistikleri','Performans verileri'],tOgt:['Öğretmen İstatistikleri','Sınıf verileri'],tFas:['Fasikül Yönetimi','İçerik ve erişim']};
+  const addBtn=document.getElementById('add-user-btn');
+  if(addBtn) addBtn.style.display = id==='tKullanici' ? 'flex' : 'none';
+  const titles={tGenel:['Anasayfa','Sistem genelindeki duruma bakın'],tKullanici:['Kullanıcılar','Hesap yönetimi'],tOgr:['Öğrenci İstatistikleri','Performans verileri'],tOgt:['Öğretmen İstatistikleri','Sınıf verileri'],tFas:['Fasiküller','İçerik ve erişim']};
   if(titles[id]){$('topbar-title').textContent=titles[id][0];$('topbar-sub').textContent=titles[id][1];}
   if(id==='tKullanici') renderKullanici();
   if(id==='tOgr') renderOgrSts();
@@ -587,6 +559,7 @@ async function renderKullanici(){
               <button class="btn-sm purple" onclick="showCred('${u.username}','${u.password}','${u.name}')">Bilgi</button>
               ${u.role==='student'?`<button class="btn-sm orange" onclick="openAssign('${u.id}','${u.name}','${u.teacherId||''}')">Öğretmen Ata</button>`:''}
               <button class="btn-sm blue" onclick="openFasAssign('${u.id}','${u.name}')">Fasiküller</button>
+              ${u.role==='student'?`<button class="btn-sm" style="background:#fff7ed;color:#c2410c;" onclick="resetActivity('${u.id}','${u.name}')">Aktivite Sıfırla</button>`:''}
               <button class="btn-sm dark" onclick="askReset('${u.id}','${u.name}')">Sıfırla</button>
               <button class="btn-sm red" onclick="delUser('${u.id}','${u.name}')">Sil</button>
             </div></td>
@@ -678,10 +651,13 @@ async function renderOgtSts(){
 /* ── Fasikül Listesi ── */
 function renderFasList(){
   $('tFas-inner').innerHTML=`
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
-    ${FASIKUL.map(f=>`<div style="background:#fff;border-radius:16px;padding:20px;box-shadow:var(--shadow-lg);">
-      <div style="width:40px;height:40px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:16px;color:var(--p);margin-bottom:14px;">${f.n}</div>
-      <div style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;color:var(--tx);margin-bottom:4px;line-height:1.3;">${f.t}</div>
+  <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:calc(4*220px + 3*14px);margin:0 auto;">
+    ${FASIKUL.map(f=>`<div style="background:#fff;border-radius:16px;padding:20px;box-shadow:var(--shadow-lg);width:220px;flex-shrink:0;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(70,21,153,.12)'" onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow-lg)'">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:16px;color:var(--p);">${f.n}</div>
+        <span style="font-size:9px;font-weight:700;color:rgba(70,21,153,.5);text-transform:uppercase;letter-spacing:.1em;">Fasikül #${f.n.padStart(2,'0')}</span>
+      </div>
+      <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);margin-bottom:4px;line-height:1.3;">${f.t}</div>
       <div style="font-size:11px;color:var(--mu);margin-bottom:14px;">${f.s}</div>
       <button class="btn-ghost" style="width:100%;justify-content:center;" onclick="(()=>{sessionStorage.setItem('dd_uid','${CU?.uid||''}');sessionStorage.setItem('dd_role','admin');sessionStorage.setItem('dd_fid','${f.id}');openFrame('${f.f}','${f.t}')})()">
         <span class="material-symbols-outlined" style="font-size:14px;">play_circle</span>Aç
@@ -731,6 +707,16 @@ window.saveUser=async()=>{
     else alert('Hata: '+e.message);
   }
   btn.disabled=false;btn.textContent='Kaydet';
+};
+
+window.resetActivity=async(uid,name)=>{
+  if(!confirm(`"${name}" adlı öğrencinin yıllık aktivite verisi silinecek. Emin misiniz?`))return;
+  try{
+    const ref=doc(db,'stats',uid);
+    const snap=await getDoc(ref);
+    if(snap.exists()){const d={...snap.data()};delete d.daily;await setDoc(ref,d);}
+    alert('Aktivite verisi sıfırlandı.');
+  }catch(e){alert('Hata: '+e.message);}
 };
 
 window.delUser=async(uid,name)=>{

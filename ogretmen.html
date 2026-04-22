@@ -167,13 +167,30 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
 .heatmap-grid{display:grid;gap:4px;}
 .heat-cell{height:14px;border-radius:3px;cursor:default;}
 
+/* ── Hamburger ── */
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:background .15s;}
+.hamburger:hover{background:var(--s-cnt);}
+.hamburger span{display:block;width:22px;height:2px;background:var(--p);border-radius:99px;transition:all .25s;}
+
+/* Sidebar overlay on mobile */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199;}
+.sb-overlay.on{display:block;}
+
 /* ── Mobile ── */
 @media(max-width:900px){
-  .sidebar{display:none;}
+  .sidebar{
+    position:fixed;left:-280px;top:0;z-index:200;
+    width:280px;height:100vh;
+    transition:left .28s cubic-bezier(.4,0,.2,1);
+    box-shadow:none;
+  }
+  .sidebar.open{left:0;box-shadow:4px 0 32px rgba(70,21,153,.18);}
+  .hamburger{display:flex;}
   .main{width:100%;}
   .stat-grid{grid-template-columns:1fr 1fr;}
   .perf-grid{grid-template-columns:1fr;}
-  .content{padding:20px 16px;}
+  .content{padding:16px 12px;}
+  .card{height:auto;min-height:0;max-height:60vh;}
 }
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -181,6 +198,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
 </style>
 </head>
 <body>
+
+<!-- Mobile sidebar overlay -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
@@ -201,15 +221,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
   <nav class="sb-nav">
     <div class="sb-section-label">Ana Menü</div>
     <button class="nav-item active" onclick="switchTab('tOgr',this)">
-      <span class="material-symbols-outlined">group</span>
-      Öğrencilerim
+      <span class="material-symbols-outlined">home</span>
+      Anasayfa
       <span class="badge" id="student-count-badge">—</span>
     </button>
     <button class="nav-item" onclick="switchTab('tFas',this)">
       <span class="material-symbols-outlined">auto_stories</span>
       Fasiküller
     </button>
+    <button class="nav-item" onclick="switchTab('tAyarlar',this)">
+      <span class="material-symbols-outlined">settings</span>
+      Ayarlar
+    </button>
 
+    <!-- Öğrenci listesi — Ayarlar'ın hemen altında -->
+    <div id="sb-students" style="margin-top:4px;padding-top:8px;border-top:1px solid rgba(203,195,213,.2);display:none;flex-direction:column;gap:2px;">
+      <div class="sb-section-label" style="margin-top:0;padding-top:2px;">Öğrenciler</div>
+    </div>
   </nav>
 
   <div class="sb-footer" style="flex-shrink:0;margin-top:auto;padding:16px 0;">
@@ -226,8 +254,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
   <!-- Topbar -->
   <header class="topbar">
     <div class="topbar-left">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
       <div>
-        <div class="topbar-title" id="topbar-title">Öğrencilerim</div>
+        <div class="topbar-title" id="topbar-title">Anasayfa</div>
         <div class="topbar-sub" id="topbar-sub">Öğrenci performanslarını izle</div>
       </div>
     </div>
@@ -235,7 +266,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
       <button class="icon-btn" title="Bildirimler">
         <span class="material-symbols-outlined">notifications</span>
       </button>
-
+      <button id="topbar-logout-btn" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:1.5px solid rgba(203,195,213,.6);background:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='#fef2f2';this.style.color='var(--r)';this.style.borderColor='#fecaca'" onmouseout="this.style.background='none';this.style.color='var(--mu)';this.style.borderColor='rgba(203,195,213,.6)'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>
+        Çıkış Yap
+      </button>
     </div>
   </header>
 
@@ -251,13 +285,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
 
     <!-- Fasiküller Tab -->
     <div class="tp" id="tFas" style="overflow-y:auto;justify-content:center;align-items:center;flex-direction:column;">
-      <div class="sec-hdr" style="width:100%;">
-        <div>
-          <h2 class="sec-title">Fasiküller</h2>
-          <p class="sec-sub">Müfredattaki tüm fasiküllerinizi buradan yönetin.</p>
-        </div>
-      </div>
       <div id="fas-grid" class="ld" style="justify-content:center;"><div class="sp"></div>Yükleniyor...</div>
+    </div>
+
+    <!-- Ayarlar Tab -->
+    <div class="tp" id="tAyarlar" style="overflow-y:auto;align-items:center;">
+      <div style="width:100%;max-width:calc(4*230px + 3*16px);margin:0 auto;">
+
+        <!-- Fasikül Atamaları -->
+        <div id="ayarlar-assignment" style="display:none;background:var(--s-lowest);border-radius:16px;padding:20px 24px;box-shadow:var(--shadow-lg);margin-bottom:16px;"></div>
+
+        <!-- Fasikül istatistikleri -->
+        <div id="ayarlar-fas-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      </div>
     </div>
 
   </div>
@@ -278,12 +318,57 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="km-stats"></div>
     <!-- Section / konu bazlı tablo -->
     <div id="km-sections"></div>
-    <!-- Canlı izle butonu -->
+    <!-- Butonlar -->
     <div style="margin-top:20px;display:flex;gap:10px;">
       <button id="km-watch-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border:none;border-radius:12px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
         👁 Canlı İzle
       </button>
+      <button id="km-view-btn" style="flex:1;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border:none;border-radius:12px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        📚 Geçmiş Çalışma
+      </button>
     </div>
+  </div>
+</div>
+
+<!-- Avatar Picker Modal -->
+<div id="avPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:6000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:22px;padding:24px;width:100%;max-width:320px;box-shadow:0 20px 56px rgba(70,21,153,.22);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-family:'Manrope',sans-serif;font-size:16px;font-weight:900;color:var(--p);">🖼 Avatar Seç</div>
+      <button onclick="closeAvPicker()" style="background:var(--s-high);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <input type="hidden" id="avPickerUid">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <button onclick="saveAvatar(document.getElementById('avPickerUid').value,'male')"
+        style="padding:18px 10px;border:2px solid rgba(203,195,213,.4);border-radius:16px;background:var(--s-low);cursor:pointer;transition:all .15s;text-align:center;"
+        onmouseover="this.style.borderColor='var(--p)';this.style.background='var(--pb)'"
+        onmouseout="this.style.borderColor='rgba(203,195,213,.4)';this.style.background='var(--s-low)'">
+        <div style="font-size:30px;">👦</div>
+        <div style="font-size:11px;font-weight:700;color:var(--mu);margin-top:6px;">Erkek</div>
+      </button>
+      <button onclick="saveAvatar(document.getElementById('avPickerUid').value,'female')"
+        style="padding:18px 10px;border:2px solid rgba(203,195,213,.4);border-radius:16px;background:var(--s-low);cursor:pointer;transition:all .15s;text-align:center;"
+        onmouseover="this.style.borderColor='var(--p)';this.style.background='var(--pb)'"
+        onmouseout="this.style.borderColor='rgba(203,195,213,.4)';this.style.background='var(--s-low)'">
+        <div style="font-size:30px;">👧</div>
+        <div style="font-size:11px;font-weight:700;color:var(--mu);margin-top:6px;">Kız</div>
+      </button>
+    </div>
+    <label style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px dashed rgba(203,195,213,.6);border-radius:12px;cursor:pointer;transition:all .15s;margin-bottom:10px;"
+      onmouseover="this.style.borderColor='var(--p)';this.style.background='var(--pb)'"
+      onmouseout="this.style.borderColor='rgba(203,195,213,.6)';this.style.background=''">
+      <span style="font-size:22px;">📁</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--tx);">Fotoğraf Yükle</div>
+        <div style="font-size:11px;color:var(--mu);">JPG, PNG — maks 600KB</div>
+      </div>
+      <input type="file" id="avFileInput" accept="image/*" style="display:none;" onchange="onAvFile(event)">
+    </label>
+    <button onclick="saveAvatar(document.getElementById('avPickerUid').value,null)"
+      style="width:100%;padding:9px;border:1.5px solid rgba(203,195,213,.5);border-radius:10px;background:none;color:var(--mu);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;"
+      onmouseover="this.style.background='var(--s-cnt)'" onmouseout="this.style.background=''">
+      Varsayılana Dön (Baş Harf)
+    </button>
   </div>
 </div>
 
@@ -317,20 +402,48 @@ const ini=n=>(n||'?').charAt(0).toUpperCase();
 const $=id=>document.getElementById(id);
 
 let CU=null,CP=null,activeStudentUid=null,liveUnsubs=[];
+let _allStudents=[];
+
+/* Hamburger */
+window.toggleSidebar=()=>{
+  const sb=$('sidebar'),ov=$('sbOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('on');
+};
+window.closeSidebar=()=>{
+  $('sidebar').classList.remove('open');
+  $('sbOverlay').classList.remove('on');
+};
 
 window.switchTab=(id,el)=>{
   document.querySelectorAll('.tp').forEach(t=>t.classList.remove('on'));
   $(id).classList.add('on');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active');
-  const titles={tOgr:['Öğrencilerim','Öğrenci performanslarını izle'],tFas:['Fasiküller','Müfredatı yönet']};
+  const titles={
+    tOgr:['Anasayfa','Öğrenci performanslarını izle'],
+    tFas:['Fasiküller','Müfredatı yönet'],
+    tAyarlar:['Ayarlar','Öğrenci araçları ve istatistikler']
+  };
   if(titles[id]){$('topbar-title').textContent=titles[id][0];$('topbar-sub').textContent=titles[id][1];}
   if(id==='tFas') renderFas();
+  if(id==='tAyarlar') initAyarlar();
+  closeSidebar();
 };
 
 window.openFrame=(url,title)=>{
   $('fasikülFrame').src=url;
   $('frmOverlay').style.display='flex';
+};
+window.openViewMode=(studentUid,fasUrl,fasTitle)=>{
+  sessionStorage.setItem('dd_uid',CU.uid);
+  sessionStorage.setItem('dd_name',CP.name);
+  sessionStorage.setItem('dd_role',CP.role);
+  sessionStorage.setItem('dd_fid','view');
+  sessionStorage.setItem('dd_tid','');
+  sessionStorage.setItem('dd_username',CP.username||'');
+  sessionStorage.setItem('dd_password',CP.password||'');
+  openFrame(fasUrl+'?view='+encodeURIComponent(studentUid), '📚 Geçmiş: '+fasTitle);
 };
 window.openLiveWatch=(studentUid,fasUrl,fasTitle)=>{
   sessionStorage.setItem('dd_uid',CU.uid);
@@ -344,7 +457,9 @@ window.openLiveWatch=(studentUid,fasUrl,fasTitle)=>{
 };
 window.closeFrame=()=>{$('frmOverlay').style.display='none';$('fasikülFrame').src='';};
 
-$('logout-btn').onclick=async()=>{await signOut(auth);location.href='index.html';};
+const doLogout=async()=>{await signOut(auth);location.href='index.html';};
+$('logout-btn').onclick=doLogout;
+$('topbar-logout-btn').onclick=doLogout;
 
 onAuthStateChanged(auth,async user=>{
   if(!user){location.href='index.html';return;}
@@ -358,6 +473,21 @@ onAuthStateChanged(auth,async user=>{
   await renderOgr();
 });
 
+/* ── Avatar helpers ── */
+const AV_COLS=['linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0ea5e9,#38bdf8)','linear-gradient(135deg,#10b981,#6ee7b7)','linear-gradient(135deg,#f59e0b,#fcd34d)','linear-gradient(135deg,#ef4444,#fca5a5)','linear-gradient(135deg,#ec4899,#f9a8d4)','linear-gradient(135deg,#14b8a6,#5eead4)','linear-gradient(135deg,#8b5cf6,#c4b5fd)'];
+function getAvColor(uid){let h=0;for(const c of(uid||'x'))h=(h<<5)-h+c.charCodeAt(0);return AV_COLS[Math.abs(h)%AV_COLS.length];}
+function avHTML(s,sz=28,fsz=11,clickable=false){
+  const col=getAvColor(s.uid);
+  const ck=clickable?`onclick="openAvatarPicker('${s.uid}')" title="Avatar değiştir" style="cursor:pointer;"`:' ';
+  if(s.avatar&&s.avatar.startsWith('data:'))
+    return `<img src="${s.avatar}" ${ck} style="width:${sz}px;height:${sz}px;border-radius:50%;object-fit:cover;flex-shrink:0;${clickable?'cursor:pointer;':''}">`;
+  if(s.avatar==='male'||s.avatar==='female'){
+    const em=s.avatar==='male'?'👦':'👧';
+    return `<div ${ck} style="width:${sz}px;height:${sz}px;border-radius:50%;background:${col};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*.52)}px;flex-shrink:0;">${em}</div>`;
+  }
+  return `<div ${ck} style="width:${sz}px;height:${sz}px;border-radius:50%;background:${col};display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:${fsz}px;color:#fff;flex-shrink:0;">${ini(s.name)}</div>`;
+}
+
 /* ── Öğrenciler Tab ── */
 async function renderOgr(){
   const el=$('tOgr-inner');
@@ -368,7 +498,7 @@ async function renderOgr(){
 
   if(snap.empty){
     el.innerHTML='<div class="es"><div class="ic">👨‍🎓</div><p>Henüz atanmış öğrenciniz yok.</p></div>';
-    $('sb-students-section').style.display='none';
+    $('sb-students').style.display='none';
     return;
   }
 
@@ -415,23 +545,29 @@ async function renderOgr(){
     </div>
   </div>`;
 
-  const studentSelectorHTML=`
-  <div style="margin-bottom:16px;">
-    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--mu);margin-bottom:12px;">ÖĞRENCİ SEÇ</div>
-    <div class="student-row" id="student-chip-row">
-      ${students.map(s=>`
-        <div class="student-chip${s.uid===activeStudentUid?' active':''}" onclick="selectStudent('${s.uid}')" id="chip-${s.uid}">
-          <div class="av-wrap">
-            <div class="avatar">${ini(s.name)}</div>
-            <span class="live-dot" id="live-dot-${s.uid}" style="display:none;"></span>
-          </div>
-          <span class="name">${s.name.split(' ')[0]}</span>
-          <span style="font-size:10px;font-weight:800;color:var(--p);">%${s.pct}</span>
-        </div>`).join('')}
-    </div>
-  </div>`;
+  /* Sidebar'a öğrenci listesi */
+  const sbStudents=$('sb-students');
+  if(sbStudents){
+    sbStudents.style.display='flex';
+    const existingItems=sbStudents.querySelectorAll('.sb-student-item');
+    existingItems.forEach(e=>e.remove());
+    students.forEach(s=>{
+      const item=document.createElement('button');
+      item.className='nav-item sb-student-item'+(s.uid===activeStudentUid?' active':'');
+      item.id='sb-chip-'+s.uid;
+      item.onclick=()=>selectStudent(s.uid);
+      item.innerHTML=`
+        <div style="position:relative;flex-shrink:0;">
+          ${avHTML(s,28,11,true)}
+          <span id="live-dot-${s.uid}" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--g);border:2px solid #fff;position:absolute;bottom:0;right:0;"></span>
+        </div>
+        <span style="flex:1;text-align:left;">${s.name.split(' ')[0]}</span>
+        <span style="font-size:10px;font-weight:800;color:${s.pct>=70?'var(--g)':s.pct>=40?'var(--amb)':'var(--mu)'};">%${s.pct}</span>`;
+      sbStudents.appendChild(item);
+    });
+  }
 
-  el.innerHTML=statsHTML+studentSelectorHTML+'<div id="student-detail" style="flex:1;min-height:0;display:flex;flex-direction:column;"></div>';
+  el.innerHTML=statsHTML+'<div id="student-detail" style="flex:1;min-height:0;display:flex;flex-direction:column;"></div>';
 
   // ── Canlı dinleyiciler ──
   liveUnsubs.forEach(u=>u());liveUnsubs=[];
@@ -446,14 +582,33 @@ async function renderOgr(){
 
   window.selectStudent=async(uid)=>{
     activeStudentUid=uid;
-    document.querySelectorAll('.student-chip').forEach(c=>c.classList.remove('active'));
-    const chip=$('chip-'+uid);if(chip) chip.classList.add('active');
+    document.querySelectorAll('.sb-student-item').forEach(c=>c.classList.remove('active'));
+    const chip=$('sb-chip-'+uid);if(chip) chip.classList.add('active');
     const s=students.find(x=>x.uid===uid);
     if(!s) return;
-    renderStudentDetail(s);
+    closeSidebar();
+    if($('tAyarlar').classList.contains('on')) loadAyarlarStats();
+    else renderStudentDetail(s);
   };
 
   renderStudentDetail(students.find(s=>s.uid===activeStudentUid)||students[0]);
+}
+
+function buildHeatmap(daily){
+  const hC=['#e7e0eb','#d0bef5','#a78bfa','#7c3aed','#461599'];
+  const now=new Date();
+  const startDate=new Date(now.getFullYear(),now.getMonth()-8,1);
+  const dates=[];const cur=new Date(startDate);
+  while(cur<=now){dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
+  let maxVal=0;
+  dates.forEach(dt=>{const v=daily[dt]||{};const s=(v.minutes||0)+(v.questions||0)*2+(v.pages||0);if(s>maxVal)maxVal=s;});
+  function col(dt){const v=daily[dt]||{};const s=(v.minutes||0)+(v.questions||0)*2+(v.pages||0);if(!s)return hC[0];const r=s/maxVal;if(r<.2)return hC[1];if(r<.4)return hC[2];if(r<.7)return hC[3];return hC[4];}
+  let totalMin=0,totalQ=0,activeDays=0,cells='';
+  dates.forEach(dt=>{const v=daily[dt]||{};const m=v.minutes||0,q=v.questions||0,p=v.pages||0;totalMin+=m;totalQ+=q;if(m||q||p)activeDays++;cells+=`<div title="${dt}: ${m}dk, ${q} soru${p?' '+p+' sayfa':''}" style="height:14px;border-radius:3px;background:${col(dt)};cursor:default;"></div>`;});
+  const mN=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  const seen=new Set();const lbls=[];dates.forEach(dt=>{const m=parseInt(dt.slice(5,7))-1;if(!seen.has(m)){seen.add(m);lbls.push(mN[m]);}});
+  const monthLabels=`<div style="display:flex;justify-content:space-between;padding:0 2px;margin-bottom:5px;">${lbls.map(m=>`<span style="font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;">${m}</span>`).join('')}</div>`;
+  return{cells,monthLabels,totalMin,totalQ,activeDays,hC};
 }
 
 function renderStudentDetail(s){
@@ -476,7 +631,36 @@ function renderStudentDetail(s){
     return{name:sub,pct:total?Math.round(c/total*100):0};
   });
 
+  const daily=s.stats.daily||{};
+  const hm=buildHeatmap(daily);
+
   el.innerHTML=`
+  <!-- Yıllık Aktivite Heatmap -->
+  <div style="background:var(--s-lowest);border-radius:20px;padding:18px 20px 14px;box-shadow:var(--shadow-lg);margin-bottom:16px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);display:flex;align-items:center;gap:7px;">
+        <span class="material-symbols-outlined" style="font-size:16px;color:var(--p);">calendar_month</span>
+        ${s.name.split(' ')[0]} — Yıllık Aktivite
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:5px;">
+          <span style="font-size:10px;color:var(--mu);">Az</span>
+          ${hm.hC.map(c=>`<div style="width:11px;height:11px;border-radius:3px;background:${c};"></div>`).join('')}
+          <span style="font-size:10px;color:var(--mu);">Çok</span>
+        </div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <div style="min-width:460px;">
+        ${hm.monthLabels}
+        <div style="display:grid;grid-template-columns:repeat(30,1fr);gap:3px;">${hm.cells}</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <p style="font-size:12px;color:var(--mu);font-style:italic;">Yıllık <strong style="color:var(--tx);">${fmt(s.tm)}</strong> çalışıldı · <strong style="color:var(--tx);">${s.tc+s.tw}</strong> soru çözüldü · <strong style="color:var(--tx);">${hm.activeDays}</strong> aktif gün</p>
+    </div>
+  </div>
+
   <div class="perf-grid">
     <!-- Performans -->
     <div class="card" style="display:flex;flex-direction:column;">
@@ -524,7 +708,7 @@ function renderStudentDetail(s){
       </div>
       <div class="fas-list" style="flex:1;overflow-y:auto;">
         ${fasStats.map(f=>`
-        <div class="fas-item${f.started?' active':''}">
+        <div class="fas-item${f.started?' active':''}" onclick="openFrame('${f.f}','${f.t}')" style="cursor:pointer;" onmouseover="this.style.background='var(--s-cnt)'" onmouseout="this.style.background=''">
           <div class="fas-icon"><span class="material-symbols-outlined">menu_book</span></div>
           <div style="flex:1;min-width:0;">
             <div class="fas-name">${f.t}</div>
@@ -533,7 +717,7 @@ function renderStudentDetail(s){
           <div class="fas-status">
             ${f.started?`<span class="pill done">%${f.pct}</span>`:'<span class="pill locked">Başlanmadı</span>'}
           </div>
-          <button class="watch-btn" onclick="openKarne('${s.uid}','${f.id}','${f.t}','${f.s}')">📋 Karne</button>
+          <button class="watch-btn" onclick="event.stopPropagation();openKarne('${s.uid}','${f.id}','${f.t}','${f.s}')">📋 Karne</button>
         </div>`).join('')}
       </div>
     </div>
@@ -646,16 +830,235 @@ window.openKarne = function(studentUid, fasId, fasTitle, fasSubject) {
       : '<div style="text-align:center;padding:30px;color:var(--mu);"><div style="font-size:32px;margin-bottom:8px;">📖</div><div style="font-size:13px;">Bu fasikül henüz başlanmamış.</div></div>';
   }
 
-  // Live watch button
+  // Live watch + view buttons
   const fasObj = FASIKUL.find(f => f.id === fasId);
   $('km-watch-btn').onclick = () => {
     closeKarne();
     if (fasObj) openLiveWatch(studentUid, fasObj.f, fasObj.t);
   };
+  $('km-view-btn').onclick = () => {
+    closeKarne();
+    if (fasObj) openViewMode(studentUid, fasObj.f, fasObj.t);
+    else alert('Bu fasikül için geçmiş görüntüleme henüz desteklenmiyor.');
+  };
 };
 
 window.closeKarne = function() {
   $('karneModal').style.display = 'none';
+};
+
+/* ── AYARLAR SEKMESİ ── */
+window.initAyarlar = async function() {
+  if (!activeStudentUid && window._allStudents?.length) activeStudentUid = window._allStudents[0].uid;
+  if (!activeStudentUid) {
+    try {
+      const snap = await getDocs(query(collection(db,'users'),where('role','==','student'),where('teacherId','==',CU.uid)));
+      if (!snap.empty) { window._allStudents = snap.docs.map(d=>({uid:d.id,...d.data()})); activeStudentUid = snap.docs[0].id; }
+    } catch(e) {}
+  }
+  loadAyarlarStats();
+};
+
+function renderAssignSection(uid, allowedFasikul){
+  const box = $('ayarlar-assignment');
+  box.style.display = 'block';
+  const allAllowed = !allowedFasikul;
+  const assignedSet = allAllowed ? new Set(FASIKUL.map(f=>f.id)) : new Set(allowedFasikul);
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <div>
+        <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);">📚 Fasikül Atamaları</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:2px;">Öğrencinin erişebileceği fasikülları seçin</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:var(--p);">${assignedSet.size} / ${FASIKUL.length} atandı</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+      ${FASIKUL.map(f=>{
+        const on = assignedSet.has(f.id);
+        return `<button onclick="toggleFasikul('${uid}','${f.id}')"
+          style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;border:1.5px solid ${on?'var(--p)':'rgba(203,195,213,.55)'};background:${on?'var(--pb)':'transparent'};color:${on?'var(--p)':'var(--mu)'};font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;"
+          onmouseover="this.style.borderColor='var(--p)'" onmouseout="this.style.borderColor='${on?'var(--p)':'rgba(203,195,213,.55)'}'">
+          <span style="width:15px;height:15px;border-radius:50%;background:${on?'var(--p)':'var(--s-high)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:#fff;">${on?'✓':''}</span>
+          #${f.n} ${f.t}
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+window.toggleFasikul = async function(uid, fid){
+  const uSnap = await getDoc(doc(db,'users',uid));
+  const uData = uSnap.exists() ? uSnap.data() : {};
+  let allowed = uData.allowedFasikul ? [...uData.allowedFasikul] : FASIKUL.map(f=>f.id);
+  if(allowed.includes(fid)) allowed = allowed.filter(id=>id!==fid);
+  else allowed.push(fid);
+  const saveVal = allowed.length === FASIKUL.length ? null : allowed;
+  await setDoc(doc(db,'users',uid), {allowedFasikul: saveVal}, {merge:true});
+  const s = (window._allStudents||[]).find(x=>x.uid===uid);
+  if(s) s.allowedFasikul = saveVal;
+  renderAssignSection(uid, saveVal);
+};
+
+window.loadAyarlarStats = async function() {
+  const uid = activeStudentUid;
+  const container = $('ayarlar-fas-list');
+  if (!uid) { container.innerHTML = '<div class="es"><p>Soldaki menüden bir öğrenci seçin.</p></div>'; $('ayarlar-assignment').style.display='none'; return; }
+
+  const s = (window._allStudents||[]).find(x=>x.uid===uid);
+  if(s) { const sub=$('topbar-sub'); if(sub) sub.textContent=s.name+' — istatistikler ve araçlar'; }
+
+  container.innerHTML = '<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+
+  try {
+    const [snap, uSnap] = await Promise.all([getDoc(doc(db,'stats',uid)), getDoc(doc(db,'users',uid))]);
+    const data = snap.exists() ? snap.data() : {};
+    const uData = uSnap.exists() ? uSnap.data() : {};
+    renderAssignSection(uid, uData.allowedFasikul || null);
+
+    const studentName = s?.name || uid;
+    container.style.cssText = 'display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:stretch;';
+    container.innerHTML = FASIKUL.map(f => {
+      const fs = data[f.id] || {};
+      const c = fs.correct || 0, w = fs.wrong || 0, m = fs.minutes || 0;
+      const total = c + w, pct = total ? Math.round(c / total * 100) : 0;
+      const started = !!(c || w || m);
+      const pctColor = pct>=70?'var(--g)':pct>=40?'var(--amb)':'var(--r)';
+      const hasDrawings = f.f === 'Temel_Matematik.html';
+      return `
+      <div style="background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 16px rgba(70,21,153,.06);width:230px;flex-shrink:0;display:flex;flex-direction:column;transition:all .2s;box-sizing:border-box;"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(70,21,153,.12)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(70,21,153,.06)'">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:15px;color:var(--p);flex-shrink:0;">${f.n}</div>
+          <span style="padding:3px 9px;border-radius:99px;font-size:9px;font-weight:800;background:${started?'#d1fae5':'var(--s-high)'};color:${started?'#065f46':'var(--mu)'};">${started?'Başlandı':'Yeni'}</span>
+        </div>
+        <div style="font-size:9px;font-weight:700;color:rgba(70,21,153,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;">Fasikül #${f.n.padStart(2,'0')}</div>
+        <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);line-height:1.3;margin-bottom:2px;">${f.t}</div>
+        <div style="font-size:11px;color:var(--mu);margin-bottom:12px;">${f.s}</div>
+        <div style="height:6px;background:var(--s-high);border-radius:99px;overflow:hidden;margin-bottom:6px;">
+          <div style="height:100%;border-radius:99px;background:${started&&total?pctColor:'var(--s-highest)'};width:${started&&total?pct:started?6:0}%;transition:width .7s cubic-bezier(.4,0,.2,1);"></div>
+        </div>
+        ${started
+          ? `<div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+               <span style="font-size:11px;font-weight:700;color:var(--g);">✓ ${c}</span>
+               <span style="font-size:11px;font-weight:700;color:var(--r);">✗ ${w}</span>
+               <span style="font-size:11px;font-weight:700;color:var(--p);">%${pct}</span>
+               <span style="font-size:11px;color:var(--mu);">⏱ ${fmt(m)}</span>
+             </div>`
+          : '<div style="margin-bottom:14px;font-size:11px;color:var(--mu);font-style:italic;">Henüz başlanmadı</div>'}
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;">
+          ${hasDrawings ? `
+          <div style="display:flex;gap:6px;">
+            <button onclick="clearStudentDrawings('${uid}','${f.id}')" title="Çizimleri Temizle"
+              style="flex:1;height:34px;background:#f8fafc;color:#64748b;border:1.5px solid #e2e8f0;border-radius:9px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:background .15s;white-space:nowrap;"
+              onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+              <span class="material-symbols-outlined" style="font-size:14px;flex-shrink:0;">delete</span>Çizim
+            </button>
+            <button onclick="openViewMode('${uid}','${f.f}','${f.t}')" title="Geçmiş Çalışma"
+              style="flex:1;height:34px;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:9px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:background .15s;white-space:nowrap;"
+              onmouseover="this.style.background='#bbf7d0'" onmouseout="this.style.background='#f0fdf4'">
+              <span class="material-symbols-outlined" style="font-size:14px;flex-shrink:0;">history</span>Geçmiş
+            </button>
+            <button onclick="openLiveWatch('${uid}','${f.f}','${f.t}')" title="Canlı İzle"
+              style="flex:1;height:34px;background:var(--pb);color:var(--p);border:1.5px solid var(--pb2);border-radius:9px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:background .15s;white-space:nowrap;"
+              onmouseover="this.style.background='var(--pb2)'" onmouseout="this.style.background='var(--pb)'">
+              <span class="material-symbols-outlined" style="font-size:14px;flex-shrink:0;">visibility</span>Canlı
+            </button>
+          </div>`
+          : '<div style="height:34px;flex-shrink:0;"></div>'}
+          <button onclick="resetStudentStats('${uid}','${f.id}','${studentName}')"
+            style="width:100%;background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;border-radius:9px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;"
+            onmouseover="this.style.background='#fecdd3'" onmouseout="this.style.background='#fff1f2'">
+            <span class="material-symbols-outlined" style="font-size:15px;">restart_alt</span>İstatistik Sıfırla
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { container.innerHTML = '<div class="es"><p>Veri yüklenemedi.</p></div>'; }
+};
+
+window.resetStudentActivity = async function(uid, name) {
+  if (!confirm(`${name} adlı öğrencinin tüm yıllık aktivite verisi silinecek. Emin misiniz?`)) return;
+  try {
+    const ref = doc(db, 'stats', uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = {...snap.data()};
+      delete data.daily;
+      await setDoc(ref, data);
+    }
+    const s = (window._allStudents||[]).find(x=>x.uid===uid);
+    if (s) { s.stats = {...(s.stats||{})}; delete s.stats.daily; }
+    renderStudentDetail((window._allStudents||[]).find(x=>x.uid===uid)||{uid,name,stats:{},tc:0,tw:0,tm:0,pct:0});
+    alert('Aktivite verisi sıfırlandı.');
+  } catch(e) { alert('Hata: ' + e.message); }
+};
+
+window.clearStudentDrawings = async function(uid, fid) {
+  if (!confirm('Bu öğrencinin tüm çizimleri kalıcı olarak silinecek. Emin misiniz?')) return;
+  try {
+    const { getDatabase, ref: rtRef3, remove } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+    const rtdb3 = getDatabase();
+    await remove(rtRef3(rtdb3, `savedDrawings/${uid}/${fid}`));
+    alert('Çizimler temizlendi.');
+  } catch(e) { alert('Hata: ' + e.message); }
+};
+
+window.resetStudentStats = async function(uid, fid, studentName) {
+  if (!confirm(`${studentName} adlı öğrencinin "${fid}" istatistikleri sıfırlanacak. Emin misiniz?`)) return;
+  try {
+    const ref = doc(db, 'stats', uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      const updated = {...data};
+      delete updated[fid];
+      delete updated[fid + '_states'];
+      await setDoc(ref, updated);
+    }
+    alert('İstatistikler sıfırlandı.');
+    loadAyarlarStats();
+  } catch(e) { alert('Hata: ' + e.message); }
+};
+
+/* ── Avatar Picker ── */
+window.openAvatarPicker = function(uid) {
+  document.getElementById('avPickerUid').value = uid;
+  document.getElementById('avPickerModal').style.display = 'flex';
+};
+window.closeAvPicker = function() {
+  document.getElementById('avPickerModal').style.display = 'none';
+};
+window.onAvFile = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 600*1024) { alert('Dosya 600KB\'den küçük olmalı.'); e.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = ev => saveAvatar(document.getElementById('avPickerUid').value, ev.target.result);
+  reader.readAsDataURL(file);
+};
+window.saveAvatar = async function(uid, val) {
+  if (!uid) return;
+  try {
+    const avatarVal = val === null ? null : val;
+    await setDoc(doc(db,'users',uid), {avatar: avatarVal}, {merge:true});
+    const s = (window._allStudents||[]).find(x=>x.uid===uid);
+    if (s) {
+      s.avatar = avatarVal;
+      const chip = document.getElementById('sb-chip-'+uid);
+      if (chip) {
+        const dotEl = document.getElementById('live-dot-'+uid);
+        const dotStyle = dotEl ? dotEl.style.display : 'none';
+        chip.innerHTML = `
+          <div style="position:relative;flex-shrink:0;">
+            ${avHTML(s,28,11,true)}
+            <span id="live-dot-${uid}" style="display:${dotStyle};width:8px;height:8px;border-radius:50%;background:var(--g);border:2px solid #fff;position:absolute;bottom:0;right:0;"></span>
+          </div>
+          <span style="flex:1;text-align:left;">${s.name.split(' ')[0]}</span>
+          <span style="font-size:10px;font-weight:800;color:${s.pct>=70?'var(--g)':s.pct>=40?'var(--amb)':'var(--mu)'};">%${s.pct}</span>`;
+      }
+    }
+    closeAvPicker();
+  } catch(err) { alert('Kaydedilemedi: ' + err.message); }
 };
 
 </script>
