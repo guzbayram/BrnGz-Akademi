@@ -430,10 +430,12 @@ async function renderGenel(){
   allUsers=users;
   const students=users.filter(u=>u.role==='student');
   const teachers=users.filter(u=>u.role==='teacher');
+  const studentIds=new Set(students.map(s=>s.id));
   $('user-count-badge').textContent=users.filter(u=>u.role!=='admin').length;
 
   let totalQ=0,totalMin=0,totalCorrect=0;
   statsSnaps.forEach(ss=>{
+    if(!studentIds.has(ss.id)) return; // sadece öğrenci istatistikleri
     const data=ss.data();
     FASIKUL.forEach(f=>{const fs=data[f.id]||{};totalQ+=(fs.correct||0)+(fs.wrong||0);totalMin+=fs.minutes||0;totalCorrect+=fs.correct||0;});
   });
@@ -529,11 +531,12 @@ async function renderGenel(){
     </table>
   </div>`;
 
-  // ── Stats gerçek zamanlı güncelleme ──
+  // ── Stats gerçek zamanlı güncelleme (sadece öğrenciler) ──
   if(window._statsUnsub) window._statsUnsub();
   window._statsUnsub = onSnapshot(collection(db,'stats'), snap=>{
     let tQ=0,tM=0,tC=0;
     snap.forEach(ss=>{
+      if(!studentIds.has(ss.id)) return;
       const data=ss.data();
       FASIKUL.forEach(f=>{const fs=data[f.id]||{};tQ+=(fs.correct||0)+(fs.wrong||0);tM+=fs.minutes||0;tC+=fs.correct||0;});
     });
