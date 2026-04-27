@@ -405,6 +405,13 @@ window.closeFrame=async()=>{
 window.addEventListener('message',async e=>{
   if(e.data==='closeFrame'){closeFrame();return;}
   if(e.data==='openHome'){closeFrame();return;}
+  if(e.data&&e.data.type==='statsLive'){
+    const t=$('hs-total'),c=$('hs-correct'),w=$('hs-wrong');
+    if(t) t.textContent=e.data.total;
+    if(c) c.textContent=e.data.correct;
+    if(w) w.textContent=e.data.wrong;
+    return;
+  }
   if(e.data&&e.data.type==='statsUpdate'&&CU&&e.data.uid===CU.uid){
     try{
       const ref=doc(db,'stats',CU.uid);
@@ -555,22 +562,22 @@ async function renderHome(){
   <div class="app-stat-grid">
     <div class="app-stat-card">
       <div class="app-stat-icon"><span class="material-symbols-outlined">quiz</span></div>
-      <div class="app-stat-val">${tc+tw}</div>
+      <div class="app-stat-val" id="hs-total">${tc+tw}</div>
       <div class="app-stat-label">Toplam Soru</div>
     </div>
     <div class="app-stat-card">
       <div class="app-stat-icon"><span class="material-symbols-outlined" style="color:#16a34a;">check_circle</span></div>
-      <div class="app-stat-val" style="color:#16a34a;">${tc}</div>
+      <div class="app-stat-val" style="color:#16a34a;" id="hs-correct">${tc}</div>
       <div class="app-stat-label">Doğru</div>
     </div>
     <div class="app-stat-card">
       <div class="app-stat-icon"><span class="material-symbols-outlined" style="color:#dc2626;">cancel</span></div>
-      <div class="app-stat-val" style="color:#dc2626;">${tw}</div>
+      <div class="app-stat-val" style="color:#dc2626;" id="hs-wrong">${tw}</div>
       <div class="app-stat-label">Yanlış</div>
     </div>
     <div class="app-stat-card">
       <div class="app-stat-icon"><span class="material-symbols-outlined">schedule</span></div>
-      <div class="app-stat-val">${fmt(tm)}</div>
+      <div class="app-stat-val" id="hs-time">${fmt(tm)}</div>
       <div class="app-stat-label">Toplam Süre</div>
     </div>
   </div>
