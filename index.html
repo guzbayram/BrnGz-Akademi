@@ -388,12 +388,30 @@ window.closeFrame=async()=>{
     if(!newDaily[today]) newDaily[today]={minutes:0,questions:0,pages:0};
     await setDoc(doc(db,'stats',CU.uid),{daily:newDaily},{merge:true});
   }
+  appSwitchTab('tHome', document.querySelector('.app-nav-item'));
   renderFas();
   renderHome();
 };
 
 window.addEventListener('message',async e=>{
   if(e.data==='closeFrame'){closeFrame();return;}
+  if(e.data==='openHome'){closeFrame();return;}
+  if(e.data&&e.data.type==='statsUpdate'&&CU&&e.data.uid===CU.uid){
+    try{
+      const ref=doc(db,'stats',CU.uid);
+      const snap=await getDoc(ref);
+      const existing=snap.exists()?snap.data():{};
+      const prev=existing[e.data.fid]||{};
+      await setDoc(ref,{...existing,[e.data.fid]:{
+        correct:e.data.correct,
+        wrong:e.data.wrong,
+        minutes:prev.minutes||0,
+        solutionViews:e.data.solutionViews||0,
+        sections:e.data.sections||{}
+      }});
+    }catch(_){}
+    return;
+  }
   if(e.data&&e.data.type==='activity'&&CU){
     const today=new Date().toISOString().slice(0,10);
     const snap=await getDoc(doc(db,'stats',CU.uid));
