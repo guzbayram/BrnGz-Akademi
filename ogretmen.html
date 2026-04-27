@@ -403,6 +403,7 @@ const $=id=>document.getElementById(id);
 
 let CU=null,CP=null,activeStudentUid=null,liveUnsubs=[];
 let _allStudents=[];
+let EFFECTIVE_FASIKUL=FASIKUL;
 
 /* Hamburger */
 window.toggleSidebar=()=>{
@@ -467,6 +468,7 @@ onAuthStateChanged(auth,async user=>{
   const snap=await getDoc(doc(db,'users',user.uid));
   if(!snap.exists()||snap.data().role!=='teacher'){location.href='index.html';return;}
   CP=snap.data();
+  EFFECTIVE_FASIKUL=CP.allowedFasikul?FASIKUL.filter(f=>CP.allowedFasikul.includes(f.id)):FASIKUL;
   $('sb-av').textContent=ini(CP.name);
   $('sb-name').textContent=CP.name;
   $('sb-email').textContent=CP.username?'@'+CP.username:'';
@@ -508,7 +510,7 @@ async function renderOgr(){
     const ss=await getDoc(doc(db,'stats',ud.id));
     const stats=ss.exists()?ss.data():{};
     let tc=0,tw=0,tm=0;
-    FASIKUL.forEach(f=>{const fs=stats[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+    EFFECTIVE_FASIKUL.forEach(f=>{const fs=stats[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
     students.push({uid:ud.id,...u,tc,tw,tm,pct:tc+tw?Math.round(tc/(tc+tw)*100):0,stats});
   }
 
@@ -616,7 +618,7 @@ function renderStudentDetail(s){
   if(!el) return;
 
   // Per-fasikul stats
-  const fasStats=FASIKUL.map(f=>{
+  const fasStats=EFFECTIVE_FASIKUL.map(f=>{
     const fs=s.stats[f.id]||{};
     const c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
     const total=c+w;
@@ -739,7 +741,7 @@ async function renderFas(){
       const ss=await getDoc(doc(db,'stats',ud.id));
       const st=ss.exists()?ss.data():{};
       let tc=0,tw=0,tm=0;
-      FASIKUL.forEach(f=>{const fs=st[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+      EFFECTIVE_FASIKUL.forEach(f=>{const fs=st[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
       arr.push({uid:ud.id,...u,tc,tw,tm,pct:tc+tw?Math.round(tc/(tc+tw)*100):0,stats:st});
     }
     window._allStudents=arr;
@@ -766,7 +768,7 @@ async function renderFas(){
 
   // ── Fasikül kartları (seçili öğrenci istatistikleriyle) ──
   const st=sel.stats||{};
-  const cards=FASIKUL.map(f=>{
+  const cards=EFFECTIVE_FASIKUL.map(f=>{
     const fs=st[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
     const started=!!(c||w||m),total=c+w,pct=total?Math.round(c/total*100):0;
     const barColor=pct>=70?'linear-gradient(90deg,#16a34a,#4ade80)':pct>=40?'linear-gradient(90deg,#d97706,#fcd34d)':'linear-gradient(90deg,var(--p),var(--pl))';
@@ -899,7 +901,7 @@ window.openKarne = function(studentUid, fasId, fasTitle, fasSubject) {
   }
 
   // Live watch + view buttons
-  const fasObj = FASIKUL.find(f => f.id === fasId);
+  const fasObj = EFFECTIVE_FASIKUL.find(f => f.id === fasId);
   $('km-watch-btn').onclick = () => {
     closeKarne();
     if (fasObj) openLiveWatch(studentUid, fasObj.f, fasObj.t);
@@ -931,17 +933,17 @@ function renderAssignSection(uid, allowedFasikul){
   const box = $('ayarlar-assignment');
   box.style.display = 'block';
   const allAllowed = !allowedFasikul;
-  const assignedSet = allAllowed ? new Set(FASIKUL.map(f=>f.id)) : new Set(allowedFasikul);
+  const assignedSet = allAllowed ? new Set(EFFECTIVE_FASIKUL.map(f=>f.id)) : new Set(allowedFasikul);
   box.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
       <div>
         <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);">📚 Fasikül Atamaları</div>
         <div style="font-size:11px;color:var(--mu);margin-top:2px;">Öğrencinin erişebileceği fasikülları seçin</div>
       </div>
-      <span style="font-size:11px;font-weight:700;color:var(--p);">${assignedSet.size} / ${FASIKUL.length} atandı</span>
+      <span style="font-size:11px;font-weight:700;color:var(--p);">${assignedSet.size} / ${EFFECTIVE_FASIKUL.length} atandı</span>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
-      ${FASIKUL.map(f=>{
+      ${EFFECTIVE_FASIKUL.map(f=>{
         const on = assignedSet.has(f.id);
         return `<button onclick="toggleFasikul('${uid}','${f.id}')"
           style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;border:1.5px solid ${on?'var(--p)':'rgba(203,195,213,.55)'};background:${on?'var(--pb)':'transparent'};color:${on?'var(--p)':'var(--mu)'};font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;"
@@ -956,10 +958,10 @@ function renderAssignSection(uid, allowedFasikul){
 window.toggleFasikul = async function(uid, fid){
   const uSnap = await getDoc(doc(db,'users',uid));
   const uData = uSnap.exists() ? uSnap.data() : {};
-  let allowed = uData.allowedFasikul ? [...uData.allowedFasikul] : FASIKUL.map(f=>f.id);
+  let allowed = uData.allowedFasikul ? [...uData.allowedFasikul] : EFFECTIVE_FASIKUL.map(f=>f.id);
   if(allowed.includes(fid)) allowed = allowed.filter(id=>id!==fid);
   else allowed.push(fid);
-  const saveVal = allowed.length === FASIKUL.length ? null : allowed;
+  const saveVal = allowed.length === EFFECTIVE_FASIKUL.length ? null : allowed;
   await setDoc(doc(db,'users',uid), {allowedFasikul: saveVal}, {merge:true});
   const s = (window._allStudents||[]).find(x=>x.uid===uid);
   if(s) s.allowedFasikul = saveVal;
@@ -984,7 +986,7 @@ window.loadAyarlarStats = async function() {
 
     const studentName = s?.name || uid;
     container.style.cssText = 'display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:stretch;';
-    container.innerHTML = FASIKUL.map(f => {
+    container.innerHTML = EFFECTIVE_FASIKUL.map(f => {
       const fs = data[f.id] || {};
       const c = fs.correct || 0, w = fs.wrong || 0, m = fs.minutes || 0;
       const total = c + w, pct = total ? Math.round(c / total * 100) : 0;
