@@ -390,7 +390,8 @@ window.closeFrame=async()=>{
   }
   appSwitchTab('tHome', document.querySelector('.app-nav-item'));
   renderFas();
-  renderHome();
+  // postMessage ile gelen statsUpdate Firestore'a yazılsın diye kısa gecikme
+  setTimeout(()=>renderHome(), 800);
 };
 
 window.addEventListener('message',async e=>{
