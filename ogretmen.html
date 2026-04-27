@@ -379,12 +379,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{initializeAuth,browserSessionPersistence,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,getDoc,setDoc,collection,getDocs,query,where,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getDatabase,ref as rtRef,onValue}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
-const auth=getAuth(FB),db=getFirestore(FB),rtdb=getDatabase(FB);
+const auth=initializeAuth(FB,{persistence:browserSessionPersistence}),db=getFirestore(FB),rtdb=getDatabase(FB);
 
 const FASIKUL=[
   {id:'f1',t:'Fonksiyonlar 1',s:'Matematik',f:'Fonksiyonlar_1.html',n:'1'},
@@ -727,29 +727,97 @@ function renderStudentDetail(s){
 /* ── Fasiküller Tab ── */
 async function renderFas(){
   const el=$('fas-grid');
+  el.style.cssText='display:flex;flex-direction:column;align-items:center;width:100%;gap:16px;padding:4px 0 16px;';
   el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
-  const ss=await getDoc(doc(db,'stats',CU.uid));
-  const stats=ss.exists()?ss.data():{};
 
-  el.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:16px;';
-  el.innerHTML=FASIKUL.map(f=>{
-    const fs=stats[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
-    const started=!!(c||w||m),total=c+w,pct=total?Math.round(c/total*100):0;
-    return`<div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 16px rgba(70,21,153,.06);cursor:pointer;transition:all .2s;width:240px;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(70,21,153,.12)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(70,21,153,.06)'" onclick="(()=>{sessionStorage.setItem('dd_uid','${CU.uid}');sessionStorage.setItem('dd_name','${CP.name}');sessionStorage.setItem('dd_role','${CP.role}');sessionStorage.setItem('dd_fid','${f.id}');sessionStorage.setItem('dd_username','${CP.username||''}');sessionStorage.setItem('dd_password','${CP.password||''}');openFrame('${f.f}','${f.t}')})()">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:16px;color:var(--p);">${f.n}</div>
-        <span style="padding:4px 10px;border-radius:99px;font-size:10px;font-weight:800;background:${started?'#d1fae5':'var(--s-high)'};color:${started?'#065f46':'var(--mu)'};">${started?'Başlandı':'Yeni'}</span>
-      </div>
-      <div style="font-size:10px;font-weight:700;color:rgba(70,21,153,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Fasikül #${f.n.padStart(2,'0')}</div>
-      <div style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;color:var(--tx);margin-bottom:4px;line-height:1.3;">${f.t}</div>
-      <div style="font-size:12px;color:var(--mu);margin-bottom:16px;">${f.s}</div>
-      <div style="height:6px;background:var(--s-high);border-radius:99px;overflow:hidden;margin-bottom:8px;">
-        <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--pl));width:${started&&total?pct:started?8:100}%;"></div>
-      </div>
-      ${started?`<div style="font-size:11px;font-weight:700;color:var(--mu);">${c} Doğru · ${w} Yanlış · %${pct}</div>`:'<div style="font-size:11px;color:var(--mu);font-style:italic;">Henüz başlanmadı</div>'}
+  // Öğrenci listesi henüz yüklenmediyse yükle
+  if(!window._allStudents||!window._allStudents.length){
+    const snap=await getDocs(query(collection(db,'users'),where('role','==','student'),where('teacherId','==',CU.uid)));
+    const arr=[];
+    for(const ud of snap.docs){
+      const u=ud.data();
+      const ss=await getDoc(doc(db,'stats',ud.id));
+      const st=ss.exists()?ss.data():{};
+      let tc=0,tw=0,tm=0;
+      FASIKUL.forEach(f=>{const fs=st[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+      arr.push({uid:ud.id,...u,tc,tw,tm,pct:tc+tw?Math.round(tc/(tc+tw)*100):0,stats:st});
+    }
+    window._allStudents=arr;
+  }
+
+  const students=window._allStudents||[];
+  if(!students.length){
+    el.innerHTML='<div class="es"><div class="ic">👨‍🎓</div><p>Henüz atanmış öğrenciniz yok.</p></div>';
+    return;
+  }
+  if(!activeStudentUid) activeStudentUid=students[0].uid;
+  const sel=students.find(s=>s.uid===activeStudentUid)||students[0];
+  activeStudentUid=sel.uid;
+
+  // ── Öğrenci seçici ──
+  const chips=students.map(s=>{
+    const isActive=s.uid===sel.uid;
+    const av=avHTML(s,44,16);
+    return`<div onclick="window._selectFasStudent('${s.uid}')" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:10px 14px;border-radius:14px;background:${isActive?'var(--pb)':'var(--s-lowest)'};border:2.5px solid ${isActive?'var(--p)':'transparent'};transition:all .15s;min-width:72px;box-shadow:${isActive?'0 2px 12px rgba(70,21,153,.14)':'none'};">
+      ${av}
+      <span style="font-size:11px;font-weight:800;color:${isActive?'var(--p)':'var(--mu)'};white-space:nowrap;">${s.name.split(' ')[0]}</span>
     </div>`;
   }).join('');
+
+  // ── Fasikül kartları (seçili öğrenci istatistikleriyle) ──
+  const st=sel.stats||{};
+  const cards=FASIKUL.map(f=>{
+    const fs=st[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
+    const started=!!(c||w||m),total=c+w,pct=total?Math.round(c/total*100):0;
+    const barColor=pct>=70?'linear-gradient(90deg,#16a34a,#4ade80)':pct>=40?'linear-gradient(90deg,#d97706,#fcd34d)':'linear-gradient(90deg,var(--p),var(--pl))';
+    return`<div onclick="openKarne('${sel.uid}','${f.id}','${f.t}','${f.s}')" style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 16px rgba(70,21,153,.06);cursor:pointer;transition:all .2s;width:230px;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(70,21,153,.12)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(70,21,153,.06)'">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;font-size:15px;color:var(--p);">${f.n}</div>
+        <span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:${started?'#d1fae5':'var(--s-high)'};color:${started?'#065f46':'var(--mu)'};">${started?'Başlandı':'Yeni'}</span>
+      </div>
+      <div style="font-size:9px;font-weight:700;color:rgba(70,21,153,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;">Fasikül #${f.n.padStart(2,'0')}</div>
+      <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:var(--tx);margin-bottom:3px;line-height:1.3;">${f.t}</div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:14px;">${f.s}</div>
+      <div style="height:5px;background:var(--s-high);border-radius:99px;overflow:hidden;margin-bottom:7px;">
+        <div style="height:100%;border-radius:99px;background:${barColor};width:${started&&total?pct:started?6:0}%;transition:width .4s;"></div>
+      </div>
+      ${started?`<div style="font-size:11px;font-weight:700;color:var(--mu);">✅ ${c} · ❌ ${w} · %${pct}</div>`:'<div style="font-size:11px;color:var(--mu);font-style:italic;">Henüz başlanmadı</div>'}
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(203,195,213,.18);display:flex;gap:6px;">
+        <button onclick="event.stopPropagation();window._openStudentFas('${sel.uid}','${sel.name}','${f.id}','${f.f}','${f.t}')" style="flex:1;background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;border:none;border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;">📖 Aç</button>
+        <button onclick="event.stopPropagation();openLiveWatch('${sel.uid}','${f.f}','${f.t}')" style="flex:1;background:var(--s-high);color:var(--p);border:1.5px solid var(--pb2);border-radius:8px;padding:7px 0;font-size:11px;font-weight:700;cursor:pointer;">👁 Canlı</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div style="background:var(--s-lowest);border-radius:16px;padding:16px 20px;box-shadow:var(--shadow-lg);width:100%;max-width:900px;">
+      <div style="font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.09em;margin-bottom:12px;">Öğrenci Seç</div>
+      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;flex-wrap:wrap;">${chips}</div>
+    </div>
+    <div style="width:100%;max-width:900px;">
+      <div style="font-size:11px;font-weight:700;color:var(--mu);margin-bottom:10px;padding-left:2px;">
+        📚 <strong style="color:var(--tx);">${sel.name}</strong> — Fasikül İstatistikleri
+        &nbsp;·&nbsp; ✅ ${sel.tc} Doğru · ❌ ${sel.tw} Yanlış · %${sel.pct}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:flex-start;">${cards}</div>
+    </div>
+  `;
 }
+
+window._selectFasStudent=function(uid){
+  activeStudentUid=uid;
+  renderFas();
+};
+
+window._openStudentFas=function(studentUid,studentName,fasId,fasFile,fasTitle){
+  sessionStorage.setItem('dd_uid',studentUid);
+  sessionStorage.setItem('dd_name',studentName);
+  sessionStorage.setItem('dd_role','teacher_view');
+  sessionStorage.setItem('dd_fid',fasId);
+  sessionStorage.setItem('dd_tid','');
+  sessionStorage.setItem('dd_username','');
+  openFrame(fasFile,'📖 '+studentName+' — '+fasTitle);
+};
 
 window.addEventListener('message',e=>{if(e.data==='closeFrame')closeFrame();});
 

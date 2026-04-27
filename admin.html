@@ -357,11 +357,11 @@ tbody tr:hover td{background:var(--s-low);}
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{initializeAuth,browserSessionPersistence,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,where,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
-const auth=getAuth(FB),db=getFirestore(FB);
+const auth=initializeAuth(FB,{persistence:browserSessionPersistence}),db=getFirestore(FB);
 
 const FASIKUL=[
   {id:'f1',t:'Fonksiyonlar 1',s:'Matematik',f:'Fonksiyonlar_1.html',n:'1'},
