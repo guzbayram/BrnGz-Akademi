@@ -834,7 +834,21 @@ window._openStudentFas=function(studentUid,studentName,fasId,fasFile,fasTitle){
   openFrame(url,'📖 '+studentName+' — '+fasTitle);
 };
 
-window.addEventListener('message',e=>{if(e.data==='closeFrame')closeFrame();});
+window.addEventListener('message',async e=>{
+  if(e.data==='closeFrame'){closeFrame();return;}
+  if(e.data&&e.data.type==='resetStats'){
+    const {uid,fid}=e.data;
+    try{
+      const ref=doc(db,'stats',uid);
+      const snap=await getDoc(ref);
+      const updated=snap.exists()?{...snap.data()}:{};
+      delete updated[fid];
+      delete updated[fid+'_states'];
+      updated[fid+'_resetAt']=Date.now();
+      await setDoc(ref,updated);
+    }catch(_){}
+  }
+});
 
 window.openKarne = function(studentUid, fasId, fasTitle, fasSubject) {
   const modal = $('karneModal');

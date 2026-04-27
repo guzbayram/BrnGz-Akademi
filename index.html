@@ -336,7 +336,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{initializeAuth,browserSessionPersistence,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,serverTimestamp,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
 const auth=initializeAuth(FB,{persistence:browserSessionPersistence}),db=getFirestore(FB);
@@ -497,6 +497,14 @@ async function showApp(){
   $('appTopSub').textContent=CP.name+' — hoş geldiniz';
   await renderHome();
   await renderFas();
+  // Stats değişince anasayfayı güncelle (öğretmen sıfırlama dahil)
+  if(window._statsHomeUnsub) window._statsHomeUnsub();
+  let _firstSnap=true;
+  window._statsHomeUnsub=onSnapshot(doc(db,'stats',CU.uid),()=>{
+    if(_firstSnap){_firstSnap=false;return;} // ilk tetiklenme zaten renderHome'dan geliyor
+    if($('tHome')&&$('tHome').classList.contains('on')) renderHome();
+    renderFas();
+  });
 }
 
 /* ── Heatmap builder ── */
