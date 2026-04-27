@@ -423,7 +423,7 @@ window.addEventListener('message',async e=>{
       await setDoc(ref,{...existing,[e.data.fid]:{
         correct:e.data.correct,
         wrong:e.data.wrong,
-        minutes:prev.minutes||0,
+        minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
         solutionViews:e.data.solutionViews||0,
         sections:e.data.sections||{}
       }});
