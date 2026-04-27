@@ -358,7 +358,7 @@ tbody tr:hover td{background:var(--s-low);}
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{initializeAuth,browserSessionPersistence,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,where,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,where,serverTimestamp,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
 const auth=initializeAuth(FB,{persistence:browserSessionPersistence}),db=getFirestore(FB);
@@ -453,12 +453,12 @@ async function renderGenel(){
     </div>
     <div class="stat-card">
       <div class="stat-icon"><span class="material-symbols-outlined">quiz</span></div>
-      <div class="stat-val">${totalQ.toLocaleString('tr')}</div>
+      <div class="stat-val" id="adm-total-q">${totalQ.toLocaleString('tr')}</div>
       <div class="stat-label">Toplam Soru</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></div>
-      <div class="stat-val">%${avgPct}</div>
+      <div class="stat-val" id="adm-avg-pct">%${avgPct}</div>
       <div class="stat-label">Ort. Başarı</div>
     </div>
   </div>
@@ -484,14 +484,14 @@ async function renderGenel(){
       <div class="highlight-card purple">
         <span class="material-symbols-outlined">schedule</span>
         <div>
-          <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;">${fmt(totalMin)}</div>
+          <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;" id="adm-total-min">${fmt(totalMin)}</div>
           <div style="font-size:11px;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">Toplam Çalışma</div>
         </div>
       </div>
       <div class="highlight-card green">
         <span class="material-symbols-outlined">check_circle</span>
         <div>
-          <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;">${totalCorrect.toLocaleString('tr')}</div>
+          <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:900;" id="adm-total-correct">${totalCorrect.toLocaleString('tr')}</div>
           <div style="font-size:11px;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">Doğru Cevap</div>
         </div>
       </div>
@@ -528,6 +528,22 @@ async function renderGenel(){
       </tbody>
     </table>
   </div>`;
+
+  // ── Stats gerçek zamanlı güncelleme ──
+  if(window._statsUnsub) window._statsUnsub();
+  window._statsUnsub = onSnapshot(collection(db,'stats'), snap=>{
+    let tQ=0,tM=0,tC=0;
+    snap.forEach(ss=>{
+      const data=ss.data();
+      FASIKUL.forEach(f=>{const fs=data[f.id]||{};tQ+=(fs.correct||0)+(fs.wrong||0);tM+=fs.minutes||0;tC+=fs.correct||0;});
+    });
+    const aP=tQ?Math.round(tC/tQ*100):0;
+    const eQ=$('adm-total-q'),eA=$('adm-avg-pct'),eM=$('adm-total-min'),eC=$('adm-total-correct');
+    if(eQ)eQ.textContent=tQ.toLocaleString('tr');
+    if(eA)eA.textContent='%'+aP;
+    if(eM)eM.textContent=fmt(tM);
+    if(eC)eC.textContent=tC.toLocaleString('tr');
+  });
 }
 
 /* ── Kullanıcı Yönetimi ── */

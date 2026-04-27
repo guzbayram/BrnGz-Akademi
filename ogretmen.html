@@ -380,7 +380,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{initializeAuth,browserSessionPersistence,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,collection,getDocs,query,where,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,collection,getDocs,query,where,serverTimestamp,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getDatabase,ref as rtRef,onValue}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
@@ -522,17 +522,17 @@ async function renderOgr(){
     </div>
     <div class="stat-card">
       <div class="stat-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></div>
-      <div class="stat-val">%${avgPct}</div>
+      <div class="stat-val" id="stat-avg-pct">%${avgPct}</div>
       <div class="stat-label">Ortalama Başarı</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon"><span class="material-symbols-outlined">quiz</span></div>
-      <div class="stat-val">${totalQ.toLocaleString('tr')}</div>
+      <div class="stat-val" id="stat-total-q">${totalQ.toLocaleString('tr')}</div>
       <div class="stat-label">Toplam Soru</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon"><span class="material-symbols-outlined">schedule</span></div>
-      <div class="stat-val">${fmt(totalMin)}</div>
+      <div class="stat-val" id="stat-total-min">${fmt(totalMin)}</div>
       <div class="stat-label">Toplam Süre</div>
     </div>
   </div>`;
@@ -564,12 +564,40 @@ async function renderOgr(){
   // ── Canlı dinleyiciler ──
   liveUnsubs.forEach(u=>u());liveUnsubs=[];
   students.forEach(s=>{
+    // Çizim canlı nokta
     const r=rtRef(rtdb,`drawings/${s.uid}/meta`);
     const unsub=onValue(r,snap=>{
       const dot=$('live-dot-'+s.uid);
       if(dot) dot.style.display=snap.exists()?'block':'none';
     });
     liveUnsubs.push(unsub);
+
+    // İstatistik gerçek zamanlı güncelleme
+    const statsUnsub=onSnapshot(doc(db,'stats',s.uid),snap=>{
+      const data=snap.exists()?snap.data():{};
+      let tc=0,tw=0,tm=0;
+      EFFECTIVE_FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+      s.tc=tc; s.tw=tw; s.tm=tm; s.pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
+      s.stats=data;
+      // Sidebar chip güncelle
+      const chip=$('sb-chip-'+s.uid);
+      if(chip){
+        const pctEl=chip.querySelector('span:last-child');
+        if(pctEl){pctEl.textContent='%'+s.pct;pctEl.style.color=s.pct>=70?'var(--g)':s.pct>=40?'var(--amb)':'var(--mu)';}
+      }
+      // Özet stat kartları güncelle
+      const allS=window._allStudents||[];
+      const avgP=allS.length?Math.round(allS.reduce((a,x)=>a+x.pct,0)/allS.length):0;
+      const totQ=allS.reduce((a,x)=>a+x.tc+x.tw,0);
+      const totM=allS.reduce((a,x)=>a+x.tm,0);
+      const vAvg=$('stat-avg-pct'),vQ=$('stat-total-q'),vM=$('stat-total-min');
+      if(vAvg)vAvg.textContent='%'+avgP;
+      if(vQ)vQ.textContent=totQ.toLocaleString('tr');
+      if(vM)vM.textContent=fmt(totM);
+      // Aktif öğrenci detayı açıksa yenile
+      if(s.uid===activeStudentUid) renderStudentDetail(s);
+    });
+    liveUnsubs.push(statsUnsub);
   });
 
   window.selectStudent=async(uid)=>{
