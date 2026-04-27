@@ -373,8 +373,16 @@ window.doLogin=async()=>{
   if(!ok){err.textContent='Kullanıcı adı veya şifre hatalı.';err.style.display='block';btn.disabled=false;btn.textContent='Giriş Yap';}
 };
 
-window.openFrame=(url,title)=>{
-  $('fasikülFrame').src=url;
+window.openFrame=(url,title,params={})=>{
+  const p=new URLSearchParams({
+    dd_uid:params.uid||'',
+    dd_fid:params.fid||'',
+    dd_role:params.role||'',
+    dd_name:params.name||'',
+    dd_tid:params.tid||''
+  });
+  const sep=url.includes('?')?'&':'?';
+  $('fasikülFrame').src=url+sep+p.toString();
   $('frmOverlay').classList.add('on');
 };
 window.closeFrame=async()=>{
@@ -600,7 +608,7 @@ async function renderHome(){
       <div class="app-card-title"><span class="material-symbols-outlined">auto_stories</span>Fasikül Durumu</div>
       <div class="app-fas-list" style="flex:1;overflow-y:auto;">
         ${fasStats.map(f=>`
-        <div class="app-fas-item" onclick="(()=>{sessionStorage.setItem('dd_uid','${CU.uid}');sessionStorage.setItem('dd_name','${CP.name}');sessionStorage.setItem('dd_role','student');sessionStorage.setItem('dd_fid','${f.id}');sessionStorage.setItem('dd_tid','${CP.teacherId||''}');sessionStorage.setItem('dd_username','${CP.username||''}');sessionStorage.setItem('dd_password','${CP.password||''}');openFrame('${f.f}','${f.t}')})()">
+        <div class="app-fas-item" onclick="openFrame('${f.f}','${f.t}',{uid:'${CU.uid}',name:'${CP.name}',role:'student',fid:'${f.id}',tid:'${CP.teacherId||''}'})">
           <div class="app-fas-icon"><span class="material-symbols-outlined">menu_book</span></div>
           <div style="flex:1;min-width:0;">
             <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--tx);line-height:1.3;">${f.t}</div>
@@ -679,16 +687,7 @@ async function renderFas(){
         '</div>'+
         '<button class="fc-btn">▶ '+(started?'Devam Et':'Başla')+'</button>'+
       '</div>';
-    card.onclick=()=>{
-      sessionStorage.setItem('dd_uid',CU.uid);
-      sessionStorage.setItem('dd_name',CP.name);
-      sessionStorage.setItem('dd_role','student');
-      sessionStorage.setItem('dd_fid',f.id);
-      sessionStorage.setItem('dd_tid',CP.teacherId||'');
-      sessionStorage.setItem('dd_username',CP.username||'');
-      sessionStorage.setItem('dd_password',CP.password||'');
-      openFrame(f.f,f.t);
-    };
+    card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||''});
     g.appendChild(card);
   });
 }

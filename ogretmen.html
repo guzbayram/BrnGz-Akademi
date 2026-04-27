@@ -436,25 +436,15 @@ window.openFrame=(url,title)=>{
   $('fasikülFrame').src=url;
   $('frmOverlay').style.display='flex';
 };
+window._buildUrl=(base,params)=>{
+  const p=new URLSearchParams(params);
+  return base+(base.includes('?')?'&':'?')+p.toString();
+};
 window.openViewMode=(studentUid,fasUrl,fasTitle)=>{
-  sessionStorage.setItem('dd_uid',CU.uid);
-  sessionStorage.setItem('dd_name',CP.name);
-  sessionStorage.setItem('dd_role',CP.role);
-  sessionStorage.setItem('dd_fid','view');
-  sessionStorage.setItem('dd_tid','');
-  sessionStorage.setItem('dd_username',CP.username||'');
-  sessionStorage.setItem('dd_password',CP.password||'');
-  openFrame(fasUrl+'?view='+encodeURIComponent(studentUid), '📚 Geçmiş: '+fasTitle);
+  openFrame(window._buildUrl(fasUrl,{view:studentUid}),'📚 Geçmiş: '+fasTitle);
 };
 window.openLiveWatch=(studentUid,fasUrl,fasTitle)=>{
-  sessionStorage.setItem('dd_uid',CU.uid);
-  sessionStorage.setItem('dd_name',CP.name);
-  sessionStorage.setItem('dd_role',CP.role);
-  sessionStorage.setItem('dd_fid','watch');
-  sessionStorage.setItem('dd_tid','');
-  sessionStorage.setItem('dd_username',CP.username||'');
-  sessionStorage.setItem('dd_password',CP.password||'');
-  openFrame(fasUrl+'?watch='+encodeURIComponent(studentUid), '👁 Canlı: '+fasTitle);
+  openFrame(window._buildUrl(fasUrl,{watch:studentUid}),'👁 Canlı: '+fasTitle);
 };
 window.closeFrame=()=>{$('frmOverlay').style.display='none';$('fasikülFrame').src='';};
 
@@ -812,13 +802,8 @@ window._selectFasStudent=function(uid){
 };
 
 window._openStudentFas=function(studentUid,studentName,fasId,fasFile,fasTitle){
-  sessionStorage.setItem('dd_uid',studentUid);
-  sessionStorage.setItem('dd_name',studentName);
-  sessionStorage.setItem('dd_role','teacher_view');
-  sessionStorage.setItem('dd_fid',fasId);
-  sessionStorage.setItem('dd_tid','');
-  sessionStorage.setItem('dd_username','');
-  openFrame(fasFile,'📖 '+studentName+' — '+fasTitle);
+  const url=window._buildUrl(fasFile,{dd_uid:studentUid,dd_name:studentName,dd_role:'teacher_view',dd_fid:fasId});
+  openFrame(url,'📖 '+studentName+' — '+fasTitle);
 };
 
 window.addEventListener('message',e=>{if(e.data==='closeFrame')closeFrame();});
