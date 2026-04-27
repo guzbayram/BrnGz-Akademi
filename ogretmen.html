@@ -465,12 +465,19 @@ onAuthStateChanged(auth,async user=>{
   await renderOgr();
 
   // BroadcastChannel: öğrenci cevap verince anında güncelle
-  const _bc=new BroadcastChannel('dd_stats_live');
-  _bc.onmessage=({data})=>{
+  if(window._ogBc) window._ogBc.close();
+  window._ogBc=new BroadcastChannel('dd_stats_live');
+  window._ogBc.onmessage=({data})=>{
     const s=(window._allStudents||[]).find(x=>x.uid===data.uid);
     if(!s) return;
-    s.tc=data.correct; s.tw=data.wrong;
-    s.pct=data.total?Math.round(data.correct/data.total*100):0;
+    // Sadece bu fasiküle ait veriyi güncelle, toplamı yeniden hesapla
+    if(data.fid){
+      if(!s.stats) s.stats={};
+      s.stats[data.fid]={...(s.stats[data.fid]||{}),correct:data.correct,wrong:data.wrong};
+    }
+    let tc=0,tw=0;
+    EFFECTIVE_FASIKUL.forEach(f=>{const fs=s.stats[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;});
+    s.tc=tc; s.tw=tw; s.pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
     // Sidebar chip
     const chip=$('sb-chip-'+data.uid);
     if(chip){const sp=chip.querySelector('span:last-child');if(sp){sp.textContent='%'+s.pct;sp.style.color=s.pct>=70?'var(--g)':s.pct>=40?'var(--amb)':'var(--mu)';}}

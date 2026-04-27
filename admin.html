@@ -419,12 +419,19 @@ onAuthStateChanged(auth,async user=>{
   await renderGenel();
 
   // BroadcastChannel: öğrenci cevap verince anında güncelle
-  const _bc=new BroadcastChannel('dd_stats_live');
-  _bc.onmessage=({data})=>{
-    // allStudents listesindeki ilgili öğrenciyi güncelle
+  if(window._admBc) window._admBc.close();
+  window._admBc=new BroadcastChannel('dd_stats_live');
+  window._admBc.onmessage=({data})=>{
     if(!window._admStudentStats) window._admStudentStats={};
-    window._admStudentStats[data.uid]={correct:data.correct,wrong:data.wrong,total:data.total};
-    // Tüm öğrenci toplamlarını yeniden hesapla
+    const prev=window._admStudentStats[data.uid]||{fasikuls:{}};
+    if(!prev.fasikuls) prev.fasikuls={};
+    if(data.fid) prev.fasikuls[data.fid]={correct:data.correct,wrong:data.wrong};
+    // Öğrencinin tüm fasikül toplamını yeniden hesapla
+    let sc=0,sw=0;
+    FASIKUL.forEach(f=>{const fs=prev.fasikuls[f.id]||{};sc+=fs.correct||0;sw+=fs.wrong||0;});
+    prev.correct=sc; prev.wrong=sw; prev.total=sc+sw;
+    window._admStudentStats[data.uid]=prev;
+    // Tüm öğrenci toplamlarını hesapla
     let tQ=0,tC=0;
     (allUsers||[]).filter(u=>u.role==='student').forEach(u=>{
       const st=window._admStudentStats[u.id]||{};

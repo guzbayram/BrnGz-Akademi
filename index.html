@@ -411,7 +411,7 @@ window.addEventListener('message',async e=>{
     if(c) c.textContent=e.data.correct;
     if(w) w.textContent=e.data.wrong;
     // Diğer sekmelere (öğretmen, admin) anında bildir
-    if(CU) window._statsBc&&window._statsBc.postMessage({uid:CU.uid,correct:e.data.correct,wrong:e.data.wrong,total:e.data.total});
+    if(CU) window._statsBc&&window._statsBc.postMessage({uid:e.data.uid||CU.uid,fid:e.data.fid,correct:e.data.correct,wrong:e.data.wrong});
     return;
   }
   if(e.data&&e.data.type==='statsUpdate'&&CU&&e.data.uid===CU.uid){
