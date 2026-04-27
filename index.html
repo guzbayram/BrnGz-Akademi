@@ -410,6 +410,8 @@ window.addEventListener('message',async e=>{
     if(t) t.textContent=e.data.total;
     if(c) c.textContent=e.data.correct;
     if(w) w.textContent=e.data.wrong;
+    // Diğer sekmelere (öğretmen, admin) anında bildir
+    if(CU) window._statsBc&&window._statsBc.postMessage({uid:CU.uid,correct:e.data.correct,wrong:e.data.wrong,total:e.data.total});
     return;
   }
   if(e.data&&e.data.type==='statsUpdate'&&CU&&e.data.uid===CU.uid){
@@ -502,6 +504,7 @@ async function showApp(){
   $('appAv').textContent=ini(CP.name);
   $('appName').textContent=CP.name;
   $('appTopSub').textContent=CP.name+' — hoş geldiniz';
+  window._statsBc=new BroadcastChannel('dd_stats_live');
   await renderHome();
   await renderFas();
   // Stats değişince anasayfayı güncelle (öğretmen sıfırlama dahil)

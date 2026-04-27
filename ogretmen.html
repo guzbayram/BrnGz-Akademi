@@ -463,6 +463,29 @@ onAuthStateChanged(auth,async user=>{
   $('sb-name').textContent=CP.name;
   $('sb-email').textContent=CP.username?'@'+CP.username:'';
   await renderOgr();
+
+  // BroadcastChannel: öğrenci cevap verince anında güncelle
+  const _bc=new BroadcastChannel('dd_stats_live');
+  _bc.onmessage=({data})=>{
+    const s=(window._allStudents||[]).find(x=>x.uid===data.uid);
+    if(!s) return;
+    s.tc=data.correct; s.tw=data.wrong;
+    s.pct=data.total?Math.round(data.correct/data.total*100):0;
+    // Sidebar chip
+    const chip=$('sb-chip-'+data.uid);
+    if(chip){const sp=chip.querySelector('span:last-child');if(sp){sp.textContent='%'+s.pct;sp.style.color=s.pct>=70?'var(--g)':s.pct>=40?'var(--amb)':'var(--mu)';}}
+    // Özet kartlar
+    const allS=window._allStudents||[];
+    const avgP=allS.length?Math.round(allS.reduce((a,x)=>a+x.pct,0)/allS.length):0;
+    const totQ=allS.reduce((a,x)=>a+x.tc+x.tw,0);
+    const totM=allS.reduce((a,x)=>a+x.tm,0);
+    const vA=$('stat-avg-pct'),vQ=$('stat-total-q'),vM=$('stat-total-min');
+    if(vA)vA.textContent='%'+avgP;
+    if(vQ)vQ.textContent=totQ.toLocaleString('tr');
+    if(vM)vM.textContent=fmt(totM);
+    // Aktif öğrenci detayı
+    if(data.uid===activeStudentUid) renderStudentDetail(s);
+  };
 });
 
 /* ── Avatar helpers ── */

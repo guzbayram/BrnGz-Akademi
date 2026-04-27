@@ -417,6 +417,25 @@ onAuthStateChanged(auth,async user=>{
   $('sb-av').textContent=ini(CP.name);
   $('sb-name').textContent=CP.name;
   await renderGenel();
+
+  // BroadcastChannel: öğrenci cevap verince anında güncelle
+  const _bc=new BroadcastChannel('dd_stats_live');
+  _bc.onmessage=({data})=>{
+    // allStudents listesindeki ilgili öğrenciyi güncelle
+    if(!window._admStudentStats) window._admStudentStats={};
+    window._admStudentStats[data.uid]={correct:data.correct,wrong:data.wrong,total:data.total};
+    // Tüm öğrenci toplamlarını yeniden hesapla
+    let tQ=0,tC=0;
+    (allUsers||[]).filter(u=>u.role==='student').forEach(u=>{
+      const st=window._admStudentStats[u.id]||{};
+      tQ+=(st.total||0); tC+=(st.correct||0);
+    });
+    const aP=tQ?Math.round(tC/tQ*100):0;
+    const eQ=$('adm-total-q'),eA=$('adm-avg-pct'),eC=$('adm-total-correct');
+    if(eQ)eQ.textContent=tQ.toLocaleString('tr');
+    if(eA)eA.textContent='%'+aP;
+    if(eC)eC.textContent=tC.toLocaleString('tr');
+  };
 });
 
 /* ── Genel Bakış ── */
@@ -434,10 +453,14 @@ async function renderGenel(){
   $('user-count-badge').textContent=users.filter(u=>u.role!=='admin').length;
 
   let totalQ=0,totalMin=0,totalCorrect=0;
+  window._admStudentStats={};
   statsSnaps.forEach(ss=>{
-    if(!studentIds.has(ss.id)) return; // sadece öğrenci istatistikleri
+    if(!studentIds.has(ss.id)) return;
     const data=ss.data();
-    FASIKUL.forEach(f=>{const fs=data[f.id]||{};totalQ+=(fs.correct||0)+(fs.wrong||0);totalMin+=fs.minutes||0;totalCorrect+=fs.correct||0;});
+    let sc=0,sw=0;
+    FASIKUL.forEach(f=>{const fs=data[f.id]||{};sc+=fs.correct||0;sw+=fs.wrong||0;totalMin+=fs.minutes||0;});
+    totalQ+=sc+sw; totalCorrect+=sc;
+    window._admStudentStats[ss.id]={correct:sc,wrong:sw,total:sc+sw};
   });
   const avgPct=totalQ?Math.round(totalCorrect/totalQ*100):0;
 
