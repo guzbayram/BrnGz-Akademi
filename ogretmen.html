@@ -1078,12 +1078,16 @@ window.resetStudentStats = async function(uid, fid, studentName) {
   try {
     const ref = doc(db, 'stats', uid);
     const snap = await getDoc(ref);
+    const resetAt = Date.now();
     if (snap.exists()) {
       const data = snap.data();
       const updated = {...data};
       delete updated[fid];
       delete updated[fid + '_states'];
+      updated[fid + '_resetAt'] = resetAt;
       await setDoc(ref, updated);
+    } else {
+      await setDoc(ref, {[fid + '_resetAt']: resetAt});
     }
     alert('İstatistikler sıfırlandı.');
     loadAyarlarStats();
