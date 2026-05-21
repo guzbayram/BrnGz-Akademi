@@ -1623,11 +1623,34 @@ var PDFKV = (function(){
             btn.onclick=(function(s,t){return function(){selectSection(s,t);};})(sec,cat.key);
             var numBadge='<span style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:'+(isActive?'rgba(255,255,255,.25)':cat.bg)+';color:'+(isActive?'#fff':cat.color)+';font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;">'+(idx+1)+'</span>';
             var pageTag=sec.page?'<span style="flex-shrink:0;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:'+(isActive?'rgba(255,255,255,.2)':'rgba(0,0,0,.06)')+';color:'+(isActive?'rgba(255,255,255,.85)':'#6b7280')+';">s.'+sec.page+'</span>':'';
+            // Doğru / Yanlış / Çözüm Görüldü hesapla
+            var secCorrect=0,secWrong=0,secShown=0;
+            if(st2){
+              Object.keys(st2.correct||{}).forEach(function(k){
+                var att=(st2.attempts||{})[k]||[];
+                if(att.indexOf('shown')>=0)secShown++;else secCorrect++;
+              });
+              Object.keys(st2.attempts||{}).forEach(function(k){
+                secWrong+=((st2.attempts[k]||[]).filter(function(v){return v===false;})).length;
+              });
+            }
+            var statsRow='';
+            if(secCorrect||secWrong||secShown){
+              var aC=isActive?'rgba(255,255,255,.9)':'#059669';
+              var aW=isActive?'rgba(255,255,255,.9)':'#e11d48';
+              var aS=isActive?'rgba(255,255,255,.9)':'#b45309';
+              statsRow='<div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;">'
+                +(secCorrect?'<span style="font-size:8px;font-weight:800;color:'+aC+';">✓ '+secCorrect+'</span>':'')
+                +(secWrong?'<span style="font-size:8px;font-weight:800;color:'+aW+';">✗ '+secWrong+'</span>':'')
+                +(secShown?'<span style="font-size:8px;font-weight:800;color:'+aS+';">👁 '+secShown+'</span>':'')
+                +'</div>';
+            }
             btn.innerHTML=
               numBadge+
               '<div style="flex:1;min-width:0;">'+
                 '<div style="font-weight:700;font-size:11px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+sec.name+'</div>'+
-                '<div style="font-size:9px;color:'+(isActive?'rgba(255,255,255,.65)':'#9ca3af')+';font-weight:600;margin-top:1px;">'+qcount+' soru'+(done>0?' · %'+pct+' ✓':'')+'</div>'+
+                '<div style="font-size:9px;color:'+(isActive?'rgba(255,255,255,.65)':'#9ca3af')+';font-weight:600;margin-top:1px;">'+qcount+' soru'+(done>0?' · %'+pct+'':'')+'</div>'+
+                statsRow+
               '</div>'+
               pageTag;
             catBody.appendChild(btn);
@@ -2735,12 +2758,18 @@ var PDFKV = (function(){
     },
     _restoreAggregate:function(c,w,s){ state.totalCorrect=c; state.totalWrong=w; state.totalAnswered=c; state.totalShown=s||0; updateStats(); },
     resetStats:function(){
-      if(!confirm('Tüm istatistikler sıfırlanacak. Emin misiniz?')) return;
+      if(!confirm('Tüm istatistikler ve çizimler sıfırlanacak. Emin misiniz?')) return;
       state.sectionStates={};
       state.totalCorrect=0; state.totalWrong=0; state.totalAnswered=0; state.totalShown=0; state.gunStats={};
+      // Tüm canvas çizimlerini temizle
+      state.pageDrawings={};
+      var dc=el('draw-canvas');
+      if(dc)dc.getContext('2d').clearRect(0,0,dc.width,dc.height);
       updateStats();
+      renderTopicTree();
       renderKarne();
       if(typeof window._resetStatsFirebase==='function') window._resetStatsFirebase();
+      if(typeof window._clearAllDrawings==='function') window._clearAllDrawings();
     },
     _getTotalCorrect:function(){ return state.totalCorrect; },
     _getTotalWrong:function(){ return state.totalWrong; },
@@ -2949,9 +2978,20 @@ var PDFKV = (function(){
         const updated = {...existing};
         delete updated[ddFid];
         delete updated[ddFid + '_states'];
+        delete updated[ddFid + '_lastPos'];
         await setDoc(ref, updated);
+        // localStorage sync kuyruğunu da temizle
+        try { localStorage.removeItem(SYNC_KEY); } catch(e) {}
         console.log('[Reset] İstatistikler Firestore\'dan silindi:', ddFid);
       } catch(e) { console.warn('[Reset] Hata:', e); }
+    };
+
+    /* Tüm kalıcı çizimleri RTDB'den sil */
+    window._clearAllDrawings = async function() {
+      try {
+        await rtRemove(rtRef(rtdb, `savedDrawings/${ddUid}/${ddFid}`));
+        console.log('[Reset] Çizimler RTDB\'den silindi');
+      } catch(e) { console.warn('[Reset] Çizim silme hatası:', e); }
     };
 
     /* ── Kaydedilmiş karne + çizimleri yükle ── */
