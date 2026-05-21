@@ -185,7 +185,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .app-topbar-sub{font-size:12px;color:var(--mu);font-weight:500;}
 .app-content{padding:20px 24px;flex:1;overflow-y:auto;}
 .app-tp{display:none;}.app-tp.on{display:block;}
-.app-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.app-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
 .app-stat-card{background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 4px 16px rgba(70,21,153,.06);transition:all .2s;cursor:default;}
 .app-stat-card:hover{background:var(--pb);transform:translateY(-2px);}
 .app-stat-icon{width:36px;height:36px;border-radius:10px;background:rgba(216,198,254,.25);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
@@ -220,7 +220,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
   .app-sidebar.open{left:0;box-shadow:4px 0 32px rgba(70,21,153,.18);}
   .app-hamburger{display:flex;}
   .app-main{width:100%;}
-  .app-stat-grid{grid-template-columns:1fr 1fr;}
+  .app-stat-grid{grid-template-columns:1fr 1fr 1fr;}
   .app-perf-grid{grid-template-columns:1fr;}
   .app-content{padding:16px 12px;}
   .app-card{max-height:none;}
@@ -381,6 +381,8 @@ window.openFrame=(url,title,params={})=>{
     dd_name:params.name||'',
     dd_tid:params.tid||''
   });
+  // Son açılan fasikülü kaydet (uygulama kapatılıp açılınca hatırlatmak için)
+  if(params.uid&&params.fid) try{localStorage.setItem('dd_last_'+params.uid,params.fid);}catch(e){}
   const sep=url.includes('?')?'&':'?';
   $('fasikülFrame').src=url+sep+p.toString();
   $('frmOverlay').classList.add('on');
@@ -423,9 +425,11 @@ window.addEventListener('message',async e=>{
       await setDoc(ref,{...existing,[e.data.fid]:{
         correct:e.data.correct,
         wrong:e.data.wrong,
+        shown:e.data.shown||0,
         minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
         solutionViews:e.data.solutionViews||0,
-        sections:e.data.sections||{}
+        sections:e.data.sections||{},
+        peekSections:e.data.peekSections||{}
       }});
     }catch(_){}
     return;
@@ -539,8 +543,8 @@ async function renderHome(){
   el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
   const snap=await getDoc(doc(db,'stats',CU.uid));
   const data=snap.exists()?snap.data():{};
-  let tc=0,tw=0,tm=0;
-  FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+  let tc=0,tw=0,tm=0,tsv=0;
+  FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;tsv+=fs.shown||0;});
   const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
   const daily=data.daily||{};
   const hm=buildStudentHeatmap(daily);
@@ -556,9 +560,9 @@ async function renderHome(){
 
   const fasStats=FASIKUL.map(f=>{
     const fs=data[f.id]||{};
-    const c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
+    const c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0,sv=fs.shown||0;
     const total=c+w;
-    return{...f,c,w,m,total,pct:total?Math.round(c/total*100):0,started:!!(c||w||m)};
+    return{...f,c,w,m,sv,total,pct:total?Math.round(c/total*100):0,started:!!(c||w||m)};
   });
 
   el.innerHTML=`
@@ -577,6 +581,11 @@ async function renderHome(){
       <div class="app-stat-icon"><span class="material-symbols-outlined" style="color:#dc2626;">cancel</span></div>
       <div class="app-stat-val" style="color:#dc2626;" id="hs-wrong">${tw}</div>
       <div class="app-stat-label">Yanlış</div>
+    </div>
+    <div class="app-stat-card">
+      <div class="app-stat-icon"><span class="material-symbols-outlined" style="color:#b45309;">visibility</span></div>
+      <div class="app-stat-val" style="color:#b45309;" id="hs-shown">${tsv}</div>
+      <div class="app-stat-label">Çözüm Baktı</div>
     </div>
     <div class="app-stat-card">
       <div class="app-stat-icon"><span class="material-symbols-outlined">schedule</span></div>
@@ -630,7 +639,7 @@ async function renderHome(){
           <div class="app-fas-icon"><span class="material-symbols-outlined">menu_book</span></div>
           <div style="flex:1;min-width:0;">
             <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--tx);line-height:1.3;">${f.t}</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:2px;">${f.s}${f.total?' · '+f.c+'/'+f.total+' ✓':''}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px;">${f.s}${f.total?' · '+f.c+'/'+f.total+' ✓':''}${f.sv?' · 👁 '+f.sv:''}</div>
           </div>
           <span class="app-pill ${f.started?'done':'locked'}">${f.started?'%'+f.pct:'Yeni'}</span>
         </div>`).join('')}
@@ -680,16 +689,26 @@ async function renderFas(){
   const visibleFas=allowed?FASIKUL.filter(f=>allowed.includes(f.id)):FASIKUL;
   g.innerHTML='';
   if(visibleFas.length===0){g.innerHTML='<div class="es" style="grid-column:1/-1"><div class="ic">📚</div><p>Erişebileceğiniz fasikül bulunmuyor.</p></div>';return;}
-  visibleFas.forEach(f=>{
+  let lastFid=null;
+  try{lastFid=localStorage.getItem('dd_last_'+CU.uid);}catch(e){}
+  // Son açılan fasikülü listenin başına taşı
+  const sortedFas=[...visibleFas].sort((a,b)=>{
+    if(a.id===lastFid)return -1;
+    if(b.id===lastFid)return 1;
+    return 0;
+  });
+  sortedFas.forEach(f=>{
     const fs=us[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
     const started=c||w||m,total=c+w,pct=total?Math.round(c/total*100):0;
     const numPad=f.n.toString().padStart(2,'0');
+    const isLast=f.id===lastFid&&started;
     const card=document.createElement('div');
     card.className='fc';
+    if(isLast)card.style.cssText='outline:2px solid var(--p);outline-offset:2px;';
     card.innerHTML=
       '<div class="fc-top">'+
         '<div class="fnum '+f.c+'">'+f.n+'</div>'+
-        '<span class="fc-badge '+(started?'started':'new')+'">'+(started?'Başlandı':'Yeni')+'</span>'+
+        '<span class="fc-badge '+(started?'started':'new')+'">'+(isLast?'Son Açılan':started?'Başlandı':'Yeni')+'</span>'+
       '</div>'+
       '<div class="fc-seq">Fasikül #'+numPad+'</div>'+
       '<div class="ftit">'+f.t+'</div>'+
@@ -703,7 +722,7 @@ async function renderFas(){
         '<div class="fc-progress-track">'+
           '<div class="fc-progress-fill'+(started?(total>0?' partial':''):' none')+'" style="width:'+(started?(total>0?pct:8):100)+'%"></div>'+
         '</div>'+
-        '<button class="fc-btn">▶ '+(started?'Devam Et':'Başla')+'</button>'+
+        '<button class="fc-btn">▶ '+(isLast?'Kaldığımdan Devam Et':started?'Devam Et':'Başla')+'</button>'+
       '</div>';
     card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||''});
     g.appendChild(card);
