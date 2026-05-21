@@ -874,8 +874,14 @@ window.addEventListener('message',async e=>{
       const updated=snap.exists()?{...snap.data()}:{};
       delete updated[fid];
       delete updated[fid+'_states'];
+      delete updated[fid+'_lastPos'];
       updated[fid+'_resetAt']=Date.now();
       await setDoc(ref,updated);
+      // RTDB çizimlerini de sil
+      try{
+        const{getDatabase,ref:rtRef3,remove}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+        await remove(rtRef3(getDatabase(),`savedDrawings/${uid}/${fid}`));
+      }catch(_){}
     }catch(_){}
   }
 });
@@ -1131,7 +1137,7 @@ window.clearStudentDrawings = async function(uid, fid) {
 };
 
 window.resetStudentStats = async function(uid, fid, studentName) {
-  if (!confirm(`${studentName} adlı öğrencinin "${fid}" istatistikleri sıfırlanacak. Emin misiniz?`)) return;
+  if (!confirm(`${studentName} adlı öğrencinin istatistikleri ve çizimleri sıfırlanacak. Emin misiniz?`)) return;
   try {
     const ref = doc(db, 'stats', uid);
     const snap = await getDoc(ref);
@@ -1141,12 +1147,19 @@ window.resetStudentStats = async function(uid, fid, studentName) {
       const updated = {...data};
       delete updated[fid];
       delete updated[fid + '_states'];
+      delete updated[fid + '_lastPos'];
       updated[fid + '_resetAt'] = resetAt;
       await setDoc(ref, updated);
     } else {
       await setDoc(ref, {[fid + '_resetAt']: resetAt});
     }
-    alert('İstatistikler sıfırlandı.');
+    // RTDB'deki kalıcı çizimleri de sil
+    try {
+      const { getDatabase, ref: rtRef3, remove } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+      const rtdb3 = getDatabase();
+      await remove(rtRef3(rtdb3, `savedDrawings/${uid}/${fid}`));
+    } catch(_) {}
+    alert('İstatistikler ve çizimler sıfırlandı.');
     loadAyarlarStats();
   } catch(e) { alert('Hata: ' + e.message); }
 };
