@@ -115,11 +115,52 @@
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
   }
-  #page-container.rendering {
-    opacity: 0.92;
-  }
+	  #page-container.rendering {
+	    opacity: 0.92;
+	  }
+	  #continuous-pages{
+	    position:absolute;
+	    inset:0;
+	    height:100%;
+	    overflow-y:auto;
+	    overflow-x:hidden;
+	    padding:28px 0 140px;
+	    scroll-behavior:smooth;
+	    overscroll-behavior:contain;
+	    touch-action:pan-y;
+	  }
+	  .pdf-page-shell{
+	    position:relative;
+	    margin:0 auto 24px;
+	    background:#fff;
+	    border-top:6px solid var(--primary);
+	    border-radius:2px;
+	    box-shadow:0 8px 40px rgba(0,0,0,.05);
+	    overflow:hidden;
+	  }
+	  .pdf-page-shell.is-current{box-shadow:0 10px 44px rgba(80,51,151,.18);}
+	  .pdf-page-canvas,.draw-page-canvas{display:block;width:100%;height:100%;}
+	  .draw-page-canvas{
+	    position:absolute;
+	    inset:0;
+	    z-index:10;
+	    cursor:crosshair;
+	    pointer-events:all;
+	    touch-action:none;
+	  }
+	  .page-loading{
+	    position:absolute;
+	    inset:0;
+	    display:flex;
+	    align-items:center;
+	    justify-content:center;
+	    color:#94a3b8;
+	    font:800 12px Manrope,sans-serif;
+	    letter-spacing:.08em;
+	    background:linear-gradient(180deg,#fff,#f8fafc);
+	  }
 
-  /* Question circle dots in R3 */
+	  /* Question circle dots in R3 */
   .q-circle {
     width: 11px;
     height: 11px;
@@ -724,19 +765,20 @@
     </div>
 
     <!-- Main Canvas (Scrollable + Zoomable area) -->
-    <div class="flex-grow bg-[#f4f6fa] overflow-hidden relative" id="pdf-scroll"
-         style="touch-action:none;overscroll-behavior:none;">
+	    <div class="flex-grow bg-[#f4f6fa] overflow-hidden relative" id="pdf-scroll"
+	         style="touch-action:pan-y;overscroll-behavior:contain;">
 
-      <!-- Zoom wrapper -->
-      <div id="zoom-wrapper" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;touch-action:none;overscroll-behavior:none;">
-        <!-- PDF Page -->
-        <div id="page-container" class="bg-white rounded-sm shadow-[0_8px_40px_rgba(0,0,0,0.04)] border-t-[6px] border-primary overflow-hidden"
-             style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;">
-          <canvas id="pdf-canvas" class="block"></canvas>
-          <canvas id="draw-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:all;cursor:crosshair;z-index:10;touch-action:none;"></canvas>
-        </div>
-      </div>
-    </div>
+	      <!-- Zoom wrapper -->
+	      <div id="zoom-wrapper" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;touch-action:none;overscroll-behavior:none;display:none;">
+	        <!-- PDF Page -->
+	        <div id="page-container" class="bg-white rounded-sm shadow-[0_8px_40px_rgba(0,0,0,0.04)] border-t-[6px] border-primary overflow-hidden"
+	             style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;">
+	          <canvas id="pdf-canvas" class="block"></canvas>
+	          <canvas id="draw-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:all;cursor:crosshair;z-index:10;touch-action:none;"></canvas>
+	        </div>
+	      </div>
+	      <div id="continuous-pages"></div>
+	    </div>
 
     </div><!-- /viewer-section -->
     <!-- ═══ FIXED BOTTOM: PDFKV Answer Control Center ═══ -->
@@ -848,6 +890,7 @@ var PDFKV = (function(){
 
   var state = {
     pdfDoc:null, currentPage:1, totalPages:0, scale:1.5, rendering:false, autoFit:true,
+    continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null,
     pageScrollAcc:0, touchStartY:null, isPageAutoSync:false,
     drawEnabled:true, drawTool:'pen', drawColor:'#1a1a2e', drawSize:2,
     isDrawing:false, lastX:0, lastY:0, pageDrawings:{},
@@ -1122,8 +1165,7 @@ var PDFKV = (function(){
         // sb-upload-zone removed
         var sta=el('sb-tabs-area');if(sta){sta.classList.remove('hidden');sta.classList.add('flex');}var sdt=el('sb-default-tree');if(sdt)sdt.classList.add('hidden');
 	        initSections();
-	        renderPage(1);
-	        initDrawCanvas();
+	        renderContinuousPdf();
 	        initPageScrollNavigation();
 	        updatePageNav();
         renderTopicTree();
@@ -1194,12 +1236,169 @@ var PDFKV = (function(){
     var c=el('draw-canvas');if(!c)return;
     state.pageDrawings[state.currentPage]=c.getContext('2d').getImageData(0,0,c.width,c.height);
   }
-  function restoreDrawing(num){
-    var c=el('draw-canvas');if(!c)return;
-    var ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
-    if(state.pageDrawings[num])ctx.putImageData(state.pageDrawings[num],0,0);
-  }
-  function updatePageNav(){
+	  function restoreDrawing(num){
+	    var c=el('draw-canvas');if(!c)return;
+	    var ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+	    if(state.pageDrawings[num])ctx.putImageData(state.pageDrawings[num],0,0);
+	  }
+	  function activeDrawCanvas(){
+	    return state.pageCanvases&&state.pageCanvases[state.currentPage]
+	      ? state.pageCanvases[state.currentPage].draw
+	      : el('draw-canvas');
+	  }
+	  function renderContinuousPdf(){
+	    if(!state.pdfDoc)return;
+	    state.continuousMode=true;
+	    var sc=el('pdf-scroll'),wrap=el('zoom-wrapper'),cont=el('continuous-pages');
+	    if(wrap)wrap.style.display='none';
+	    if(!cont)return;
+	    cont.innerHTML='';
+	    state.pageShells={};state.pageCanvases={};state.renderedPages={};
+	    state.pdfDoc.getPage(1).then(function(firstPage){
+	      var baseVp=firstPage.getViewport({scale:1});
+	      var availW=Math.max(320,(sc?sc.clientWidth:window.innerWidth)-72);
+	      state.scale=Math.min(availW/baseVp.width,2);
+	      for(var i=1;i<=state.totalPages;i++){
+	        var shell=document.createElement('div');
+	        shell.className='pdf-page-shell';
+	        shell.dataset.page=String(i);
+	        shell.style.width=Math.round(baseVp.width*state.scale)+'px';
+	        shell.style.height=Math.round(baseVp.height*state.scale)+'px';
+	        shell.innerHTML='<div class="page-loading">SAYFA '+i+'</div><canvas class="pdf-page-canvas"></canvas><canvas class="draw-page-canvas"></canvas>';
+	        cont.appendChild(shell);
+	        var pdfCanvas=shell.querySelector('.pdf-page-canvas');
+	        var drawCanvas=shell.querySelector('.draw-page-canvas');
+	        state.pageShells[i]=shell;
+	        state.pageCanvases[i]={pdf:pdfCanvas,draw:drawCanvas};
+	        initContinuousDrawCanvas(drawCanvas,i);
+	      }
+	      setupContinuousObservers();
+	      renderContinuousPage(1);
+	      setCurrentPageFromScroll(true);
+	    });
+	  }
+	  function renderContinuousPage(num){
+	    if(!state.pdfDoc||state.renderedPages[num])return;
+	    var pair=state.pageCanvases[num],shell=state.pageShells[num];
+	    if(!pair||!shell)return;
+	    state.renderedPages[num]=true;
+	    state.pdfDoc.getPage(num).then(function(page){
+	      var dpr=window.devicePixelRatio||1;
+	      var vp=page.getViewport({scale:state.scale*dpr});
+	      var cssVp=page.getViewport({scale:state.scale});
+	      var pdfCanvas=pair.pdf,drawCanvas=pair.draw;
+	      pdfCanvas.width=vp.width;pdfCanvas.height=vp.height;
+	      pdfCanvas.style.width=cssVp.width+'px';pdfCanvas.style.height=cssVp.height+'px';
+	      drawCanvas.width=vp.width;drawCanvas.height=vp.height;
+	      drawCanvas.style.width=cssVp.width+'px';drawCanvas.style.height=cssVp.height+'px';
+	      shell.style.width=cssVp.width+'px';shell.style.height=cssVp.height+'px';
+	      page.render({canvasContext:pdfCanvas.getContext('2d'),viewport:vp}).promise.then(function(){
+	        var ld=shell.querySelector('.page-loading');if(ld)ld.remove();
+	        restoreContinuousDrawing(num);
+	        if(typeof window._loadSavedDrawings==='function')window._loadSavedDrawings(num);
+	      });
+	    });
+	  }
+	  function setupContinuousObservers(){
+	    var cont=el('continuous-pages');
+	    if(!cont)return;
+	    if(state.pageObserver)state.pageObserver.disconnect();
+	    state.pageObserver=new IntersectionObserver(function(entries){
+	      entries.forEach(function(ent){
+	        if(!ent.isIntersecting)return;
+	        var page=parseInt(ent.target.dataset.page);
+	        renderContinuousPage(page);
+	        renderContinuousPage(page-1);
+	        renderContinuousPage(page+1);
+	      });
+	    },{root:cont,rootMargin:'900px 0px',threshold:0.01});
+	    Object.keys(state.pageShells).forEach(function(p){state.pageObserver.observe(state.pageShells[p]);});
+	    cont.onscroll=function(){
+	      clearTimeout(state.scrollSyncTimer);
+	      state.scrollSyncTimer=setTimeout(function(){setCurrentPageFromScroll(false);},60);
+	    };
+	  }
+	  function setCurrentPageFromScroll(force){
+	    var cont=el('continuous-pages');
+	    if(!cont||!state.pageShells)return;
+	    var cr=cont.getBoundingClientRect();
+	    var center=cr.top+cr.height*0.42;
+	    var best=null,bestDist=Infinity;
+	    Object.keys(state.pageShells).forEach(function(p){
+	      var r=state.pageShells[p].getBoundingClientRect();
+	      var mid=r.top+r.height/2;
+	      var d=Math.abs(mid-center);
+	      if(d<bestDist){bestDist=d;best=parseInt(p);}
+	    });
+	    if(!best)return;
+	    if(!force&&best===state.currentPage)return;
+	    state.currentPage=best;
+	    updatePageNav();
+	    Object.keys(state.pageShells).forEach(function(p){state.pageShells[p].classList.toggle('is-current',parseInt(p)===best);});
+	    syncSectionToPage(best);
+	    document.dispatchEvent(new CustomEvent('pdfPageChanged',{detail:{page:best}}));
+	    if(typeof window._liveNotifyPage==='function')window._liveNotifyPage(best);
+	  }
+	  function scrollToContinuousPage(num,behavior){
+	    var cont=el('continuous-pages'),shell=state.pageShells&&state.pageShells[num];
+	    if(!cont||!shell)return;
+	    renderContinuousPage(num);
+	    cont.scrollTo({top:Math.max(0,shell.offsetTop-24),behavior:behavior||'smooth'});
+	    setTimeout(function(){setCurrentPageFromScroll(true);},350);
+	  }
+	  function initContinuousDrawCanvas(c,pageNum){
+	    if(!c||c.dataset.drawInit==='1')return;
+	    c.dataset.drawInit='1';
+	    function pos(e){
+	      var r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height;
+	      if(e.touches&&e.touches[0])return{x:(e.touches[0].clientX-r.left)*sx,y:(e.touches[0].clientY-r.top)*sy};
+	      return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
+	    }
+	    function start(e){
+	      if(!state.drawEnabled)return;
+	      e.preventDefault();
+	      state.currentPage=pageNum;updatePageNav();syncSectionToPage(pageNum);
+	      var p=pos(e);state.isDrawing=true;state.lastX=p.x;state.lastY=p.y;state._liveStroke=[{x:Math.round(p.x),y:Math.round(p.y)}];
+	    }
+	    function move(e){
+	      if(!state.isDrawing||!state.drawEnabled)return;
+	      e.preventDefault();
+	      var p=pos(e),ctx=c.getContext('2d');
+	      ctx.beginPath();ctx.moveTo(state.lastX,state.lastY);ctx.lineTo(p.x,p.y);
+	      if(state.drawTool==='eraser'){ctx.globalCompositeOperation='destination-out';ctx.lineWidth=state.drawSize*6;ctx.strokeStyle='rgba(0,0,0,1)';}
+	      else{ctx.globalCompositeOperation='source-over';ctx.lineWidth=state.drawSize;ctx.strokeStyle=state.drawColor;}
+	      ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+	      state._liveStroke.push({x:Math.round(p.x),y:Math.round(p.y)});
+	      state.lastX=p.x;state.lastY=p.y;
+	    }
+	    function end(){
+	      if(!state.isDrawing)return;
+	      state.isDrawing=false;
+	      saveContinuousDrawing(pageNum);
+	      if(state._liveStroke&&state._liveStroke.length>1&&typeof window._liveDrawSave==='function'){
+	        window._liveDrawSave({page:pageNum,tool:state.drawTool,color:state.drawColor,size:state.drawSize,pts:state._liveStroke.slice(),cw:c.width,ch:c.height});
+	      }
+	      state._liveStroke=[];
+	    }
+	    c.addEventListener('mousedown',start);
+	    c.addEventListener('mousemove',move);
+	    c.addEventListener('mouseup',end);
+	    c.addEventListener('mouseleave',end);
+	    c.addEventListener('touchstart',start,{passive:false});
+	    c.addEventListener('touchmove',move,{passive:false});
+	    c.addEventListener('touchend',end,{passive:false});
+	  }
+	  function saveContinuousDrawing(pageNum){
+	    var c=state.pageCanvases[pageNum]&&state.pageCanvases[pageNum].draw;
+	    if(!c||!c.width||!c.height)return;
+	    try{state.pageDrawings[pageNum]=c.getContext('2d').getImageData(0,0,c.width,c.height);}catch(e){}
+	  }
+	  function restoreContinuousDrawing(pageNum){
+	    var c=state.pageCanvases[pageNum]&&state.pageCanvases[pageNum].draw;
+	    if(!c||!state.pageDrawings[pageNum])return;
+	    var ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.putImageData(state.pageDrawings[pageNum],0,0);
+	  }
+	  function updatePageNav(){
     var info=el('page-info'); if(info)info.textContent='Sayfa '+state.currentPage+' / '+state.totalPages;
     var fn=el('float-page-num'); if(fn)fn.textContent=state.currentPage;
     var ft=el('float-page-total'); if(ft)ft.textContent=state.totalPages;
@@ -1208,14 +1407,16 @@ var PDFKV = (function(){
     if(next)next.disabled=state.currentPage>=state.totalPages;
     var jump=el('page-jump');if(jump)jump.value=state.currentPage;
   }
-  function goPage(dir){
-    var np=state.currentPage+dir;
-    if(np<1||np>state.totalPages)return;
-    renderPage(np);
-  }
+	  function goPage(dir){
+	    var np=state.currentPage+dir;
+	    if(np<1||np>state.totalPages)return;
+	    if(state.continuousMode){scrollToContinuousPage(np);return;}
+	    renderPage(np);
+	  }
 	  function jumpToPage(v){
 	    var n=parseInt(v);
 	    if(isNaN(n)||n<1||n>state.totalPages)return;
+	    if(state.continuousMode){scrollToContinuousPage(n);return;}
 	    renderPage(n);
 	  }
 
@@ -1263,6 +1464,7 @@ var PDFKV = (function(){
 	    var area=el('pdf-scroll');
 	    if(!area||area.dataset.pageScrollNav==='1')return;
 	    area.dataset.pageScrollNav='1';
+	    if(state.continuousMode)return;
 	    area.addEventListener('wheel',function(e){
 	      if(!state.pdfDoc||state.rendering)return;
 	      if(Math.abs(e.deltaY)<Math.abs(e.deltaX))return;
@@ -1549,20 +1751,20 @@ var PDFKV = (function(){
     if(pb){pb.style.background=tool==='pen'?'#503397':'#f1f5f9';pb.style.color=tool==='pen'?'#fff':'#64748b';}
     if(eb){eb.style.background=tool==='eraser'?'#503397':'#f1f5f9';eb.style.color=tool==='eraser'?'#fff':'#64748b';}
   }
-  function clearDraw(){
-    var c=el('draw-canvas');
-    if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);
-    delete state.pageDrawings[state.currentPage];
+	  function clearDraw(){
+	    var c=activeDrawCanvas();
+	    if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);
+	    delete state.pageDrawings[state.currentPage];
     /* Canlı izleme: bu sayfanın stroke'larını Firebase'den sil */
     if(typeof window._liveClearPage==='function') window._liveClearPage(state.currentPage);
   }
   function toggleDrawEnabled(){
     state.drawEnabled=!state.drawEnabled;
-    var btn=el('draw-toggle');
-    if(btn){var ic=btn.querySelector('.material-symbols-outlined');if(ic)ic.textContent=state.drawEnabled?'lock_open':'lock';}
-    var c=el('draw-canvas');
-    if(c)c.style.cursor=state.drawEnabled?'crosshair':'grab';
-  }
+	    var btn=el('draw-toggle');
+	    if(btn){var ic=btn.querySelector('.material-symbols-outlined');if(ic)ic.textContent=state.drawEnabled?'lock_open':'lock';}
+	    var c=activeDrawCanvas();
+	    if(c)c.style.cursor=state.drawEnabled?'crosshair':'grab';
+	  }
 
   /* ── SECTIONS & TABS ── */
   /* ── Extract topic name from sub string like "Gün 1 — Tam Sayılarla İşlemler · Sayfa 7" ── */
@@ -1837,7 +2039,10 @@ var PDFKV = (function(){
     if(!state.sectionStates[sec.id])
       state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
 	    // Navigate to page in PDF
-	    if(sec.page&&state.pdfDoc&&!opts.skipPageRender)renderPage(sec.page);
+	    if(sec.page&&state.pdfDoc&&!opts.skipPageRender){
+	      if(state.continuousMode)scrollToContinuousPage(sec.page);
+	      else renderPage(sec.page);
+	    }
     var qp=el('q-panel');if(qp){qp.style.display='flex';qp.classList.remove('hidden');}
     var lbl=el('current-sec-label');if(lbl)lbl.textContent=sec.name;
     // Open this topic
@@ -2795,7 +3000,7 @@ var PDFKV = (function(){
     var sta=el('sb-tabs-area');if(sta){sta.classList.remove('hidden');sta.classList.add('flex');}
     var sdt=el('sb-default-tree');if(sdt)sdt.classList.add('hidden');
     var cpb=el('btn-change-pdf');if(cpb)cpb.style.display='';
-	    initSections();renderPage(1);initDrawCanvas();initPageScrollNavigation();updatePageNav();renderTopicTree();renderProgressCard();
+	    initSections();renderContinuousPdf();initPageScrollNavigation();updatePageNav();renderTopicTree();renderProgressCard();
     // Son bölümü önce localStorage'dan (hızlı), sonra Firestore'dan geri yükle
     setTimeout(function(){
       try{
@@ -2839,7 +3044,8 @@ var PDFKV = (function(){
 	    loadPdfFromUrl:loadPdfFromUrl,
 	    loadPdfFromData:loadPdfFromData,
 	    loadCachedPdf:loadCachedPdf,
-    loadJsonFile:loadJsonFile,
+	    _getDrawCanvasForPage:function(pageNum){return state.pageCanvases&&state.pageCanvases[pageNum]?state.pageCanvases[pageNum].draw:null;},
+	    loadJsonFile:loadJsonFile,
     goPage:goPage,
     jumpToPage:jumpToPage,
     setColor:setColor,
@@ -3204,7 +3410,9 @@ var PDFKV = (function(){
           const { get } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
           const snap = await get(savedDrawRef);
           if (!snap.exists()) return;
-          const c = document.getElementById('draw-canvas');
+	          const c = (window.PDFKV && PDFKV._getDrawCanvasForPage)
+	            ? PDFKV._getDrawCanvasForPage(pageNum)
+	            : document.getElementById('draw-canvas');
           if (!c || c.width === 0) return;
           const ctx = c.getContext('2d');
           ctx.clearRect(0, 0, c.width, c.height);
