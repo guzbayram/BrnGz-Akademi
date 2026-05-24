@@ -1051,17 +1051,67 @@ var PDFKV = (function(){
     reader.readAsText(file);
   }
 
-  /* ── PDF LOADING ── */
-  function loadPdfFile(input){
-    var file=input.files[0];if(!file)return;
-    // Show filename
+	  /* ── PDF LOADING ── */
+	  var PDF_CACHE_DB='pdfkv-local-pdfs-v1';
+	  var PDF_CACHE_STORE='pdfs';
+	  function pdfCacheKey(){
+	    return 'pdf:'+(location.pathname.split('/').pop()||'Temel_Matematik.html');
+	  }
+	  function openPdfCacheDb(){
+	    return new Promise(function(resolve,reject){
+	      if(!window.indexedDB){reject(new Error('IndexedDB yok'));return;}
+	      var req=indexedDB.open(PDF_CACHE_DB,1);
+	      req.onupgradeneeded=function(){
+	        var db=req.result;
+	        if(!db.objectStoreNames.contains(PDF_CACHE_STORE))db.createObjectStore(PDF_CACHE_STORE,{keyPath:'key'});
+	      };
+	      req.onsuccess=function(){resolve(req.result);};
+	      req.onerror=function(){reject(req.error||new Error('IndexedDB açılamadı'));};
+	    });
+	  }
+	  function savePdfToCache(file,data){
+	    openPdfCacheDb().then(function(db){
+	      var tx=db.transaction(PDF_CACHE_STORE,'readwrite');
+	      tx.objectStore(PDF_CACHE_STORE).put({
+	        key:pdfCacheKey(),
+	        name:file.name,
+	        size:file.size,
+	        type:file.type||'application/pdf',
+	        updatedAt:Date.now(),
+	        blob:new Blob([data],{type:'application/pdf'})
+	      });
+	      tx.oncomplete=function(){db.close();};
+	      tx.onerror=function(){db.close();};
+	    }).catch(function(e){console.warn('[PDF Cache] Kaydedilemedi:',e);});
+	  }
+	  function loadCachedPdf(){
+	    return openPdfCacheDb().then(function(db){
+	      return new Promise(function(resolve){
+	        var tx=db.transaction(PDF_CACHE_STORE,'readonly');
+	        var req=tx.objectStore(PDF_CACHE_STORE).get(pdfCacheKey());
+	        req.onsuccess=function(){
+	          var rec=req.result;
+	          db.close();
+	          if(!rec||!rec.blob){resolve(false);return;}
+	          rec.blob.arrayBuffer().then(function(buf){
+	            loadPdfFromData(new Uint8Array(buf)).then(function(){resolve(true);}).catch(function(){resolve(false);});
+	          }).catch(function(){resolve(false);});
+	        };
+	        req.onerror=function(){db.close();resolve(false);};
+	      });
+	    }).catch(function(){return false;});
+	  }
+	  function loadPdfFile(input){
+	    var file=input.files[0];if(!file)return;
+	    // Show filename
     
     
     var cpb=el('btn-change-pdf');if(cpb)cpb.style.display='';
-    var reader=new FileReader();
-    reader.onload=function(e){
-      var data=new Uint8Array(e.target.result);
-      pdfjsLib.getDocument({data:data}).promise.then(function(doc){
+	    var reader=new FileReader();
+	    reader.onload=function(e){
+	      var data=new Uint8Array(e.target.result);
+	      savePdfToCache(file,data);
+	      pdfjsLib.getDocument({data:data}).promise.then(function(doc){
         state.pdfDoc=doc;state.totalPages=doc.numPages;state.currentPage=1;
         // Switch layout
         el('upload-screen').style.display='none';
@@ -2701,21 +2751,23 @@ var PDFKV = (function(){
       console.warn('PDF url-load error:',err);
     });
   }
-  function loadPdfFromData(data){
-    if(state._pdfStarted) return;
-    state._pdfStarted = true;
-    pdfjsLib.getDocument({data:data}).promise.then(_afterPdfLoaded)
-      .catch(function(err){
-        state._pdfStarted = false;
-        console.warn('PDF data-load error:',err);
-      });
-  }
+	  function loadPdfFromData(data){
+	    if(state._pdfStarted) return Promise.resolve(false);
+	    state._pdfStarted = true;
+	    return pdfjsLib.getDocument({data:data}).promise.then(_afterPdfLoaded)
+	      .catch(function(err){
+	        state._pdfStarted = false;
+	        console.warn('PDF data-load error:',err);
+	        throw err;
+	      });
+	  }
 
   /* ── PUBLIC API ── */
   return {
-    loadPdfFile:loadPdfFile,
-    loadPdfFromUrl:loadPdfFromUrl,
-    loadPdfFromData:loadPdfFromData,
+	    loadPdfFile:loadPdfFile,
+	    loadPdfFromUrl:loadPdfFromUrl,
+	    loadPdfFromData:loadPdfFromData,
+	    loadCachedPdf:loadCachedPdf,
     loadJsonFile:loadJsonFile,
     goPage:goPage,
     jumpToPage:jumpToPage,
@@ -3596,7 +3648,10 @@ var PDFKV = (function(){
 	        +'<style>@keyframes pdfAutoSpin{to{transform:rotate(360deg);}}</style>'
 	        +'</div>';
 	    }
-	    PDFKV.loadPdfFromUrl(PDF_URL);
+	    PDFKV.loadCachedPdf().then(function(loaded){
+	      if(loaded)return;
+	      PDFKV.loadPdfFromUrl(PDF_URL);
+	    });
 	    setTimeout(function(){
 	      if(!us || us.style.display==='none')return;
 	      if(!manualUploadHtml)return;
