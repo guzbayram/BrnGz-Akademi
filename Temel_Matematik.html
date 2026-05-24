@@ -890,7 +890,7 @@ var PDFKV = (function(){
 
   var state = {
     pdfDoc:null, currentPage:1, totalPages:0, scale:1.5, rendering:false, autoFit:true,
-    continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null, pendingOpenPage:null,
+    continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null, pendingOpenPage:null, pendingOpenSectionId:null,
     pageScrollAcc:0, touchStartY:null, isPageAutoSync:false, manualSectionLockUntil:0,
     drawEnabled:true, drawTool:'pen', drawColor:'#1a1a2e', drawSize:2,
     isDrawing:false, lastX:0, lastY:0, pageDrawings:{},
@@ -1274,7 +1274,7 @@ var PDFKV = (function(){
 	      }
 	      setupContinuousObservers();
 	      renderContinuousPage(1);
-	      if(state.pendingOpenPage)scrollToContinuousPage(state.pendingOpenPage,'auto');
+	      if(state.pendingOpenPage)scrollToContinuousPage(state.pendingOpenPage,'auto',state.pendingOpenSectionId);
 	      else setCurrentPageFromScroll(true);
 	    });
 	  }
@@ -1343,12 +1343,15 @@ var PDFKV = (function(){
 	    document.dispatchEvent(new CustomEvent('pdfPageChanged',{detail:{page:best}}));
 	    if(typeof window._liveNotifyPage==='function')window._liveNotifyPage(best);
 	  }
-	  function scrollToContinuousPage(num,behavior){
+	  function scrollToContinuousPage(num,behavior,sectionId){
 	    var cont=el('continuous-pages'),shell=state.pageShells&&state.pageShells[num];
 	    if(!cont||!shell)return;
 	    state.pendingOpenPage=null;
+	    state.pendingOpenSectionId=null;
 	    renderContinuousPage(num);
-	    cont.scrollTo({top:Math.max(0,shell.offsetTop-24),behavior:behavior||'smooth'});
+	    var ratio=sectionScrollRatio(sectionId);
+	    var top=Math.max(0,shell.offsetTop+(shell.offsetHeight*ratio)-24);
+	    cont.scrollTo({top:top,behavior:behavior||'smooth'});
 	    setTimeout(function(){setCurrentPageFromScroll(true);},350);
 	  }
 	  function initContinuousDrawCanvas(c,pageNum){
@@ -1429,8 +1432,9 @@ var PDFKV = (function(){
 	    var target=parseInt(sec.page);
 	    if(isNaN(target))return;
 	    state.pendingOpenPage=target;
+	    state.pendingOpenSectionId=sec.id;
 	    if(state.continuousMode&&state.pageShells&&state.pageShells[target]){
-	      scrollToContinuousPage(target);
+	      scrollToContinuousPage(target,'smooth',sec.id);
 	      return;
 	    }
 	    if(state.pdfDoc){
@@ -1959,6 +1963,24 @@ var PDFKV = (function(){
     h10_hocan_anlats_n_4___kup:20801,
     s10_i_k_p_a_l_m_ve_ax_bx_c_arpan:20802
   };
+  var SECTION_SCROLL_RATIOS={
+    h1_hocan_anlats_n_2_____karm:0.72,
+    h1_hocan_anlats_n_4___b_lme:0.05,
+    s1_g____arpma_seriler:0.45,
+    s1_k___de_i_ken__x_5__y__3_:0.05,
+    s2_f___bile_ik___tam_say_l_:0.58,
+    h2_hocan_anlats_n_3___geni_l:0.05,
+    s2_g_rasyonal:0.05,
+    h3__arpma:0.05,
+    s3_j___kesirli_b_lme:0.05,
+    h3_hocan_ha10:0.05,
+    s3_r_ondalik:0.52
+  };
+
+  function sectionScrollRatio(sectionId){
+    if(sectionId&&Object.prototype.hasOwnProperty.call(SECTION_SCROLL_RATIOS,sectionId))return SECTION_SCROLL_RATIOS[sectionId];
+    return 0.04;
+  }
 
   function sectionFlowOrder(sec,tab){
     if(!sec)return null;
