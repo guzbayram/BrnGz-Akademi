@@ -1821,31 +1821,6 @@ var PDFKV = (function(){
   var SECTION_PAGE_FIXES={
     h1_hocan_anlats_n_2_____karm:2,
     h2_hocan_anlats_n_3___geni_l:26,
-    h4__arpma:72,
-    h4_b_lme:72,
-    h4_ortak__arpan:72,
-    h4_denklem___zme:72,
-    h5_hocan_anlats_n_2___rasyon:90,
-    h5_hocan_anlats_n_3___paydad:90,
-    h5_hocan_anlats_n_4___merdiv:90,
-    h5_hocan_anlats_n_5___i_ki_b:90,
-    h5_hocan_anlats_n_6___i_ki_b:90,
-    h6_hocan_anlats_n_2___e_itsi:110,
-    h6_hocan_anlats_n_3___tersin:110,
-    h6_hocan_anlats_n_4___ayn__y:110,
-    h6_hocan_anlats_n_5___x_y__a:110,
-    h6_hocan_anlats_n_6___tam_sa:110,
-    h6_hocan_anlats_n_7___kuvvet:110,
-    h7_hocan_anlats_n_2___karek_:130,
-    h7_hocan_anlats_n_3___mutlak:130,
-    h7_hocan_anlats_n_4___mutlak:130,
-    h7_hocan_anlats_n_5___mutlak:130,
-    h7_hocan_anlats_n_6____f_x__:130,
-    h7_hocan_anlats_n_7___en_k__:130,
-    h7_hocan_anlats_n_8___mutlak:130,
-    h8_hocan_anlats_n_2___sl_ifade_kuvveti:151,
-    h8_hocan_anlats_n_8___sl_esitsizlik:151,
-    h9_hocan_anlats_n_6___ic_ice:179,
     s1_a___toplama:2,
     s1_b_____karma:4,
     s1_d_____karma_kar___k:5,
@@ -1979,7 +1954,21 @@ var PDFKV = (function(){
 
   function sectionScrollRatio(sectionId){
     if(sectionId&&Object.prototype.hasOwnProperty.call(SECTION_SCROLL_RATIOS,sectionId))return SECTION_SCROLL_RATIOS[sectionId];
+    var found=findSectionById(sectionId);
+    if(found&&typeof found.sec.scrollRatio==='number')return found.sec.scrollRatio;
     return 0.04;
+  }
+
+  function findSectionById(sectionId){
+    if(!sectionId||!state.sections)return null;
+    var tabs=['hocan','ara','test'];
+    for(var t=0;t<tabs.length;t++){
+      var tab=tabs[t],list=state.sections[tab]||[];
+      for(var i=0;i<list.length;i++){
+        if(list[i].id===sectionId)return{tab:tab,sec:list[i]};
+      }
+    }
+    return null;
   }
 
   function sectionFlowOrder(sec,tab){
@@ -1989,6 +1978,35 @@ var PDFKV = (function(){
     var order={ara:0,hocan:1,test:2};
     var tabOrder=Object.prototype.hasOwnProperty.call(order,tab)?order[tab]:9;
     return page*100+tabOrder;
+  }
+
+  function assignSectionScrollRatios(){
+    var groups={};
+    ['hocan','ara','test'].forEach(function(tab){
+      (state.sections[tab]||[]).forEach(function(sec,idx){
+        var page=sectionPage(sec);
+        if(!page)return;
+        if(!groups[page])groups[page]=[];
+        groups[page].push({sec:sec,tab:tab,idx:idx,flow:sectionFlowOrder(sec,tab)});
+      });
+    });
+    Object.keys(groups).forEach(function(page){
+      var group=groups[page].sort(function(a,b){
+        return (a.flow-b.flow)||(a.idx-b.idx);
+      });
+      if(group.length===1){
+        if(!Object.prototype.hasOwnProperty.call(SECTION_SCROLL_RATIOS,group[0].sec.id))group[0].sec.scrollRatio=0.04;
+        return;
+      }
+      var maxRatio=group.length>4?0.86:0.78;
+      group.forEach(function(item,i){
+        if(Object.prototype.hasOwnProperty.call(SECTION_SCROLL_RATIOS,item.sec.id)){
+          item.sec.scrollRatio=SECTION_SCROLL_RATIOS[item.sec.id];
+          return;
+        }
+        item.sec.scrollRatio=0.04+(maxRatio-0.04)*(i/(group.length-1));
+      });
+    });
   }
 
   function initSections(){
@@ -2002,6 +2020,7 @@ var PDFKV = (function(){
         sec.flowOrder=sectionFlowOrder(sec,tab);
       });
     });
+    assignSectionScrollRatios();
     state.gunStats={};
     state.collapsedTopics={};
     state._topicsInitialized=false;
