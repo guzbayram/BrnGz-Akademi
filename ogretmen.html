@@ -195,6 +195,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);height:
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .tp.on > *{animation:fadeUp .3s ease both;}
+.og-info-wrap{position:relative;display:inline-flex;align-items:center;flex-shrink:0;}
+.og-info-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e0e7ef;color:#64748b;font-size:10px;font-weight:900;cursor:default;line-height:1;user-select:none;flex-shrink:0;}
+.og-info-icon:hover{background:#c7d7ea;color:#334155;}
+.og-tooltip{visibility:hidden;opacity:0;pointer-events:none;position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1e293b;color:#f1f5f9;font-family:'Manrope',sans-serif;font-size:11px;font-weight:600;line-height:1.5;padding:9px 12px;border-radius:9px;width:max-content;max-width:220px;white-space:normal;box-shadow:0 4px 18px rgba(0,0,0,.28);z-index:9999;transition:opacity .15s;}
+.og-info-wrap:hover .og-tooltip{visibility:visible;opacity:1;}
+.og-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e293b;}
 </style>
 </head>
 <body>
@@ -1098,11 +1104,17 @@ window.loadAyarlarStats = async function() {
             </button>
           </div>`
           : '<div style="height:34px;flex-shrink:0;"></div>'}
-          <button onclick="resetStudentStats('${uid}','${f.id}','${studentName}')"
-            style="width:100%;background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;border-radius:9px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;"
-            onmouseover="this.style.background='#fecdd3'" onmouseout="this.style.background='#fff1f2'">
-            <span class="material-symbols-outlined" style="font-size:15px;">restart_alt</span>İstatistik Sıfırla
-          </button>
+          <div style="display:flex;align-items:center;gap:5px;width:100%;">
+            <button onclick="resetStudentStats('${uid}','${f.id}','${studentName}')"
+              style="flex:1;background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;border-radius:9px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;"
+              onmouseover="this.style.background='#fecdd3'" onmouseout="this.style.background='#fff1f2'">
+              <span class="material-symbols-outlined" style="font-size:15px;">restart_alt</span>İstatistik Sıfırla
+            </button>
+            <span class="og-info-wrap">
+              <span class="og-info-icon">i</span>
+              <span class="og-tooltip">D/Y/Görüldü istatistikleri ve çizimler kalıcı olarak silinir. Öğrenci fasikülü yeniden açtığında sıfırdan başlar.</span>
+            </span>
+          </div>
         </div>
       </div>`;
     }).join('');

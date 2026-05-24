@@ -491,6 +491,12 @@
       font-size: 11px !important;
     }
   }
+.pdfkv-info-wrap{position:relative;display:inline-flex;align-items:center;}
+.pdfkv-info-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#e0e7ef;color:#64748b;font-size:11px;font-weight:900;cursor:default;flex-shrink:0;line-height:1;user-select:none;}
+.pdfkv-info-icon:hover{background:#c7d7ea;color:#334155;}
+.pdfkv-tooltip{visibility:hidden;opacity:0;pointer-events:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e293b;color:#f1f5f9;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;line-height:1.5;padding:10px 14px;border-radius:10px;white-space:nowrap;max-width:260px;white-space:normal;width:max-content;max-width:240px;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:9999;transition:opacity .15s;}
+.pdfkv-info-wrap:hover .pdfkv-tooltip{visibility:visible;opacity:1;}
+.pdfkv-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#1e293b;}
 </style>
 </head>
 <body class="bg-[#f8f9fc] text-on-surface overflow-hidden" style="overscroll-behavior:none;">
@@ -564,10 +570,16 @@
         <div id="karne-topic-rows" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
       <!-- Kapat + Sıfırla -->
-      <div style="padding:0 36px 32px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
-        <button onclick="PDFKV.resetStats()" style="background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;border-radius:14px;padding:14px 28px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;" onmouseover="this.style.background='#fecdd3'" onmouseout="this.style.background='#fff1f2'">
-          <span style="font-size:16px;">🔄</span> İstatistikleri Sıfırla
-        </button>
+      <div style="padding:0 36px 32px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="PDFKV.resetStats()" style="background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;border-radius:14px;padding:14px 28px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;" onmouseover="this.style.background='#fecdd3'" onmouseout="this.style.background='#fff1f2'">
+            <span style="font-size:16px;">🔄</span> İstatistikleri Sıfırla
+          </button>
+          <span class="pdfkv-info-wrap">
+            <span class="pdfkv-info-icon">i</span>
+            <span class="pdfkv-tooltip">Tüm D/Y/Görüldü sayıları ve çizimler sıfırlanır. Karnedeki konu bazlı veriler temizlenir. Bu işlem geri alınamaz.</span>
+          </span>
+        </div>
         <button onclick="PDFKV.closeKarne()" style="background:linear-gradient(135deg,#503397,#7c3aed);color:#fff;border:none;border-radius:14px;padding:14px 48px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(80,51,151,.3);transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='';">Kapat</button>
       </div>
     </div>
@@ -2761,19 +2773,33 @@ var PDFKV = (function(){
       if(!confirm('Tüm istatistikler ve çizimler sıfırlanacak. Emin misiniz?')) return;
       state.sectionStates={};
       state.totalCorrect=0; state.totalWrong=0; state.totalAnswered=0; state.totalShown=0; state.gunStats={};
+      state._posSavedManually=false;
+      state.currentSection=null;
       // Tüm canvas çizimlerini temizle
       state.pageDrawings={};
       var dc=el('draw-canvas');
       if(dc)dc.getContext('2d').clearRect(0,0,dc.width,dc.height);
+      // localStorage pozisyonunu temizle
+      try{localStorage.removeItem(_posKey());}catch(e){}
       updateStats();
       renderTopicTree();
       renderKarne();
+      // İlk bölüme git
+      PDFKV._goToFirstSection();
       if(typeof window._resetStatsFirebase==='function') window._resetStatsFirebase();
       if(typeof window._clearAllDrawings==='function') window._clearAllDrawings();
     },
     _getTotalCorrect:function(){ return state.totalCorrect; },
     _getTotalWrong:function(){ return state.totalWrong; },
     _getTotalShown:function(){ return state.totalShown; },
+    _clearPosFlag:function(){ state._posSavedManually=false; },
+    _goToFirstSection:function(){
+      var allSecs=(state.sections.hocan||[]).concat(state.sections.ara||[]).concat(state.sections.test||[]);
+      if(!allSecs.length)return;
+      var firstCat=state.sections.hocan&&state.sections.hocan.length?'hocan':
+                   state.sections.ara&&state.sections.ara.length?'ara':'test';
+      selectSection(allSecs[0],firstCat,true);
+    },
     _restorePosition:function(sectionId,tab){
       if(state._posSavedManually)return; // kullanıcı zaten manuel seçim yaptı
       var allSecs=(state.sections.hocan||[]).concat(state.sections.ara||[]).concat(state.sections.test||[]);
@@ -3000,30 +3026,40 @@ var PDFKV = (function(){
         const savedSnap = await getDoc(doc(db, 'stats', ddUid));
         if (savedSnap.exists()) {
           const saved = savedSnap.data();
-          /* Karne: sectionStates geri yükle */
-          const statesJson = saved[ddFid + '_states'];
-          if (statesJson) {
-            try {
-              const loaded = JSON.parse(statesJson);
-              PDFKV._restoreSectionStates(loaded);
-              console.log('[Karne] Önceki oturum yüklendi:', Object.keys(loaded).length, 'bölüm');
-            } catch(e) { console.warn('[Karne] Yükleme hatası:', e); }
-          }
-          /* Aggregate doğru/yanlış/çözüm görme'yi geri yükle */
-          const prevFas = saved[ddFid] || {};
-          if (prevFas.correct || prevFas.wrong || prevFas.shown) {
-            PDFKV._restoreAggregate(prevFas.correct || 0, prevFas.wrong || 0, prevFas.shown || 0);
-          }
-          /* Son pozisyonu Firestore'dan yükle (farklı cihaz / localStorage silinmiş ise) */
-          const lastPosStr = saved[ddFid + '_lastPos'];
-          if (lastPosStr) {
-            try {
-              const pos = JSON.parse(lastPosStr);
-              // localStorage önbelleğini güncelle
-              try { localStorage.setItem('dd_pos_' + ddUid + '_' + ddFid, JSON.stringify(pos)); } catch(e) {}
-              // localStorage restore daha önce yanlış/farklı bölümü açmış olabilir → Firestore kazanır
-              PDFKV._restorePosition(pos.sectionId, pos.tab);
-            } catch(e) {}
+          /* Öğretmen sıfırlaması varsa tüm yerel veriyi temizle, geri yükleme yapma */
+          const resetAt = saved[ddFid + '_resetAt'];
+          if (resetAt) {
+            try { localStorage.removeItem('dd_pos_' + ddUid + '_' + ddFid); } catch(e) {}
+            try { localStorage.removeItem(SYNC_KEY); } catch(e) {}
+            PDFKV._clearPosFlag();
+            PDFKV._goToFirstSection();
+            console.log('[Reset] Öğretmen sıfırlaması algılandı, ilk bölüme gidiliyor.');
+          } else {
+            /* Karne: sectionStates geri yükle */
+            const statesJson = saved[ddFid + '_states'];
+            if (statesJson) {
+              try {
+                const loaded = JSON.parse(statesJson);
+                PDFKV._restoreSectionStates(loaded);
+                console.log('[Karne] Önceki oturum yüklendi:', Object.keys(loaded).length, 'bölüm');
+              } catch(e) { console.warn('[Karne] Yükleme hatası:', e); }
+            }
+            /* Aggregate doğru/yanlış/çözüm görme'yi geri yükle */
+            const prevFas = saved[ddFid] || {};
+            if (prevFas.correct || prevFas.wrong || prevFas.shown) {
+              PDFKV._restoreAggregate(prevFas.correct || 0, prevFas.wrong || 0, prevFas.shown || 0);
+            }
+            /* Son pozisyonu Firestore'dan yükle (farklı cihaz / localStorage silinmiş ise) */
+            const lastPosStr = saved[ddFid + '_lastPos'];
+            if (lastPosStr) {
+              try {
+                const pos = JSON.parse(lastPosStr);
+                // localStorage önbelleğini güncelle
+                try { localStorage.setItem('dd_pos_' + ddUid + '_' + ddFid, JSON.stringify(pos)); } catch(e) {}
+                // localStorage restore daha önce yanlış/farklı bölümü açmış olabilir → Firestore kazanır
+                PDFKV._restorePosition(pos.sectionId, pos.tab);
+              } catch(e) {}
+            }
           }
         }
       } catch(e) { console.warn('[Karne] Firestore okuma hatası:', e); }
