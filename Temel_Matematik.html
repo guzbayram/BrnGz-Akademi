@@ -2079,7 +2079,9 @@ var PDFKV = (function(){
         '</div>'+
         '<span class="material-symbols-outlined" style="font-size:16px;color:#a78bfa;transition:transform .2s;'+(isCollapsed?'':'transform:rotate(90deg);')+'">'+'chevron_right'+'</span>';
       hdr.onclick=(function(tn){return function(){
-        state.collapsedTopics[tn]=!state.collapsedTopics[tn];
+        var willOpen=!!state.collapsedTopics[tn];
+        Object.keys(state.collapsedTopics).forEach(function(k){state.collapsedTopics[k]=true;});
+        state.collapsedTopics[tn]=willOpen?false:true;
         renderTopicTree();
       };})(topicName);
       grp.appendChild(hdr);
