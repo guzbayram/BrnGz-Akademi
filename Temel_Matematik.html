@@ -1475,10 +1475,35 @@ var PDFKV = (function(){
 	    list.sort(function(a,b){return a.page-b.page;});
 	    return list[0];
 	  }
+	  function currentPageViewRatio(pageNum){
+	    var cont=el('continuous-pages'),shell=state.pageShells&&state.pageShells[pageNum];
+	    if(!cont||!shell||!shell.offsetHeight)return 0.04;
+	    var anchor=cont.scrollTop+Math.min(cont.clientHeight*0.32,260);
+	    var ratio=(anchor-shell.offsetTop)/shell.offsetHeight;
+	    if(isNaN(ratio))return 0.04;
+	    return Math.max(0,Math.min(1,ratio));
+	  }
+	  function findSectionForPagePosition(pageNum){
+	    var list=allSectionsWithTabs();
+	    if(!list.length)return null;
+	    var exact=list.filter(function(x){return x.page===pageNum;});
+	    if(!exact.length)return findSectionForPage(pageNum);
+	    exact.sort(function(a,b){
+	      var ar=sectionScrollRatio(a.sec.id),br=sectionScrollRatio(b.sec.id);
+	      if(ar!==br)return ar-br;
+	      return (a.flowOrder||0)-(b.flowOrder||0);
+	    });
+	    var ratio=currentPageViewRatio(pageNum);
+	    var match=exact[0];
+	    exact.forEach(function(item){
+	      if(sectionScrollRatio(item.sec.id)<=ratio)match=item;
+	    });
+	    return match;
+	  }
 	  function syncSectionToPage(pageNum){
 	    if(state.isPageAutoSync)return;
 	    if(state.currentSection&&sectionPage(state.currentSection.sec)===pageNum&&Date.now()<state.manualSectionLockUntil)return;
-	    var match=findSectionForPage(pageNum);
+	    var match=findSectionForPagePosition(pageNum);
 	    if(!match)return;
 	    if(state.currentSection&&state.currentSection.id===match.sec.id){
 	      renderSectionQuestions(match.sec);
@@ -1945,9 +1970,9 @@ var PDFKV = (function(){
     s1_k___de_i_ken__x_5__y__3_:0.05,
     s2_f___bile_ik___tam_say_l_:0.58,
     h2_hocan_anlats_n_3___geni_l:0.05,
-    s2_g_rasyonal:0.05,
+    s2_g_rasyonal:0.08,
     h3__arpma:0.05,
-    s3_j___kesirli_b_lme:0.05,
+    s3_j___kesirli_b_lme:0.08,
     h3_hocan_ha10:0.05,
     s3_r_ondalik:0.52
   };
@@ -2002,6 +2027,10 @@ var PDFKV = (function(){
       group.forEach(function(item,i){
         if(Object.prototype.hasOwnProperty.call(SECTION_SCROLL_RATIOS,item.sec.id)){
           item.sec.scrollRatio=SECTION_SCROLL_RATIOS[item.sec.id];
+          return;
+        }
+        if(i>0&&item.tab==='ara'&&group[0].tab==='hocan'){
+          item.sec.scrollRatio=i===1?0.08:Math.min(0.82,0.52+((i-2)*0.18));
           return;
         }
         item.sec.scrollRatio=0.04+(maxRatio-0.04)*(i/(group.length-1));
@@ -3355,6 +3384,12 @@ var PDFKV = (function(){
       var sec=allSecs.find(function(s){return s.id===sectionId;});
       if(sec)selectSection(sec,tab||'hocan',true);
     },
+    _selectSectionById:function(sectionId){
+      var found=findSectionById(sectionId);
+      if(found)selectSection(found.sec,found.tab);
+      return !!found;
+    },
+    _sectionScrollRatio:sectionScrollRatio,
     changePdf:function(){
       state.pdfDoc=null;state.currentPage=1;state.pageDrawings={};state.currentSection=null;state.autoFit=true;
       state.totalCorrect=0;state.totalWrong=0;state.totalAnswered=0;state.gunStats={};
@@ -3371,6 +3406,7 @@ var PDFKV = (function(){
     }
   };
 })();
+if(typeof window!=='undefined')window.PDFKV=PDFKV;
 </script>
 
 <script type="module">
