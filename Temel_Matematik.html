@@ -1952,6 +1952,7 @@ var PDFKV = (function(){
           btn.onmouseenter=function(){if(!isActive)this.style.background='rgba(255,255,255,.9)';};
           btn.onmouseleave=function(){if(!isActive)this.style.background='rgba(255,255,255,.5)';};
           btn.onclick=(function(s,t){return function(){selectSection(s,t);};})(sec,item.tab);
+          btn.dataset.sectionId=sec.id;
           var numBadge='<span style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:'+(isActive?'rgba(255,255,255,.25)':cat.bg)+';color:'+(isActive?'#fff':cat.color)+';font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;">'+(flowIndex+1)+'</span>';
           var pageTag=sec.page?'<span style="flex-shrink:0;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:'+(isActive?'rgba(255,255,255,.2)':'rgba(0,0,0,.06)')+';color:'+(isActive?'rgba(255,255,255,.85)':'#6b7280')+';">s.'+sec.page+'</span>':'';
           var typeTag='<span style="display:inline-flex;align-items:center;gap:3px;font-size:8px;font-weight:900;letter-spacing:.35px;text-transform:uppercase;color:'+(isActive?'rgba(255,255,255,.85)':cat.color)+';">'
@@ -2008,6 +2009,7 @@ var PDFKV = (function(){
       var isActive=state.currentSection&&state.currentSection.id===sec.id;
       btn.style.cssText='display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px;border:1px solid '+(isActive?'var(--primary)':'var(--border)')+';background:'+(isActive?'var(--primary)':'#fff')+';color:'+(isActive?'#fff':'var(--text)')+';width:100%;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,0.05);';
       btn.onclick=function(){selectSection(sec,tabName);};
+      btn.dataset.sectionId=sec.id;
       var icon=sec.type==='mcq'?'quiz':(tabName==='hocan'?'school':'edit_square');
       var qcount=sec.type==='mcq'?(sec.questionCount||0):(sec.questions||[]).length;
       var st=state.sectionStates[sec.id];
@@ -2050,6 +2052,15 @@ var PDFKV = (function(){
     Object.keys(state.catOpen).forEach(function(k){state.catOpen[k]=false;});
     state.catOpen[curTopic+'__'+tabName]=true;
     renderTopicTree();
+    setTimeout(function(){
+      var buttons=document.querySelectorAll('#sb-section-list button[data-section-id]');
+      for(var i=0;i<buttons.length;i++){
+        if(buttons[i].dataset.sectionId===sec.id){
+          buttons[i].scrollIntoView({block:'nearest',inline:'nearest'});
+          break;
+        }
+      }
+    },0);
     if(sec.type==='mcq')renderMcqSection(sec);
     else renderTextSection(sec);
     updateQNav();
