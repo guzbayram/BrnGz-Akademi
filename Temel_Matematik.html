@@ -1439,7 +1439,7 @@ var PDFKV = (function(){
 	    if(exact.length){
 	      var curExact=exact.find(function(x){return x.sec.id===currentId;});
 	      if(curExact)return curExact;
-	      var order={hocan:0,ara:1,test:2};
+	      var order={ara:0,hocan:1,test:2};
 	      exact.sort(function(a,b){return (order[a.tab]||9)-(order[b.tab]||9);});
 	      return exact[0];
 	    }
@@ -1790,9 +1790,27 @@ var PDFKV = (function(){
     return tree;
   }
 
+  var SECTION_PAGE_FIXES={
+    h1_hocan_anlats_n_2_____karm:2,
+    s1_a___toplama:2,
+    s1_b_____karma:4,
+    s1_d_____karma_kar___k:5,
+    s1_f____arpma_kar___k:8,
+    s1_h___b_lme:9,
+    s1_i____s:12,
+    s1_j___i__lem__nceli_i:13
+  };
+
   function initSections(){
     var base=state.customSections||DEFAULT_SECTIONS;
     state.sections=JSON.parse(JSON.stringify(base));
+    ['hocan','ara','test'].forEach(function(tab){
+      (state.sections[tab]||[]).forEach(function(sec){
+        if(Object.prototype.hasOwnProperty.call(SECTION_PAGE_FIXES,sec.id)){
+          sec.page=SECTION_PAGE_FIXES[sec.id];
+        }
+      });
+    });
     state.gunStats={};
     state.collapsedTopics={};
     state._topicsInitialized=false;
@@ -1870,8 +1888,8 @@ var PDFKV = (function(){
     if(!state.catOpen)state.catOpen={};
 
     var cats=[
-      {key:'hocan',label:'Hocan Anlatsın',short:'HA',icon:'school',color:'#503397',bg:'#ede9fe',order:0},
-      {key:'ara',  label:'Şimdi Sıra Sende',short:'SSS',icon:'edit_square',color:'#2d4add',bg:'#e0e7ff',order:1},
+      {key:'hocan',label:'Hocan Anlatsın',short:'HA',icon:'school',color:'#503397',bg:'#ede9fe',order:1},
+      {key:'ara',  label:'Şimdi Sıra Sende',short:'SSS',icon:'edit_square',color:'#2d4add',bg:'#e0e7ff',order:0},
       {key:'test', label:'Test',short:'TEST',icon:'quiz',color:'#0f766e',bg:'#ccfbf1',order:2}
     ];
     topicNames.forEach(function(topicName){
