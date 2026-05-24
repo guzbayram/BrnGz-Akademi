@@ -501,17 +501,6 @@
 </head>
 <body class="bg-[#f8f9fc] text-on-surface overflow-hidden" style="overscroll-behavior:none;">
 <!-- ══ UPLOAD OVERLAY (shown first) ══ -->
-<!-- GitHub Pages'de upload ekranı gizlenir; sadece local/desktop'ta görünür -->
-<script>
-(function(){
-  if(location.hostname.endsWith('github.io')){
-    document.addEventListener('DOMContentLoaded',function(){
-      var us=document.getElementById('upload-screen');
-      if(us) us.style.display='none';
-    });
-  }
-})();
-</script>
 <div id="upload-screen" class="fixed inset-0 z-50 flex flex-col">
   <div class="flex-grow flex items-center justify-center bg-[#f0f0f5] cursor-pointer"
     ondragover="event.preventDefault()"
@@ -3586,27 +3575,37 @@ var PDFKV = (function(){
 <script>
 /* ── OTOMATİK PDF YÜKLEMESİ (Netlify) ── */
 (function(){
-  var PDF_URL='Temel_Matematik.pdf';
-  var us=document.getElementById('upload-screen');
-  
-  /* Önce sessizce fetch dene */
-  function tryAutoLoad(){
+	  var PDF_URL='Temel_Matematik.pdf';
+	  var us=document.getElementById('upload-screen');
+	  var manualUploadHtml = us ? us.innerHTML : '';
+	  
+	  /* Önce sessizce fetch dene */
+	  function tryAutoLoad(){
     if(typeof pdfjsLib==='undefined'||typeof PDFKV==='undefined'){
       setTimeout(tryAutoLoad,200); return;
     }
     /* Firebase zaten yüklediyse atla */
     if(us && us.style.display==='none') return;
-    /* Spinner göster */
-    if(us){
-      us.style.pointerEvents='none';
-      us.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0f0f5;gap:16px;">'
-        +'<div style="width:52px;height:52px;border-radius:50%;border:5px solid #e9ddff;border-top-color:#503397;animation:pdfAutoSpin 0.8s linear infinite;"></div>'
-        +'<div style="font-family:Manrope,sans-serif;font-weight:800;font-size:15px;color:#503397;letter-spacing:.02em;">PDF yükleniyor…</div>'
-        +'<style>@keyframes pdfAutoSpin{to{transform:rotate(360deg);}}</style>'
-        +'</div>';
-    }
-    PDFKV.loadPdfFromUrl(PDF_URL);
-  }
+	    /* Spinner göster; başarısız olursa manuel seçime geri dön */
+	    if(us){
+	      us.style.pointerEvents='none';
+	      us.innerHTML='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0f0f5;gap:16px;">'
+	        +'<div style="width:52px;height:52px;border-radius:50%;border:5px solid #e9ddff;border-top-color:#503397;animation:pdfAutoSpin 0.8s linear infinite;"></div>'
+	        +'<div style="font-family:Manrope,sans-serif;font-weight:800;font-size:15px;color:#503397;letter-spacing:.02em;">PDF yükleniyor…</div>'
+	        +'<div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:#64748b;">Bulunamazsa cihazınızdan seçmeniz istenecek.</div>'
+	        +'<style>@keyframes pdfAutoSpin{to{transform:rotate(360deg);}}</style>'
+	        +'</div>';
+	    }
+	    PDFKV.loadPdfFromUrl(PDF_URL);
+	    setTimeout(function(){
+	      if(!us || us.style.display==='none')return;
+	      if(!manualUploadHtml)return;
+	      us.style.pointerEvents='';
+	      us.innerHTML=manualUploadHtml;
+	      var msg=us.querySelector('p');
+	      if(msg)msg.textContent='Otomatik PDF bulunamadı. Aynı PDF dosyasını cihazınızdan seçin; dosya sunucuya yüklenmez.';
+	    },4500);
+	  }
   
   window.addEventListener('load', tryAutoLoad);
 })();
