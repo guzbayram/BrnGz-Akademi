@@ -890,7 +890,7 @@ var PDFKV = (function(){
 
   var state = {
     pdfDoc:null, currentPage:1, totalPages:0, scale:1.5, rendering:false, autoFit:true,
-    continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null,
+    continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null, pendingOpenPage:null,
     pageScrollAcc:0, touchStartY:null, isPageAutoSync:false,
     drawEnabled:true, drawTool:'pen', drawColor:'#1a1a2e', drawSize:2,
     isDrawing:false, lastX:0, lastY:0, pageDrawings:{},
@@ -1274,7 +1274,8 @@ var PDFKV = (function(){
 	      }
 	      setupContinuousObservers();
 	      renderContinuousPage(1);
-	      setCurrentPageFromScroll(true);
+	      if(state.pendingOpenPage)scrollToContinuousPage(state.pendingOpenPage,'auto');
+	      else setCurrentPageFromScroll(true);
 	    });
 	  }
 	  function renderContinuousPage(num){
@@ -1345,6 +1346,7 @@ var PDFKV = (function(){
 	  function scrollToContinuousPage(num,behavior){
 	    var cont=el('continuous-pages'),shell=state.pageShells&&state.pageShells[num];
 	    if(!cont||!shell)return;
+	    state.pendingOpenPage=null;
 	    renderContinuousPage(num);
 	    cont.scrollTo({top:Math.max(0,shell.offsetTop-24),behavior:behavior||'smooth'});
 	    setTimeout(function(){setCurrentPageFromScroll(true);},350);
@@ -1421,6 +1423,20 @@ var PDFKV = (function(){
 	    if(isNaN(n)||n<1||n>state.totalPages)return;
 	    if(state.continuousMode){scrollToContinuousPage(n);return;}
 	    renderPage(n);
+	  }
+	  function openSectionPage(sec){
+	    if(!sec||!sec.page)return;
+	    var target=parseInt(sec.page);
+	    if(isNaN(target))return;
+	    state.pendingOpenPage=target;
+	    if(state.continuousMode&&state.pageShells&&state.pageShells[target]){
+	      scrollToContinuousPage(target);
+	      return;
+	    }
+	    if(state.pdfDoc){
+	      if(state.continuousMode)renderContinuousPdf();
+	      else renderPage(target);
+	    }
 	  }
 
 	  function sectionPage(sec){
@@ -2035,10 +2051,7 @@ var PDFKV = (function(){
     if(!state.sectionStates[sec.id])
       state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
 	    // Navigate to page in PDF
-	    if(sec.page&&state.pdfDoc&&!opts.skipPageRender){
-	      if(state.continuousMode)scrollToContinuousPage(sec.page);
-	      else renderPage(sec.page);
-	    }
+	    if(sec.page&&!opts.skipPageRender)openSectionPage(sec);
     var qp=el('q-panel');if(qp){qp.style.display='flex';qp.classList.remove('hidden');}
     var lbl=el('current-sec-label');if(lbl)lbl.textContent=sec.name;
     // Open this topic
