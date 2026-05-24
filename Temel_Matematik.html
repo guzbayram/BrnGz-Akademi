@@ -891,7 +891,7 @@ var PDFKV = (function(){
   var state = {
     pdfDoc:null, currentPage:1, totalPages:0, scale:1.5, rendering:false, autoFit:true,
     continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null, pendingOpenPage:null,
-    pageScrollAcc:0, touchStartY:null, isPageAutoSync:false,
+    pageScrollAcc:0, touchStartY:null, isPageAutoSync:false, manualSectionLockUntil:0,
     drawEnabled:true, drawTool:'pen', drawColor:'#1a1a2e', drawSize:2,
     isDrawing:false, lastX:0, lastY:0, pageDrawings:{},
     currentTab:'hocan', currentSection:null, gunFilter:0,
@@ -1469,6 +1469,7 @@ var PDFKV = (function(){
 	  }
 	  function syncSectionToPage(pageNum){
 	    if(state.isPageAutoSync)return;
+	    if(state.currentSection&&sectionPage(state.currentSection.sec)===pageNum&&Date.now()<state.manualSectionLockUntil)return;
 	    var match=findSectionForPage(pageNum);
 	    if(!match)return;
 	    if(state.currentSection&&state.currentSection.id===match.sec.id)return;
@@ -2048,6 +2049,7 @@ var PDFKV = (function(){
 	  function selectSection(sec,tabName,_isAutoRestore){
 	    var opts=arguments[3]||{};
 	    state.currentSection={id:sec.id,tab:tabName,sec:sec};
+	    if(!_isAutoRestore&&!opts.skipPageRender)state.manualSectionLockUntil=Date.now()+1800;
     if(!state.sectionStates[sec.id])
       state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
 	    // Navigate to page in PDF
