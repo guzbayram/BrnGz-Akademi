@@ -1476,7 +1476,10 @@ var PDFKV = (function(){
 	    if(state.currentSection&&sectionPage(state.currentSection.sec)===pageNum&&Date.now()<state.manualSectionLockUntil)return;
 	    var match=findSectionForPage(pageNum);
 	    if(!match)return;
-	    if(state.currentSection&&state.currentSection.id===match.sec.id)return;
+	    if(state.currentSection&&state.currentSection.id===match.sec.id){
+	      renderSectionQuestions(match.sec);
+	      return;
+	    }
 	    state.isPageAutoSync=true;
 	    selectSection(match.sec,match.tab,true,{skipPageRender:true});
 	    state.isPageAutoSync=false;
@@ -2230,14 +2233,27 @@ var PDFKV = (function(){
         }
       }
     },0);
-    if(sec.type==='mcq')renderMcqSection(sec);
-    else renderTextSection(sec);
-    updateQNav();
+    renderSectionQuestions(sec);
     if(!_isAutoRestore){
       state._posSavedManually=true;
       try{localStorage.setItem(_posKey(),JSON.stringify({sectionId:sec.id,tab:tabName}));}catch(e){}
       if(typeof window._savePos==='function')window._savePos(sec.id,tabName);
     }
+  }
+
+  function renderSectionQuestions(sec){
+    if(!sec)return;
+    if(!state.sectionStates[sec.id])
+      state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
+    var st=state.sectionStates[sec.id];
+    var qcount=sec.type==='mcq'?(sec.questionCount||Object.keys(sec.correctAnswers||{}).length):(sec.questions||[]).length;
+    if(!qcount)st.cur=0;
+    else if(st.cur<0||st.cur>=qcount)st.cur=0;
+    var qp=el('q-panel');if(qp){qp.style.display='flex';qp.classList.remove('hidden');}
+    var lbl=el('current-sec-label');if(lbl)lbl.textContent=sec.name;
+    if(sec.type==='mcq')renderMcqSection(sec);
+    else renderTextSection(sec);
+    updateQNav();
   }
 
   /* ── TEXT SECTION ── */
