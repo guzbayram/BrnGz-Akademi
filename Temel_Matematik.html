@@ -1446,7 +1446,7 @@ var PDFKV = (function(){
 	    var out=[];
 	    if(!state.sections)return out;
 	    ['hocan','ara','test'].forEach(function(tab){
-	      (state.sections[tab]||[]).forEach(function(sec){out.push({tab:tab,sec:sec,page:sectionPage(sec)});});
+	      (state.sections[tab]||[]).forEach(function(sec){out.push({tab:tab,sec:sec,page:sectionPage(sec),flowOrder:sectionFlowOrder(sec,tab)});});
 	    });
 	    return out.filter(function(x){return x.page&&!isNaN(x.page);});
 	  }
@@ -1457,8 +1457,8 @@ var PDFKV = (function(){
 	    if(exact.length){
 	      var order={ara:0,hocan:1,test:2};
 	      exact.sort(function(a,b){
-	        var ao=Object.prototype.hasOwnProperty.call(order,a.tab)?order[a.tab]:9;
-	        var bo=Object.prototype.hasOwnProperty.call(order,b.tab)?order[b.tab]:9;
+	        var ao=a.flowOrder!=null?a.flowOrder:(Object.prototype.hasOwnProperty.call(order,a.tab)?order[a.tab]:9);
+	        var bo=b.flowOrder!=null?b.flowOrder:(Object.prototype.hasOwnProperty.call(order,b.tab)?order[b.tab]:9);
 	        return ao-bo;
 	      });
 	      return exact[0];
@@ -1910,6 +1910,23 @@ var PDFKV = (function(){
     s10_j_ax_2_bx_c_a_1_21:210,
     s10_k_rasyonel_i_fadelerin_sadel:211
   };
+  var SECTION_FLOW_ORDER={
+    s1_a___toplama:201,
+    h1_hocan_anlats_n_2_____karm:202,
+    h2_hocan_anlats_n_2___d_n___:2501,
+    s2_e___tam_say_l____bile_ik:2502,
+    s2_f___bile_ik___tam_say_l_:2503,
+    h2_hocan_anlats_n_3___geni_l:2504
+  };
+
+  function sectionFlowOrder(sec,tab){
+    if(!sec)return null;
+    if(Object.prototype.hasOwnProperty.call(SECTION_FLOW_ORDER,sec.id))return SECTION_FLOW_ORDER[sec.id];
+    var page=sectionPage(sec)||99999;
+    var order={ara:0,hocan:1,test:2};
+    var tabOrder=Object.prototype.hasOwnProperty.call(order,tab)?order[tab]:9;
+    return page*100+tabOrder;
+  }
 
   function initSections(){
     var base=state.customSections||DEFAULT_SECTIONS;
@@ -1919,6 +1936,7 @@ var PDFKV = (function(){
         if(Object.prototype.hasOwnProperty.call(SECTION_PAGE_FIXES,sec.id)){
           sec.page=SECTION_PAGE_FIXES[sec.id];
         }
+        sec.flowOrder=sectionFlowOrder(sec,tab);
       });
     });
     state.gunStats={};
@@ -2042,6 +2060,9 @@ var PDFKV = (function(){
         flowItems.sort(function(a,b){
           var ap=a.sec.page||99999,bp=b.sec.page||99999;
           if(ap!==bp)return ap-bp;
+          var afo=a.sec.flowOrder!=null?a.sec.flowOrder:sectionFlowOrder(a.sec,a.tab);
+          var bfo=b.sec.flowOrder!=null?b.sec.flowOrder:sectionFlowOrder(b.sec,b.tab);
+          if(afo!==bfo)return afo-bfo;
           if(a.cat.order!==b.cat.order)return a.cat.order-b.cat.order;
           return a.catIndex-b.catIndex;
         });
