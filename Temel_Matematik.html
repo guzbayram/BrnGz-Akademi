@@ -2000,6 +2000,12 @@ var PDFKV = (function(){
           item.sec.scrollRatio=i===1?0.08:Math.min(0.82,0.52+((i-2)*0.18));
           return;
         }
+        if(i>0&&item.tab==='hocan'&&group[0].tab==='ara'){
+          var hocanIndex=0;
+          for(var j=1;j<=i;j++)if(group[j].tab==='hocan')hocanIndex++;
+          item.sec.scrollRatio=hocanIndex===1?0.08:Math.min(0.82,0.52+((hocanIndex-2)*0.18));
+          return;
+        }
         item.sec.scrollRatio=0.04+(maxRatio-0.04)*(i/(group.length-1));
       });
     });
