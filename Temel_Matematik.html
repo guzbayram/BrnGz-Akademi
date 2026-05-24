@@ -3198,6 +3198,9 @@ var PDFKV = (function(){
           } catch(e) {
             console.warn('[Offline] İstatistikler kuyruğa alındı, internet gelince gönderilecek.');
           }
+        } catch(e) {
+          console.warn('[Stats] Kaydetme hazırlığı başarısız:', e);
+        }
       }, 2000);
     };
 
