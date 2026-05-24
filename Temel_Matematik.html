@@ -1331,7 +1331,10 @@ var PDFKV = (function(){
 	      if(d<bestDist){bestDist=d;best=parseInt(p);}
 	    });
 	    if(!best)return;
-	    if(!force&&best===state.currentPage)return;
+	    if(!force&&best===state.currentPage){
+	      syncSectionToPage(best);
+	      return;
+	    }
 	    state.currentPage=best;
 	    updatePageNav();
 	    Object.keys(state.pageShells).forEach(function(p){state.pageShells[p].classList.toggle('is-current',parseInt(p)===best);});
@@ -1434,11 +1437,8 @@ var PDFKV = (function(){
 	  function findSectionForPage(pageNum){
 	    var list=allSectionsWithTabs();
 	    if(!list.length)return null;
-	    var currentId=state.currentSection&&state.currentSection.id;
 	    var exact=list.filter(function(x){return x.page===pageNum;});
 	    if(exact.length){
-	      var curExact=exact.find(function(x){return x.sec.id===currentId;});
-	      if(curExact)return curExact;
 	      var order={ara:0,hocan:1,test:2};
 	      exact.sort(function(a,b){return (order[a.tab]||9)-(order[b.tab]||9);});
 	      return exact[0];
