@@ -848,6 +848,7 @@ var PDFKV = (function(){
 
   var state = {
     pdfDoc:null, currentPage:1, totalPages:0, scale:1.5, rendering:false, autoFit:true,
+    pageScrollAcc:0, touchStartY:null, isPageAutoSync:false,
     drawEnabled:true, drawTool:'pen', drawColor:'#1a1a2e', drawSize:2,
     isDrawing:false, lastX:0, lastY:0, pageDrawings:{},
     currentTab:'hocan', currentSection:null, gunFilter:0,
@@ -1120,10 +1121,11 @@ var PDFKV = (function(){
 
         // sb-upload-zone removed
         var sta=el('sb-tabs-area');if(sta){sta.classList.remove('hidden');sta.classList.add('flex');}var sdt=el('sb-default-tree');if(sdt)sdt.classList.add('hidden');
-        initSections();
-        renderPage(1);
-        initDrawCanvas();
-        updatePageNav();
+	        initSections();
+	        renderPage(1);
+	        initDrawCanvas();
+	        initPageScrollNavigation();
+	        updatePageNav();
         renderTopicTree();
         renderProgressCard();
       }).catch(function(err){alert('PDF yüklenirken hata: '+err.message);});
@@ -1177,15 +1179,16 @@ var PDFKV = (function(){
           state.cssScale=1; state.panX=0; state.panY=0;
           if(typeof applyTransform==='function') setTimeout(applyTransform,30);
           else if(pc){pc.style.transform='translate(0,0) scale(1)';}
-          state.rendering=false; state.currentPage=num;
-          updatePageNav(); restoreDrawing(num);
-          /* Canlı izleme: sayfa değişimini bildir */
-          document.dispatchEvent(new CustomEvent('pdfPageChanged', {detail:{page:num}}));
-          if(typeof window._liveNotifyPage==='function') window._liveNotifyPage(num);
-        });
-      });
-    });
-  }
+	          state.rendering=false; state.currentPage=num;
+	          updatePageNav(); restoreDrawing(num);
+	          /* Canlı izleme: sayfa değişimini bildir */
+	          document.dispatchEvent(new CustomEvent('pdfPageChanged', {detail:{page:num}}));
+	          if(typeof window._liveNotifyPage==='function') window._liveNotifyPage(num);
+	          syncSectionToPage(num);
+	        });
+	      });
+	    });
+	  }
 
   function saveCurrentDrawing(){
     var c=el('draw-canvas');if(!c)return;
@@ -1210,13 +1213,80 @@ var PDFKV = (function(){
     if(np<1||np>state.totalPages)return;
     renderPage(np);
   }
-  function jumpToPage(v){
-    var n=parseInt(v);
-    if(isNaN(n)||n<1||n>state.totalPages)return;
-    renderPage(n);
-  }
+	  function jumpToPage(v){
+	    var n=parseInt(v);
+	    if(isNaN(n)||n<1||n>state.totalPages)return;
+	    renderPage(n);
+	  }
 
-  /* ── DRAW CANVAS ── */
+	  function sectionPage(sec){
+	    return sec&&sec.page?parseInt(sec.page):null;
+	  }
+	  function allSectionsWithTabs(){
+	    var out=[];
+	    if(!state.sections)return out;
+	    ['hocan','ara','test'].forEach(function(tab){
+	      (state.sections[tab]||[]).forEach(function(sec){out.push({tab:tab,sec:sec,page:sectionPage(sec)});});
+	    });
+	    return out.filter(function(x){return x.page&&!isNaN(x.page);});
+	  }
+	  function findSectionForPage(pageNum){
+	    var list=allSectionsWithTabs();
+	    if(!list.length)return null;
+	    var currentId=state.currentSection&&state.currentSection.id;
+	    var exact=list.filter(function(x){return x.page===pageNum;});
+	    if(exact.length){
+	      var curExact=exact.find(function(x){return x.sec.id===currentId;});
+	      if(curExact)return curExact;
+	      var order={ara:0,hocan:1,test:2};
+	      exact.sort(function(a,b){return (order[a.tab]||9)-(order[b.tab]||9);});
+	      return exact[0];
+	    }
+	    var prev=list.filter(function(x){return x.page<=pageNum;});
+	    if(prev.length){
+	      prev.sort(function(a,b){return b.page-a.page;});
+	      return prev[0];
+	    }
+	    list.sort(function(a,b){return a.page-b.page;});
+	    return list[0];
+	  }
+	  function syncSectionToPage(pageNum){
+	    if(state.isPageAutoSync)return;
+	    var match=findSectionForPage(pageNum);
+	    if(!match)return;
+	    if(state.currentSection&&state.currentSection.id===match.sec.id)return;
+	    state.isPageAutoSync=true;
+	    selectSection(match.sec,match.tab,true,{skipPageRender:true});
+	    state.isPageAutoSync=false;
+	  }
+	  function initPageScrollNavigation(){
+	    var area=el('pdf-scroll');
+	    if(!area||area.dataset.pageScrollNav==='1')return;
+	    area.dataset.pageScrollNav='1';
+	    area.addEventListener('wheel',function(e){
+	      if(!state.pdfDoc||state.rendering)return;
+	      if(Math.abs(e.deltaY)<Math.abs(e.deltaX))return;
+	      e.preventDefault();
+	      state.pageScrollAcc+=(e.deltaY||0);
+	      if(Math.abs(state.pageScrollAcc)<90)return;
+	      var dir=state.pageScrollAcc>0?1:-1;
+	      state.pageScrollAcc=0;
+	      goPage(dir);
+	    },{passive:false});
+	    area.addEventListener('touchstart',function(e){
+	      state.touchStartY=e.touches&&e.touches[0]?e.touches[0].clientY:null;
+	    },{passive:true});
+	    area.addEventListener('touchmove',function(e){
+	      if(state.touchStartY==null||!e.touches||!e.touches[0]||state.rendering)return;
+	      var dy=state.touchStartY-e.touches[0].clientY;
+	      if(Math.abs(dy)<48)return;
+	      e.preventDefault();
+	      state.touchStartY=e.touches[0].clientY;
+	      goPage(dy>0?1:-1);
+	    },{passive:false});
+	  }
+
+	  /* ── DRAW CANVAS ── */
   function initDrawCanvas(){
     var c=el('draw-canvas');if(!c)return;
     var scrollEl=el('zoom-wrapper');
@@ -1761,12 +1831,13 @@ var PDFKV = (function(){
     var fid=sessionStorage.getItem('dd_fid')||new URLSearchParams(location.search).get('dd_fid')||location.pathname.split('/').pop().replace('.html','');
     return 'dd_pos_'+uid+'_'+fid;
   }
-  function selectSection(sec,tabName,_isAutoRestore){
-    state.currentSection={id:sec.id,tab:tabName,sec:sec};
+	  function selectSection(sec,tabName,_isAutoRestore){
+	    var opts=arguments[3]||{};
+	    state.currentSection={id:sec.id,tab:tabName,sec:sec};
     if(!state.sectionStates[sec.id])
       state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
-    // Navigate to page in PDF
-    if(sec.page&&state.pdfDoc)renderPage(sec.page);
+	    // Navigate to page in PDF
+	    if(sec.page&&state.pdfDoc&&!opts.skipPageRender)renderPage(sec.page);
     var qp=el('q-panel');if(qp){qp.style.display='flex';qp.classList.remove('hidden');}
     var lbl=el('current-sec-label');if(lbl)lbl.textContent=sec.name;
     // Open this topic
@@ -2724,7 +2795,7 @@ var PDFKV = (function(){
     var sta=el('sb-tabs-area');if(sta){sta.classList.remove('hidden');sta.classList.add('flex');}
     var sdt=el('sb-default-tree');if(sdt)sdt.classList.add('hidden');
     var cpb=el('btn-change-pdf');if(cpb)cpb.style.display='';
-    initSections();renderPage(1);initDrawCanvas();updatePageNav();renderTopicTree();renderProgressCard();
+	    initSections();renderPage(1);initDrawCanvas();initPageScrollNavigation();updatePageNav();renderTopicTree();renderProgressCard();
     // Son bölümü önce localStorage'dan (hızlı), sonra Firestore'dan geri yükle
     setTimeout(function(){
       try{
