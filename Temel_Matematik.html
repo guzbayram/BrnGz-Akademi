@@ -886,7 +886,7 @@ var PDFKV = (function(){
   var state = {
     pdfDoc:null, currentPage:1, totalPages:0, scale:1.5, rendering:false, autoFit:true,
     continuousMode:true, pageShells:{}, pageCanvases:{}, renderedPages:{}, pageObserver:null, scrollSyncTimer:null, pendingOpenPage:null, pendingOpenSectionId:null,
-    pageScrollAcc:0, touchStartY:null, isPageAutoSync:false, manualSectionLockUntil:0,
+    pageScrollAcc:0, touchStartY:null, isPageAutoSync:false, manualSectionLockUntil:0, scrollSyncPausedUntil:0,
     drawEnabled:true, drawTool:'pen', drawColor:'#1a1a2e', drawSize:2,
     isDrawing:false, lastX:0, lastY:0, pageDrawings:{},
     currentTab:'hocan', currentSection:null, gunFilter:0,
@@ -1310,6 +1310,7 @@ var PDFKV = (function(){
 	    },{root:cont,rootMargin:'900px 0px',threshold:0.01});
 	    Object.keys(state.pageShells).forEach(function(p){state.pageObserver.observe(state.pageShells[p]);});
 	    cont.onscroll=function(){
+	      if(Date.now()<state.scrollSyncPausedUntil)return;
 	      clearTimeout(state.scrollSyncTimer);
 	      state.scrollSyncTimer=setTimeout(function(){setCurrentPageFromScroll(false);},60);
 	    };
@@ -1345,9 +1346,17 @@ var PDFKV = (function(){
 	    state.pendingOpenSectionId=null;
 	    renderContinuousPage(num);
 	    var ratio=sectionScrollRatio(sectionId);
-	    var top=Math.max(0,shell.offsetTop+(shell.offsetHeight*ratio)-24);
-	    cont.scrollTo({top:top,behavior:behavior||'smooth'});
-	    setTimeout(function(){setCurrentPageFromScroll(true);},350);
+	    state.scrollSyncPausedUntil=Date.now()+1600;
+	    state.manualSectionLockUntil=Date.now()+1600;
+	    function targetTop(){return Math.max(0,shell.offsetTop+(shell.offsetHeight*ratio)-Math.min(cont.clientHeight*0.14,110));}
+	    function applyScroll(){
+	      cont.scrollTop=targetTop();
+	    }
+	    applyScroll();
+	    setTimeout(applyScroll,80);
+	    setTimeout(applyScroll,240);
+	    setTimeout(function(){applyScroll();setCurrentPageFromScroll(true);},520);
+	    setTimeout(function(){state.scrollSyncPausedUntil=0;},1700);
 	  }
 	  function initContinuousDrawCanvas(c,pageNum){
 	    if(!c||c.dataset.drawInit==='1')return;
@@ -1844,7 +1853,7 @@ var PDFKV = (function(){
     s1_a___toplama:2,
     s1_b_____karma:4,
     s1_d_____karma_kar___k:5,
-    s1_f____arpma_kar___k:8,
+    s1_f____arpma_kar___k:7,
     s1_h___b_lme:9,
     s1_i____s:12,
     s1_j___i__lem__nceli_i:13,
@@ -1928,7 +1937,11 @@ var PDFKV = (function(){
   var SECTION_SCROLL_RATIOS={
     h1_hocan_anlats_n_2_____karm:0.72,
     h1_hocan_anlats_n_4___b_lme:0.05,
+    s1_c___i__aret:0.56,
+    s1_d_____karma_kar___k:0.14,
+    s1_f____arpma_kar___k:0.68,
     s1_g____arpma_seriler:0.45,
+    s1_j___i__lem__nceli_i:0.14,
     s1_k___de_i_ken__x_5__y__3_:0.05,
     s2_f___bile_ik___tam_say_l_:0.58,
     h2_hocan_anlats_n_3___geni_l:0.05,
@@ -2335,7 +2348,7 @@ var PDFKV = (function(){
   function renderTextQ(sec,st){
     var q=sec.questions[st.cur];if(!q)return;
     el('q-num').textContent='S'+(st.cur+1);
-    el('q-label').textContent=q.soru||'Soru '+(st.cur+1);
+    el('q-label').innerHTML=formatQuestionText(q.soru||'Soru '+(st.cur+1));
     var isDone=!!st.correct[st.cur];
     var inp=el('ans-input'),chk=el('check-btn'),sab=el('show-ans-btn');
     if(inp){inp.disabled=isDone;inp.value=isDone?q.cevap:'';inp.style.borderColor=isDone?'#10b981':'#e2e8f0';inp.style.background=isDone?'#f0fdf4':'#f8fafc';}
@@ -2345,6 +2358,18 @@ var PDFKV = (function(){
     var hasWrong=att.some(function(a){return !a;});
     if(sab){if(hasWrong&&!isDone){sab.disabled=false;sab.style.background='#fff1f2';sab.style.borderColor='#fecdd3';sab.style.color='#e11d48';sab.style.cursor='pointer';}else{sab.disabled=true;sab.style.background='#f8fafc';sab.style.borderColor='#e2e8f0';sab.style.color='#cbd5e1';sab.style.cursor='default';}}
     renderAttempts(st);renderDots(sec,st);updateQNav();
+  }
+
+  function formatQuestionText(text){
+    var esc=String(text).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});
+    return esc
+      .replace(/([A-Za-zÇĞİÖŞÜçğıöşü0-9)\]])\^\(([^)]+)\)/g,function(_,base,exp){return base+'<sup>'+toSuperscript('('+exp+')')+'</sup>';})
+      .replace(/([A-Za-zÇĞİÖŞÜçğıöşü0-9)\]])\^(-?\d+|[A-Za-zÇĞİÖŞÜçğıöşü])/g,function(_,base,exp){return base+'<sup>'+toSuperscript(exp)+'</sup>';});
+  }
+
+  function toSuperscript(value){
+    var map={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','/':'⁄','n':'ⁿ','i':'ⁱ'};
+    return String(value).split('').map(function(ch){return map[ch]||ch;}).join('');
   }
 
   /* ── MCQ SECTION ── */
