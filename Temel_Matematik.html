@@ -2171,7 +2171,6 @@ var PDFKV = (function(){
           btn.onmouseleave=function(){if(!isActive)this.style.background='rgba(255,255,255,.5)';};
           btn.onclick=(function(s,t){return function(){selectSection(s,t);};})(sec,item.tab);
           btn.dataset.sectionId=sec.id;
-          var numBadge='<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:'+(isActive?'rgba(255,255,255,.25)':cat.bg)+';color:'+(isActive?'#fff':cat.color)+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;">'+(flowIndex+1)+'</span>';
           var typeText=(cat.label||'').toLocaleUpperCase('tr-TR');
           var topicTitle=sec.name||'';
           function navEsc(v){return String(v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
@@ -2214,7 +2213,6 @@ var PDFKV = (function(){
               +'</div>';
           }
           btn.innerHTML=
-            numBadge+
             '<div style="flex:1;min-width:0;">'+
               typeTag+
               '<div style="font-weight:750;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px;">'+navEsc(topicTitle)+'</div>'+
