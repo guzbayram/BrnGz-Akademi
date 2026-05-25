@@ -2188,14 +2188,15 @@ var PDFKV = (function(){
           var topicTitle=sec.name||'';
           function navEsc(v){return String(v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
           var letterMatch=topicTitle.match(/^([A-ZÇĞİÖŞÜI])\s*-\s*(.+)$/);
-          var hocanMatch=topicTitle.match(/^Hocan Anlatsın\s*\d+\s*-\s*(.+)$/i);
+          var hocanMatch=topicTitle.match(/^Hocan Anlatsın\s*(\d+)\s*-\s*(.+)$/i);
           var testMatch=topicTitle.match(/^Test\s*(\d+)\s*-\s*(.+)$/i);
           var firstLine=(flowIndex+1)+' - '+typeText;
           if(item.tab==='ara'&&letterMatch){
             firstLine+=' - '+letterMatch[1];
             topicTitle=letterMatch[2];
           }else if(item.tab==='hocan'&&hocanMatch){
-            topicTitle=hocanMatch[1];
+            firstLine+=' - '+hocanMatch[1];
+            topicTitle=hocanMatch[2];
           }else if(item.tab==='test'&&testMatch){
             firstLine+=' - '+testMatch[1];
             topicTitle=testMatch[2];
