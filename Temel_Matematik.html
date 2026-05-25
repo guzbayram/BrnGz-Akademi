@@ -1883,7 +1883,11 @@ var PDFKV = (function(){
     s4_g___denklem__iki_ad_ml__:81,
     s4_h___denklem__parantezli_:82,
     s4_i___denklem__karma__k_:82,
-    s4_i____k_k_verilmi_:83
+    s4_i____k_k_verilmi_:83,
+    s5_e___i_ki_bilinmeyenli___o:99,
+    s5_f___i_ki_bilinmeyenli_sis:102,
+    s6_a___say__do_rusunda_g_ste:111,
+    s7_k___mutlak_de_erli_e_itsi:144
   };
   var SECTION_FLOW_ORDER={
     s1_a___toplama:201,
@@ -2167,8 +2171,10 @@ var PDFKV = (function(){
           return a.catIndex-b.catIndex;
         });
 
+        var hocanRunning=0;
         flowItems.forEach(function(item,flowIndex){
           var sec=item.sec,cat=item.cat;
+          if(item.tab==='hocan')hocanRunning++;
           var isActive=state.currentSection&&state.currentSection.id===sec.id;
           var qcount=sec.type==='mcq'?(sec.questionCount||0):(sec.questions||[]).length;
           var st2=state.sectionStates[sec.id];
@@ -2197,6 +2203,8 @@ var PDFKV = (function(){
           }else if(item.tab==='hocan'&&hocanMatch){
             firstLine+=' - '+hocanMatch[1];
             topicTitle=hocanMatch[2];
+          }else if(item.tab==='hocan'){
+            firstLine+=' - '+hocanRunning;
           }else if(item.tab==='test'&&testMatch){
             firstLine+=' - '+testMatch[1];
             topicTitle=testMatch[2];
@@ -2308,6 +2316,10 @@ var PDFKV = (function(){
       }
     },0);
     renderSectionQuestions(sec);
+    if(!_isAutoRestore&&!opts.skipPageRender&&sec.page){
+      setTimeout(function(){openSectionPage(sec);},120);
+      setTimeout(function(){openSectionPage(sec);},620);
+    }
     if(!_isAutoRestore){
       state._posSavedManually=true;
       try{localStorage.setItem(_posKey(),JSON.stringify({sectionId:sec.id,tab:tabName}));}catch(e){}
