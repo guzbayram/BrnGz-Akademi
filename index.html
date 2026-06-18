@@ -544,24 +544,26 @@ function buildStudentHeatmap(daily){
 async function renderHome(){
   const el=$('tHome');
   el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
-  const snap=await getDoc(doc(db,'stats',CU.uid));
+  const [snap,userSnap]=await Promise.all([getDoc(doc(db,'stats',CU.uid)),getDoc(doc(db,'users',CU.uid))]);
   const data=snap.exists()?snap.data():{};
+  const allowed=userSnap.exists()&&Array.isArray(userSnap.data().allowedFasikul)?userSnap.data().allowedFasikul:null;
+  const visibleFas=allowed?FASIKUL.filter(f=>allowed.includes(f.id)):FASIKUL;
   let tc=0,tw=0,tm=0,tsv=0;
-  FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;tsv+=fs.shown||0;});
+  visibleFas.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;tsv+=fs.shown||0;});
   const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
   const daily=data.daily||{};
   const hm=buildStudentHeatmap(daily);
 
-  const subjects=['Matematik','Fizik'];
+  const subjects=['Matematik','Fizik'].filter(sub=>visibleFas.some(f=>f.s.toLowerCase().includes(sub.toLowerCase())));
   const subjectStats=subjects.map(sub=>{
-    const fs=FASIKUL.filter(f=>f.s.toLowerCase().includes(sub.toLowerCase()));
+    const fs=visibleFas.filter(f=>f.s.toLowerCase().includes(sub.toLowerCase()));
     const c=fs.reduce((a,f)=>{const d=data[f.id]||{};return a+(d.correct||0);},0);
     const w=fs.reduce((a,f)=>{const d=data[f.id]||{};return a+(d.wrong||0);},0);
     const total=c+w;
     return{name:sub,pct:total?Math.round(c/total*100):0};
   });
 
-  const fasStats=FASIKUL.map(f=>{
+  const fasStats=visibleFas.map(f=>{
     const fs=data[f.id]||{};
     const c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0,sv=fs.shown||0;
     const total=c+w;
@@ -638,7 +640,7 @@ async function renderHome(){
       <div class="app-card-title"><span class="material-symbols-outlined">auto_stories</span>Fasikül Durumu</div>
       <div class="app-fas-list" style="flex:1;overflow-y:auto;">
         ${fasStats.map(f=>`
-        <div class="app-fas-item" onclick="openFrame('${f.f}','${f.t}',{uid:'${CU.uid}',name:'${CP.name}',role:'student',fid:'${f.id}',tid:'${CP.teacherId||''}'})">
+        <div class="app-fas-item" onclick="openFrame('${f.f}','${f.t}',{uid:'${CU.uid}',name:'${CP.name}',role:'student',fid:'${f.id}',tid:'${CP.teacherId||''}',resetAt:${data[f.id+'_resetAt']||0}})">
           <div class="app-fas-icon"><span class="material-symbols-outlined">menu_book</span></div>
           <div style="flex:1;min-width:0;">
             <div style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--tx);line-height:1.3;">${f.t}</div>
