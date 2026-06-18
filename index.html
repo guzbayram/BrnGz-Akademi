@@ -351,6 +351,7 @@ const FASIKUL=[
   {id:'f7',t:'İş-Güç-Enerji',s:'Fizik 10. Sınıf',f:'is-guc-enerji.html',c:'green',n:'7'},
   {id:'f8',t:'Temel Matematik',s:'Matematik',f:'Temel_Matematik.html',c:'purple',n:'8'}
 ];
+const FASIKUL_ASSET_VERSION='20260619-f2-scope';
 
 let CU=null,CP=null;
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
@@ -379,7 +380,8 @@ window.openFrame=(url,title,params={})=>{
     dd_fid:params.fid||'',
     dd_role:params.role||'',
     dd_name:params.name||'',
-    dd_tid:params.tid||''
+    dd_tid:params.tid||'',
+    v:FASIKUL_ASSET_VERSION
   });
   // Son açılan fasikülü kaydet (uygulama kapatılıp açılınca hatırlatmak için)
   if(params.uid&&params.fid) try{localStorage.setItem('dd_last_'+params.uid,params.fid);}catch(e){}
