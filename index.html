@@ -351,7 +351,7 @@ const FASIKUL=[
   {id:'f7',t:'İş-Güç-Enerji',s:'Fizik 10. Sınıf',f:'is-guc-enerji.html',c:'green',n:'7'},
   {id:'f8',t:'Temel Matematik',s:'Matematik',f:'Temel_Matematik.html',c:'purple',n:'8'}
 ];
-const FASIKUL_ASSET_VERSION='20260619-f2-scope';
+const FASIKUL_ASSET_VERSION='20260619-f2-reset';
 
 let CU=null,CP=null;
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
@@ -381,6 +381,7 @@ window.openFrame=(url,title,params={})=>{
     dd_role:params.role||'',
     dd_name:params.name||'',
     dd_tid:params.tid||'',
+    dd_reset_at:params.resetAt||'',
     v:FASIKUL_ASSET_VERSION
   });
   // Son açılan fasikülü kaydet (uygulama kapatılıp açılınca hatırlatmak için)
@@ -726,7 +727,7 @@ async function renderFas(){
         '</div>'+
         '<button class="fc-btn">▶ '+(isLast?'Kaldığımdan Devam Et':started?'Devam Et':'Başla')+'</button>'+
       '</div>';
-    card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||''});
+    card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||'',resetAt:us[f.id+'_resetAt']||0});
     g.appendChild(card);
   });
 }
