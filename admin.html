@@ -843,7 +843,6 @@ window.doReset=async()=>{
     });
     await setDoc(ref,updated);
     closeModal('mReset');rUID=null;
-    await renderKullanici();
     alert('İstatistikler sıfırlandı. Öğrenci fasikülü açtığında fasikül içi kayıtlar da temizlenecek.');
   }catch(e){alert('Hata: '+e.message);}
 };
