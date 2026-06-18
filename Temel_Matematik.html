@@ -900,6 +900,34 @@ var PDFKV = (function(){
 
   function el(id){ return document.getElementById(id); }
 
+  function normalizeQuestionState(st){
+    if(!st)return st;
+    st.correct=st.correct||{};
+    st.attempts=st.attempts||{};
+    st.selectedMcq=st.selectedMcq||{};
+    st.locked=st.locked||{};
+    st.shown=st.shown||{};
+    st.submitted=st.submitted||{};
+    Object.keys(st.attempts).forEach(function(k){
+      var att=st.attempts[k]||[];
+      var firstResult=att.find(function(v){return v===true||v===false;});
+      if(firstResult===true||firstResult===false){
+        st.locked[k]=true;
+        st.correct[k]=firstResult===true;
+      }else if(st.correct[k]){
+        st.locked[k]=true;
+      }
+      if(att.indexOf('shown')>=0)st.shown[k]=true;
+    });
+    return st;
+  }
+
+  function firstQuestionResult(st,k){
+    var att=(st&&st.attempts&&st.attempts[k])||[];
+    for(var i=0;i<att.length;i++)if(att[i]===true||att[i]===false)return att[i];
+    return null;
+  }
+
   /* ── AUDIO ── */
   function playSuccess(){
     try{var c=new(window.AudioContext||window.webkitAudioContext)();
@@ -2111,7 +2139,8 @@ var PDFKV = (function(){
     state._topicsInitialized=false;
     state.sections.hocan.concat(state.sections.ara).concat(state.sections.test).forEach(function(sec){
       if(!state.sectionStates[sec.id])
-        state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
+        state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{},locked:{},shown:{},submitted:{}};
+      normalizeQuestionState(state.sectionStates[sec.id]);
     });
     var allSecs=state.sections.hocan.concat(state.sections.ara).concat(state.sections.test);
     var maxGun=allSecs.reduce(function(m,s){return Math.max(m,s.gun||1);},1);
@@ -2243,7 +2272,7 @@ var PDFKV = (function(){
           var isActive=state.currentSection&&state.currentSection.id===sec.id;
           var qcount=sec.type==='mcq'?(sec.questionCount||0):(sec.questions||[]).length;
           var st2=state.sectionStates[sec.id];
-          var done=st2?Object.keys(st2.correct||{}).length:0;
+          var done=st2?Object.keys(normalizeQuestionState(st2).locked||{}).filter(function(k){return st2.locked[k];}).length:0;
           var pct=qcount>0?Math.round(done/qcount*100):0;
           var btn=document.createElement('button');
           btn.style.cssText=
@@ -2280,12 +2309,13 @@ var PDFKV = (function(){
           // Doğru / Yanlış / Çözüm Görüldü hesapla
           var secCorrect=0,secWrong=0,secShown=0;
           if(st2){
-            Object.keys(st2.correct||{}).forEach(function(k){
-              var att=(st2.attempts||{})[k]||[];
-              if(att.indexOf('shown')>=0)secShown++;else secCorrect++;
-            });
+            normalizeQuestionState(st2);
             Object.keys(st2.attempts||{}).forEach(function(k){
-              secWrong+=((st2.attempts[k]||[]).filter(function(v){return v===false;})).length;
+              var att=(st2.attempts||{})[k]||[];
+              var result=firstQuestionResult(st2,k);
+              if(result===true)secCorrect++;
+              else if(result===false)secWrong++;
+              if(att.indexOf('shown')>=0)secShown++;
             });
           }
           var statsRow='';
@@ -2334,7 +2364,7 @@ var PDFKV = (function(){
       var icon=sec.type==='mcq'?'quiz':(tabName==='hocan'?'school':'edit_square');
       var qcount=sec.type==='mcq'?(sec.questionCount||0):(sec.questions||[]).length;
       var st=state.sectionStates[sec.id];
-      var done=st?Object.keys(st.correct||{}).length:0;
+      var done=st?Object.keys(normalizeQuestionState(st).locked||{}).filter(function(k){return st.locked[k];}).length:0;
       var doneStr=done>0
         ?'<span style="color:'+(isActive?'rgba(255,255,255,0.9)':'var(--green)')+'">'+done+'/'+qcount+' ✓</span>'
         :'<span>'+qcount+' soru</span>';
@@ -2355,7 +2385,8 @@ var PDFKV = (function(){
 	    state.currentSection={id:sec.id,tab:tabName,sec:sec};
 	    if(!_isAutoRestore&&!opts.skipPageRender)state.manualSectionLockUntil=Date.now()+1800;
     if(!state.sectionStates[sec.id])
-      state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
+	  state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{},locked:{},shown:{},submitted:{}};
+	  normalizeQuestionState(state.sectionStates[sec.id]);
 	    // Navigate to page in PDF
 	    if(sec.page&&!opts.skipPageRender)openSectionPage(sec);
     var qp=el('q-panel');if(qp){qp.style.display='flex';qp.classList.remove('hidden');}
@@ -2395,8 +2426,8 @@ var PDFKV = (function(){
   function renderSectionQuestions(sec){
     if(!sec)return;
     if(!state.sectionStates[sec.id])
-      state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{}};
-    var st=state.sectionStates[sec.id];
+      state.sectionStates[sec.id]={cur:0,correct:{},attempts:{},selectedMcq:{},locked:{},shown:{},submitted:{}};
+    var st=normalizeQuestionState(state.sectionStates[sec.id]);
     var qcount=sec.type==='mcq'?(sec.questionCount||Object.keys(sec.correctAnswers||{}).length):(sec.questions||[]).length;
     if(!qcount)st.cur=0;
     else if(st.cur<0||st.cur>=qcount)st.cur=0;
@@ -2424,17 +2455,25 @@ var PDFKV = (function(){
     renderTextQ(sec,st);
   }
   function renderTextQ(sec,st){
+    normalizeQuestionState(st);
     var q=sec.questions[st.cur];if(!q)return;
     el('q-num').textContent='S'+(st.cur+1);
     el('q-label').innerHTML=formatQuestionText(q.soru||'Soru '+(st.cur+1));
-    var isDone=!!st.correct[st.cur];
+    var isCorrect=st.correct[st.cur]===true;
+    var isLocked=!!st.locked[st.cur];
+    var isShown=!!st.shown[st.cur]||(st.attempts[st.cur]||[]).indexOf('shown')>=0;
     var inp=el('ans-input'),chk=el('check-btn'),sab=el('show-ans-btn');
-    if(inp){inp.disabled=isDone;inp.value=isDone?q.cevap:'';inp.style.borderColor=isDone?'#10b981':'#e2e8f0';inp.style.background=isDone?'#f0fdf4':'#f8fafc';}
-    if(chk){chk.disabled=isDone;chk.textContent=isDone?'✓ Doğru':'KONTROL';}
-    // "Cevabı Gör" butonu: sadece en az 1 yanlış deneme varsa ve soru bitmemişse göster
+    if(inp){
+      inp.disabled=isLocked;
+      inp.value=isShown?q.cevap:(isLocked?(st.submitted[st.cur]||''):'');
+      inp.style.borderColor=(isCorrect||isShown)?'#10b981':(isLocked?'#f43f5e':'#e2e8f0');
+      inp.style.background=(isCorrect||isShown)?'#f0fdf4':(isLocked?'#fff1f2':'#f8fafc');
+    }
+    if(chk){chk.disabled=isLocked;chk.textContent=isCorrect?'✓ Doğru':(isShown?'Gösterildi':(isLocked?'✗ Yanlış':'KONTROL'));}
+    // "Cevabı Gör" sadece ilk kontrolü yanlış olan kilitli soruda kullanılabilir.
     var att=st.attempts[st.cur]||[];
-    var hasWrong=att.some(function(a){return !a;});
-    if(sab){if(hasWrong&&!isDone){sab.disabled=false;sab.style.background='#fff1f2';sab.style.borderColor='#fecdd3';sab.style.color='#e11d48';sab.style.cursor='pointer';}else{sab.disabled=true;sab.style.background='#f8fafc';sab.style.borderColor='#e2e8f0';sab.style.color='#cbd5e1';sab.style.cursor='default';}}
+    var firstResult=firstQuestionResult(st,st.cur);
+    if(sab){if(firstResult===false&&!isShown){sab.disabled=false;sab.style.background='#fff1f2';sab.style.borderColor='#fecdd3';sab.style.color='#e11d48';sab.style.cursor='pointer';}else{sab.disabled=true;sab.style.background='#f8fafc';sab.style.borderColor='#e2e8f0';sab.style.color='#cbd5e1';sab.style.cursor='default';}}
     renderAttempts(st);renderDots(sec,st);updateQNav();
   }
 
@@ -2458,10 +2497,11 @@ var PDFKV = (function(){
     renderMcqQ(sec,st);
   }
   function renderMcqQ(sec,st){
+    normalizeQuestionState(st);
     var qNum=st.cur+1;
     el('q-num').textContent='S'+qNum;
     el('q-label').textContent=qNum+'. Soru';
-    var isDone=!!st.correct[st.cur];
+    var isDone=!!st.locked[st.cur];
     var correctAns=sec.correctAnswers?sec.correctAnswers[qNum]:null;
     var selected=st.selectedMcq[st.cur];
     document.querySelectorAll('.mcq-btn').forEach(function(b){
@@ -2477,20 +2517,25 @@ var PDFKV = (function(){
   function selectMcq(btnEl){
     if(!state.currentSection)return;
     var sec=state.currentSection.sec,st=state.sectionStates[sec.id];
-    if(st.correct[st.cur])return;
+    normalizeQuestionState(st);
+    if(st.locked[st.cur])return;
     st.selectedMcq[st.cur]=btnEl.dataset.opt;
     document.querySelectorAll('.mcq-btn').forEach(function(b){b.classList.remove('selected');});
     btnEl.classList.add('selected');
     checkMcq(sec,st,btnEl.dataset.opt);
   }
   function checkMcq(sec,st,opt){
+    normalizeQuestionState(st);
+    if(st.locked[st.cur])return;
     var qNum=st.cur+1;
     var correctAns=sec.correctAnswers?sec.correctAnswers[qNum]:null;
     if(!st.attempts[st.cur])st.attempts[st.cur]=[];
     var ok=(opt===correctAns);
     st.attempts[st.cur].push(ok);
+    st.locked[st.cur]=true;
+    state.totalAnswered++;
     if(ok){
-      st.correct[st.cur]=true;state.totalCorrect++;state.totalAnswered++;
+      st.correct[st.cur]=true;state.totalCorrect++;
       if(state.gunStats[sec.gun])state.gunStats[sec.gun].correct++;
       playSuccess();showFlash();
       document.querySelectorAll('.mcq-btn').forEach(function(b){
@@ -2501,12 +2546,14 @@ var PDFKV = (function(){
         if(st.cur<getQTotal(sec)-1){st.cur++;renderMcqQ(sec,st);}
       },1400);
     } else {
-      state.totalWrong++;state.totalAnswered++;
+      st.correct[st.cur]=false;state.totalWrong++;
       playWrong();
-      var btn=document.querySelector('.mcq-btn[data-opt="'+opt+'"]');
-      if(btn){btn.classList.remove('selected');btn.classList.add('wrong-ans');
-        setTimeout(function(){btn.classList.remove('wrong-ans');},600);}
-      updateStats();renderAttempts(st);
+      document.querySelectorAll('.mcq-btn').forEach(function(b){
+        b.disabled=true;
+        if(b.dataset.opt===correctAns)b.classList.add('correct-ans');
+        else if(b.dataset.opt===opt)b.classList.add('wrong-ans');
+      });
+      updateStats();renderAttempts(st);renderDots(sec,st);renderProgressCard();
     }
   }
 
@@ -2516,15 +2563,19 @@ var PDFKV = (function(){
     var sec=state.currentSection.sec,st=state.sectionStates[sec.id];
     if(sec.type==='mcq')return;
     if(!sec.questions||!sec.questions.length)return;
-    var q=sec.questions[st.cur];if(!q||st.correct[st.cur])return;
+    normalizeQuestionState(st);
+    var q=sec.questions[st.cur];if(!q||st.locked[st.cur])return;
     var inp=el('ans-input');if(!inp)return;
     var uv=inp.value.trim().replace(/\s+/g,'').replace(/,/g,'.').toLowerCase();
     var cv=String(q.cevap).trim().replace(/\s+/g,'').replace(/,/g,'.').toLowerCase();
     if(!st.attempts[st.cur])st.attempts[st.cur]=[];
     var ok=(uv===cv);
     st.attempts[st.cur].push(ok);
+    st.submitted[st.cur]=inp.value.trim();
+    st.locked[st.cur]=true;
+    state.totalAnswered++;
     if(ok){
-      st.correct[st.cur]=true;state.totalCorrect++;state.totalAnswered++;
+      st.correct[st.cur]=true;state.totalCorrect++;
       if(state.gunStats[sec.gun])state.gunStats[sec.gun].correct++;
       inp.style.borderColor='#10b981';inp.style.background='#f0fdf4';
       playSuccess();showFlash();
@@ -2534,10 +2585,12 @@ var PDFKV = (function(){
         if(st.cur<sec.questions.length-1){st.cur++;renderTextQ(sec,st);}
       },1400);
     } else {
-      state.totalWrong++;state.totalAnswered++;
+      st.correct[st.cur]=false;state.totalWrong++;
       inp.style.borderColor='#f43f5e';inp.style.background='#fff1f2';
+      inp.disabled=true;
       setTimeout(function(){if(inp)inp.style.animation='';},500);
-      playWrong();updateStats();renderAttempts(st);renderDots(sec,st);inp.select();
+      playWrong();updateStats();renderAttempts(st);renderDots(sec,st);
+      el('check-btn').textContent='✗ Yanlış';el('check-btn').disabled=true;
       // Cevabı Gör butonunu göster
       var sab=el('show-ans-btn');if(sab){sab.disabled=false;sab.style.background='#fff1f2';sab.style.borderColor='#fecdd3';sab.style.color='#e11d48';sab.style.cursor='pointer';}
     }
@@ -2546,33 +2599,21 @@ var PDFKV = (function(){
   function hint(){
     if(!state.currentSection)return;
     var sec=state.currentSection.sec,st=state.sectionStates[sec.id];
+    normalizeQuestionState(st);
     if(sec.type==='mcq'){
       var qNum=st.cur+1,correctAns=sec.correctAnswers?sec.correctAnswers[qNum]:null;
-      if(!correctAns)return;
+      if(!correctAns||st.locked[st.cur])return;
       document.querySelectorAll('.mcq-btn').forEach(function(b){
         b.disabled=true;if(b.dataset.opt===correctAns)b.classList.add('correct-ans');
       });
-      st.correct[st.cur]=true;st.selectedMcq[st.cur]=correctAns;
-      if(!st.attempts[st.cur])st.attempts[st.cur]=[];st.attempts[st.cur].push(true);
+      st.locked[st.cur]=true;st.shown[st.cur]=true;st.selectedMcq[st.cur]=correctAns;
+      if(!st.attempts[st.cur])st.attempts[st.cur]=[];st.attempts[st.cur].push('shown');
+      state.totalShown++;
+      updateStats();
       renderAttempts(st);renderDots(sec,st);
       setTimeout(function(){if(st.cur<getQTotal(sec)-1){st.cur++;renderMcqQ(sec,st);}},1500);
     } else {
-      if(!sec.questions||!sec.questions.length)return;
-      var q=sec.questions[st.cur];if(!q||st.correct[st.cur])return;
-      var att=st.attempts[st.cur]||[];
-      if(att.length<2){
-        var hb=document.querySelector('.btn-hint');
-        if(hb){hb.textContent=att.length===0?'Önce dene!':(2-att.length)+' deneme daha';
-          setTimeout(function(){if(hb)hb.textContent='İpucu';},1500);}
-        return;
-      }
-      var inp=el('ans-input');
-      if(inp){inp.value=q.cevap;inp.style.borderColor='#10b981';inp.style.background='#f0fdf4';inp.disabled=true;}
-      st.correct[st.cur]=true;
-      if(!st.attempts[st.cur])st.attempts[st.cur]=[];st.attempts[st.cur].push(true);
-      el('check-btn').textContent='Gösterildi';el('check-btn').disabled=true;
-      renderAttempts(st);renderDots(sec,st);
-      setTimeout(function(){if(st.cur<sec.questions.length-1){st.cur++;renderTextQ(sec,st);}},1500);
+      showAnswer();
     }
   }
 
@@ -2581,12 +2622,15 @@ var PDFKV = (function(){
     if(!state.currentSection)return;
     var sec=state.currentSection.sec,st=state.sectionStates[sec.id];
     if(sec.type==='mcq')return;
-    var q=sec.questions[st.cur];if(!q||st.correct[st.cur])return;
+    normalizeQuestionState(st);
+    var q=sec.questions[st.cur];
+    if(!q||firstQuestionResult(st,st.cur)!==false||st.shown[st.cur])return;
     var inp=el('ans-input'),chk=el('check-btn'),sab=el('show-ans-btn');
     if(inp){inp.value=q.cevap;inp.style.borderColor='#10b981';inp.style.background='#f0fdf4';inp.disabled=true;}
-    st.correct[st.cur]=true;
     if(!st.attempts[st.cur])st.attempts[st.cur]=[];
     st.attempts[st.cur].push('shown');
+    st.shown[st.cur]=true;
+    st.locked[st.cur]=true;
     // Soru bazlı çözüm görme sayacı
     if(!st.peekCount)st.peekCount={};
     st.peekCount[st.cur]=(st.peekCount[st.cur]||0)+1;
@@ -2632,7 +2676,8 @@ var PDFKV = (function(){
     for(var i=0;i<total;i++){(function(idx){
       // Top dot-nav (existing)
       var d=document.createElement('button');
-      d.className='dot'+(idx===st.cur?' active':'')+(st.correct[idx]?' done':'');
+      var result=firstQuestionResult(st,idx);
+      d.className='dot'+(idx===st.cur?' active':'')+(result===true?' done':(result===false?' wrong':''));
       d.title='Soru '+(idx+1);
       d.onclick=function(){
         st.cur=idx;
@@ -2644,9 +2689,8 @@ var PDFKV = (function(){
       if(circles){
         var c=document.createElement('span');
         var att=st.attempts[idx]||[];
-        var isCorrect=!!st.correct[idx];
-        // A question is "wrong" if it has been attempted but not yet correct
-        var hasWrongAttempt=att.length>0&&att.some(function(a){return !a;})&&!isCorrect;
+        var isCorrect=firstQuestionResult(st,idx)===true;
+        var hasWrongAttempt=firstQuestionResult(st,idx)===false;
         var isCurrent=idx===st.cur;
         var cls='q-circle';
         if(isCorrect) cls+=' correct';
@@ -2673,11 +2717,14 @@ var PDFKV = (function(){
       dots.appendChild(d);
     });
     if(statusEl){
-      if(st.correct[st.cur]){
-        statusEl.textContent=att.length===1?'🌟 İlk denemede!':att.length+'. denemede doğru';
+      var result=firstQuestionResult(st,st.cur);
+      if(result===true){
+        statusEl.textContent='🌟 İlk denemede doğru';
         statusEl.style.color='var(--green)';
-      } else if(att.length>0){
-        statusEl.textContent=att.length+'. deneme';statusEl.style.color='var(--on-surface-muted)';
+      } else if(result===false){
+        statusEl.textContent=st.shown&&st.shown[st.cur]?'Yanlış · çözüm görüldü':'İlk deneme yanlış';statusEl.style.color='var(--on-surface-muted)';
+      } else if(st.shown&&st.shown[st.cur]){
+        statusEl.textContent='Çözüm görüldü';statusEl.style.color='var(--on-surface-muted)';
       } else statusEl.textContent='';
     }
   }
@@ -2698,7 +2745,7 @@ var PDFKV = (function(){
       allSecs.forEach(function(sec){
         tQ+=sec.type==='mcq'?(sec.questionCount||0):(sec.questions||[]).length;
         var st2=state.sectionStates[sec.id];
-        if(st2)tD+=Object.keys(st2.correct||{}).length;
+        if(st2)tD+=Object.keys(normalizeQuestionState(st2).locked||{}).filter(function(k){return st2.locked[k];}).length;
       });
       var badge=el('karne-badge');
       if(badge)badge.textContent='%'+(tQ>0?Math.round(tD/tQ*100):0);
@@ -3227,16 +3274,19 @@ var PDFKV = (function(){
 
       var st=state.sectionStates[sec.id];
       if(st){
-        var doneKeys=Object.keys(st.correct||{});
+        normalizeQuestionState(st);
+        var doneKeys=Object.keys(st.attempts||{}).filter(function(k){return firstQuestionResult(st,k)!==null;});
         doneKeys.forEach(function(k){
           var att=st.attempts[k]||[];
           var isShown=att.indexOf('shown')>=0;
-          var isFirstCorrect=att.length===1&&att[0]===true;
+          var result=firstQuestionResult(st,k);
           totalDone++;topicMap[topic].done++;
-          if(isShown){ totalShown++; }
-          else { totalCorrect++; topicMap[topic].correct++; }
-          /* Count wrong attempts */
-          att.forEach(function(a){if(a===false){totalWrong++;topicMap[topic].wrong++;}});
+          if(result===true){totalCorrect++;topicMap[topic].correct++;}
+          else if(result===false){totalWrong++;topicMap[topic].wrong++;}
+          if(isShown)totalShown++;
+        });
+        Object.keys(st.attempts||{}).forEach(function(k){
+          if(firstQuestionResult(st,k)===null&&(st.attempts[k]||[]).indexOf('shown')>=0)totalShown++;
         });
       }
     });
@@ -3428,18 +3478,19 @@ var PDFKV = (function(){
       var tc=0,tw=0;
       var ts=0;
       Object.keys(state.sectionStates).forEach(function(id){
-        var st=state.sectionStates[id];
-        tc+=Object.keys(st.correct||{}).filter(function(k){return st.correct[k];}).length;
+        var st=normalizeQuestionState(state.sectionStates[id]);
         Object.keys(st.attempts||{}).forEach(function(k){
           var att=st.attempts[k]||[];
-          tw+=att.filter(function(v){return v===false;}).length;
+          var result=firstQuestionResult(st,k);
+          if(result===true)tc++;
+          else if(result===false)tw++;
           if(att.indexOf('shown')>=0)ts++;
         });
       });
-      state.totalCorrect=tc; state.totalWrong=tw; state.totalAnswered=tc; state.totalShown=ts;
+      state.totalCorrect=tc; state.totalWrong=tw; state.totalAnswered=tc+tw; state.totalShown=ts;
       updateStats();
     },
-    _restoreAggregate:function(c,w,s){ state.totalCorrect=c; state.totalWrong=w; state.totalAnswered=c; state.totalShown=s||0; updateStats(); },
+    _restoreAggregate:function(c,w,s){ state.totalCorrect=c; state.totalWrong=w; state.totalAnswered=c+w; state.totalShown=s||0; updateStats(); },
     resetStats:function(){
       if(!confirm('Tüm istatistikler ve çizimler sıfırlanacak. Emin misiniz?')) return;
       state.sectionStates={};
@@ -3704,6 +3755,7 @@ if(typeof window!=='undefined')window.PDFKV=PDFKV;
         const savedSnap = await getDoc(doc(db, 'stats', ddUid));
         if (savedSnap.exists()) {
           const saved = savedSnap.data();
+          let restoredSectionStates = false;
           /* Öğretmen sıfırlaması varsa tüm yerel veriyi temizle, geri yükleme yapma */
           const resetAt = saved[ddFid + '_resetAt'];
           if (resetAt) {
@@ -3719,12 +3771,13 @@ if(typeof window!=='undefined')window.PDFKV=PDFKV;
               try {
                 const loaded = JSON.parse(statesJson);
                 PDFKV._restoreSectionStates(loaded);
+                restoredSectionStates = true;
                 console.log('[Karne] Önceki oturum yüklendi:', Object.keys(loaded).length, 'bölüm');
               } catch(e) { console.warn('[Karne] Yükleme hatası:', e); }
             }
             /* Aggregate doğru/yanlış/çözüm görme'yi geri yükle */
             const prevFas = saved[ddFid] || {};
-            if (prevFas.correct || prevFas.wrong || prevFas.shown) {
+            if (!restoredSectionStates && (prevFas.correct || prevFas.wrong || prevFas.shown)) {
               PDFKV._restoreAggregate(prevFas.correct || 0, prevFas.wrong || 0, prevFas.shown || 0);
             }
             /* Son pozisyonu Firestore'dan yükle (farklı cihaz / localStorage silinmiş ise) */
@@ -3810,10 +3863,11 @@ if(typeof window!=='undefined')window.PDFKV=PDFKV;
           allSecs.forEach(function(sec) {
             const st = PDFKV._getSectionState(sec.id);
             if (!st) return;
-            const c = Object.keys(st.correct || {}).filter(k => st.correct[k]).length;
-            let w = 0;
+            let c = 0, w = 0;
             Object.keys(st.attempts || {}).forEach(k => {
-              w += (st.attempts[k] || []).filter(v => !v).length;
+              const first = (st.attempts[k] || []).find(v => v === true || v === false);
+              if (first === true) c++;
+              else if (first === false) w++;
             });
             if (c || w) sectionMap[sec.name] = { correct: c, wrong: w };
           });

@@ -910,7 +910,7 @@ window.openKarne = function(studentUid, fasId, fasTitle, fasSubject) {
   const m = fs.minutes || 0;
   const total = c + w;
   const pct = total ? Math.round(c / total * 100) : 0;
-  const sv = fs.solutionViews || 0;
+  const sv = fs.shown ?? fs.solutionViews ?? 0;
 
   // Stat boxes
   $('km-stats').innerHTML = `
