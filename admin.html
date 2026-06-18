@@ -583,7 +583,16 @@ async function renderGenel(){
 async function renderKullanici(){
   const el=$('tKullanici-inner');
   el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
-  const snap=await getDocs(query(collection(db,'users'),where('role','!=','admin')));
+  let snap;
+  try{
+    snap=await Promise.race([
+      getDocs(query(collection(db,'users'),where('role','!=','admin'))),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('Kullanıcı listesi zaman aşımına uğradı.')),12000))
+    ]);
+  }catch(e){
+    el.innerHTML=`<div class="es"><div class="ic">⚠️</div><p>${e.message||'Kullanıcılar yüklenemedi.'}</p><button class="btn-primary" onclick="renderKullanici()">Tekrar Dene</button></div>`;
+    return;
+  }
   const users=snap.docs.map(d=>({id:d.id,...d.data()}));
   allUsers=users;
   $('user-count-badge').textContent=users.length;
