@@ -3758,9 +3758,12 @@ if(typeof window!=='undefined')window.PDFKV=PDFKV;
           let restoredSectionStates = false;
           /* Öğretmen sıfırlaması varsa tüm yerel veriyi temizle, geri yükleme yapma */
           const resetAt = saved[ddFid + '_resetAt'];
-          if (resetAt) {
+          const resetSeenKey = 'dd_reset_seen_' + ddUid + '_' + ddFid;
+          const resetSeenAt = Number(localStorage.getItem(resetSeenKey) || 0);
+          if (resetAt && resetAt > resetSeenAt) {
             try { localStorage.removeItem('dd_pos_' + ddUid + '_' + ddFid); } catch(e) {}
             try { localStorage.removeItem(SYNC_KEY); } catch(e) {}
+            try { localStorage.setItem(resetSeenKey, String(resetAt)); } catch(e) {}
             PDFKV._clearPosFlag();
             PDFKV._goToFirstSection();
             console.log('[Reset] Öğretmen sıfırlaması algılandı, ilk bölüme gidiliyor.');

@@ -826,12 +826,26 @@ window.doAssign=async()=>{
   btn.disabled=false;btn.textContent='Kaydet';assignUID=null;
 };
 
-window.askReset=(uid,name)=>{rUID=uid;$('rtxt').textContent=`"${name}" tüm istatistikleri silinecek.`;oModal('mReset');};
+window.askReset=(uid,name)=>{rUID=uid;$('rtxt').textContent=`"${name}" tüm istatistikleri ve fasikül içi soru kayıtları sıfırlanacak.`;oModal('mReset');};
 window.doReset=async()=>{
   if(!rUID)return;
-  await deleteDoc(doc(db,'stats',rUID)).catch(()=>{});
-  closeModal('mReset');rUID=null;
-  await renderKullanici();
+  try{
+    const ref=doc(db,'stats',rUID);
+    const snap=await getDoc(ref);
+    const updated=snap.exists()?{...snap.data()}:{};
+    const resetAt=Date.now();
+    delete updated.daily;
+    FASIKUL.forEach(f=>{
+      delete updated[f.id];
+      delete updated[f.id+'_states'];
+      delete updated[f.id+'_lastPos'];
+      updated[f.id+'_resetAt']=resetAt;
+    });
+    await setDoc(ref,updated);
+    closeModal('mReset');rUID=null;
+    await renderKullanici();
+    alert('İstatistikler sıfırlandı. Öğrenci fasikülü açtığında fasikül içi kayıtlar da temizlenecek.');
+  }catch(e){alert('Hata: '+e.message);}
 };
 
 window.addEventListener('message',e=>{if(e.data==='closeFrame')closeFrame();});
