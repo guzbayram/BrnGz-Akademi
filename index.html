@@ -354,12 +354,71 @@ const FASIKUL=[
 const FASIKUL_ASSET_VERSION='20260619-f2-reset';
 
 let CU=null,CP=null;
+let studentStatsCache=null,studentUserCache=null;
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
 const ini=n=>(n||'?').charAt(0).toUpperCase();
 const $=id=>document.getElementById(id);
 const showScr=id=>{document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const actTab=id=>{document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));document.querySelectorAll('.tp').forEach(p=>p.classList.toggle('on',p.id===id));};
 const ld=id=>$(id).innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+
+function setStudentCache(statsData,userData){
+  studentStatsCache=statsData||{};
+  studentUserCache=userData||{};
+}
+function visibleFasikulList(userData=studentUserCache){
+  const allowed=userData&&Array.isArray(userData.allowedFasikul)?userData.allowedFasikul:null;
+  return allowed?FASIKUL.filter(f=>allowed.includes(f.id)):FASIKUL;
+}
+async function loadStudentCache(force=false){
+  if(!force&&studentStatsCache&&studentUserCache)return{stats:studentStatsCache,user:studentUserCache};
+  const [snap,userSnap]=await Promise.all([getDoc(doc(db,'stats',CU.uid)),getDoc(doc(db,'users',CU.uid))]);
+  setStudentCache(snap.exists()?snap.data():{},userSnap.exists()?userSnap.data():{});
+  return{stats:studentStatsCache,user:studentUserCache};
+}
+function renderFasCards(statsData,userData){
+  const g=$('fgrid'),us=statsData||{};
+  const visibleFas=visibleFasikulList(userData);
+  g.innerHTML='';
+  if(visibleFas.length===0){g.innerHTML='<div class="es" style="grid-column:1/-1"><div class="ic">📚</div><p>Erişebileceğiniz fasikül bulunmuyor.</p></div>';return;}
+  let lastFid=null;
+  try{lastFid=localStorage.getItem('dd_last_'+CU.uid);}catch(e){}
+  const sortedFas=[...visibleFas].sort((a,b)=>{
+    if(a.id===lastFid)return -1;
+    if(b.id===lastFid)return 1;
+    return 0;
+  });
+  sortedFas.forEach(f=>{
+    const fs=us[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
+    const started=c||w||m,total=c+w,pct=total?Math.round(c/total*100):0;
+    const numPad=f.n.toString().padStart(2,'0');
+    const isLast=f.id===lastFid&&started;
+    const card=document.createElement('div');
+    card.className='fc';
+    if(isLast)card.style.cssText='outline:2px solid var(--p);outline-offset:2px;';
+    card.innerHTML=
+      '<div class="fc-top">'+
+        '<div class="fnum '+f.c+'">'+f.n+'</div>'+
+        '<span class="fc-badge '+(started?'started':'new')+'">'+(isLast?'Son Açılan':started?'Başlandı':'Yeni')+'</span>'+
+      '</div>'+
+      '<div class="fc-seq">Fasikül #'+numPad+'</div>'+
+      '<div class="ftit">'+f.t+'</div>'+
+      '<div class="fsub">'+f.s+'</div>'+
+      '<div class="fc-meta">'+
+        (c||w?'<div class="fc-meta-item">✓ '+c+' Doğru · '+w+' Yanlış</div>':'')+
+        (m?'<div class="fc-meta-item">⏱ '+fmt(m)+'</div>':'')+
+        (!started?'<div class="fc-meta-item" style="color:var(--mu);font-style:italic;">Henüz başlanmadı</div>':'')+
+      '</div>'+
+      '<div class="fc-footer">'+
+        '<div class="fc-progress-track">'+
+          '<div class="fc-progress-fill'+(started?(total>0?' partial':''):' none')+'" style="width:'+(started?(total>0?pct:8):100)+'%"></div>'+
+        '</div>'+
+        '<button class="fc-btn">▶ '+(isLast?'Kaldığımdan Devam Et':started?'Devam Et':'Başla')+'</button>'+
+      '</div>';
+    card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||'',resetAt:us[f.id+'_resetAt']||0,correct:c,wrong:w,minutes:m,solutionViews:fs.solutionViews||fs.shown||0,lastPos:fs.lastPos||null});
+    g.appendChild(card);
+  });
+}
 
 window.doLogin=async()=>{
   const u=$('lu').value.trim().toLowerCase(),p=$('lp').value.trim();
@@ -443,6 +502,16 @@ window.addEventListener('message',async e=>{
         sections:e.data.sections||{},
         peekSections:e.data.peekSections||{}
       }});
+      studentStatsCache={...existing,[e.data.fid]:{
+        correct:e.data.correct,
+        wrong:e.data.wrong,
+        shown:e.data.shown||0,
+        minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
+        solutionViews:e.data.solutionViews||0,
+        lastPos:e.data.lastPos||prev.lastPos||null,
+        sections:e.data.sections||{},
+        peekSections:e.data.peekSections||{}
+      }};
     }catch(_){}
     return;
   }
@@ -460,12 +529,13 @@ window.addEventListener('message',async e=>{
   }
 });
 
-window.doLogout=async()=>{await signOut(auth);CU=null;CP=null;showScr('sLogin');};
+window.doLogout=async()=>{await signOut(auth);CU=null;CP=null;studentStatsCache=null;studentUserCache=null;showScr('sLogin');};
 
 onAuthStateChanged(auth,async user=>{
   const loadEl=$('sLoading');
   const btn=$('lbtn');
   if(user){
+    studentStatsCache=null;studentUserCache=null;
     CU=user;
     let snap=await getDoc(doc(db,'users',user.uid));
     const isAdmin=user.email==='admin@dijital-fasikul.com'||user.email==='admin@admin.com'||user.email==='admin@brngs.com';
@@ -521,13 +591,15 @@ async function showApp(){
   $('appName').textContent=CP.name;
   $('appTopSub').textContent=CP.name+' — hoş geldiniz';
   window._statsBc=new BroadcastChannel('dd_stats_live');
-  await renderHome();
-  await renderFas();
+  await loadStudentCache(true);
+  renderHome();
+  renderFas();
   // Stats değişince anasayfayı güncelle (öğretmen sıfırlama dahil)
   if(window._statsHomeUnsub) window._statsHomeUnsub();
   let _firstSnap=true;
-  window._statsHomeUnsub=onSnapshot(doc(db,'stats',CU.uid),()=>{
+  window._statsHomeUnsub=onSnapshot(doc(db,'stats',CU.uid),(snap)=>{
     if(_firstSnap){_firstSnap=false;return;} // ilk tetiklenme zaten renderHome'dan geliyor
+    studentStatsCache=snap.exists()?snap.data():{};
     if($('tHome')&&$('tHome').classList.contains('on')) renderHome();
     renderFas();
   });
@@ -552,11 +624,12 @@ function buildStudentHeatmap(daily){
 
 async function renderHome(){
   const el=$('tHome');
-  el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
-  const [snap,userSnap]=await Promise.all([getDoc(doc(db,'stats',CU.uid)),getDoc(doc(db,'users',CU.uid))]);
-  const data=snap.exists()?snap.data():{};
-  const allowed=userSnap.exists()&&Array.isArray(userSnap.data().allowedFasikul)?userSnap.data().allowedFasikul:null;
-  const visibleFas=allowed?FASIKUL.filter(f=>allowed.includes(f.id)):FASIKUL;
+  if(!studentStatsCache||!studentUserCache){
+    el.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+    await loadStudentCache();
+  }
+  const data=studentStatsCache||{};
+  const visibleFas=visibleFasikulList();
   let tc=0,tw=0,tm=0,tsv=0;
   visibleFas.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;tsv+=fs.solutionViews||fs.shown||0;});
   const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
@@ -669,8 +742,8 @@ async function renderHome(){
 
 async function renderAyarlar(){
   const el=$('tAyarlar');
-  const snap=await getDoc(doc(db,'stats',CU.uid));
-  const data=snap.exists()?snap.data():{};
+  if(!studentStatsCache) await loadStudentCache();
+  const data=studentStatsCache||{};
   let tc=0,tw=0,tm=0;
   FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
   const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
@@ -701,51 +774,11 @@ async function renderAyarlar(){
 }
 
 async function renderFas(){
-  const g=$('fgrid');g.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
-  const [statsSnap,userSnap]=await Promise.all([getDoc(doc(db,'stats',CU.uid)),getDoc(doc(db,'users',CU.uid))]);
-  const us=statsSnap.exists()?statsSnap.data():{};
-  const allowed=userSnap.exists()&&userSnap.data().allowedFasikul?userSnap.data().allowedFasikul:null;
-  const visibleFas=allowed?FASIKUL.filter(f=>allowed.includes(f.id)):FASIKUL;
-  g.innerHTML='';
-  if(visibleFas.length===0){g.innerHTML='<div class="es" style="grid-column:1/-1"><div class="ic">📚</div><p>Erişebileceğiniz fasikül bulunmuyor.</p></div>';return;}
-  let lastFid=null;
-  try{lastFid=localStorage.getItem('dd_last_'+CU.uid);}catch(e){}
-  // Son açılan fasikülü listenin başına taşı
-  const sortedFas=[...visibleFas].sort((a,b)=>{
-    if(a.id===lastFid)return -1;
-    if(b.id===lastFid)return 1;
-    return 0;
-  });
-  sortedFas.forEach(f=>{
-    const fs=us[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
-    const started=c||w||m,total=c+w,pct=total?Math.round(c/total*100):0;
-    const numPad=f.n.toString().padStart(2,'0');
-    const isLast=f.id===lastFid&&started;
-    const card=document.createElement('div');
-    card.className='fc';
-    if(isLast)card.style.cssText='outline:2px solid var(--p);outline-offset:2px;';
-    card.innerHTML=
-      '<div class="fc-top">'+
-        '<div class="fnum '+f.c+'">'+f.n+'</div>'+
-        '<span class="fc-badge '+(started?'started':'new')+'">'+(isLast?'Son Açılan':started?'Başlandı':'Yeni')+'</span>'+
-      '</div>'+
-      '<div class="fc-seq">Fasikül #'+numPad+'</div>'+
-      '<div class="ftit">'+f.t+'</div>'+
-      '<div class="fsub">'+f.s+'</div>'+
-      '<div class="fc-meta">'+
-        (c||w?'<div class="fc-meta-item">✓ '+c+' Doğru · '+w+' Yanlış</div>':'')+
-        (m?'<div class="fc-meta-item">⏱ '+fmt(m)+'</div>':'')+
-        (!started?'<div class="fc-meta-item" style="color:var(--mu);font-style:italic;">Henüz başlanmadı</div>':'')+
-      '</div>'+
-      '<div class="fc-footer">'+
-        '<div class="fc-progress-track">'+
-          '<div class="fc-progress-fill'+(started?(total>0?' partial':''):' none')+'" style="width:'+(started?(total>0?pct:8):100)+'%"></div>'+
-        '</div>'+
-        '<button class="fc-btn">▶ '+(isLast?'Kaldığımdan Devam Et':started?'Devam Et':'Başla')+'</button>'+
-      '</div>';
-    card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||'',resetAt:us[f.id+'_resetAt']||0,correct:c,wrong:w,minutes:m,solutionViews:fs.solutionViews||fs.shown||0,lastPos:fs.lastPos||null});
-    g.appendChild(card);
-  });
+  const g=$('fgrid');
+  if(studentStatsCache&&studentUserCache){renderFasCards(studentStatsCache,studentUserCache);return;}
+  g.innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+  const data=await loadStudentCache();
+  renderFasCards(data.stats,data.user);
 }
 
 
