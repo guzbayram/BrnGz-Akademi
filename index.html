@@ -210,6 +210,60 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .app-pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;text-transform:uppercase;}
 .app-pill.done{background:#d1fae5;color:#065f46;}
 .app-pill.locked{background:var(--s-high);color:var(--mu);}
+/* YKS preparation */
+.yks-wrap{max-width:1280px;margin:0 auto;}
+.yks-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+.yks-back{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--br);background:#fff;color:var(--tx);border-radius:10px;padding:8px 12px;font:600 12px 'Inter',sans-serif;cursor:pointer;}
+.yks-back:hover{background:var(--pb);color:var(--p);border-color:var(--pb);}
+.yks-breadcrumb{font-size:12px;color:var(--mu);font-weight:600;}
+.yks-section-title{font:800 22px 'Manrope',sans-serif;color:var(--tx);margin-bottom:6px;}
+.yks-section-meta{font-size:12px;color:var(--mu);margin-bottom:18px;}
+.yks-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.yks-level{min-height:150px;border:0;border-radius:14px;padding:22px;text-align:left;color:#fff;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 6px 18px rgba(29,26,34,.08);transition:transform .18s,box-shadow .18s;}
+.yks-level:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 26px rgba(29,26,34,.14);}
+.yks-level:disabled{cursor:default;opacity:.72;}
+.yks-level.tyt{background:#2563eb}.yks-level.ayt{background:#e11d48}.yks-level.support{background:#4b5563}
+.yks-level .material-symbols-outlined{font-size:28px;margin-bottom:28px;}
+.yks-level-name{font:800 20px 'Manrope',sans-serif;display:block;}
+.yks-level-note{font-size:11px;font-weight:600;opacity:.82;margin-top:6px;display:block;}
+.yks-subject-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+.yks-subject{min-height:108px;border:1px solid rgba(203,195,213,.45);border-radius:14px;background:#fff;padding:18px;display:flex;align-items:flex-start;gap:14px;text-align:left;color:var(--tx);font:700 14px 'Manrope',sans-serif;cursor:pointer;transition:all .18s;}
+.yks-subject:hover:not(:disabled){border-color:var(--p);background:var(--pb);transform:translateY(-2px);}
+.yks-subject:disabled{cursor:default;color:var(--mu);background:var(--s-low);}
+.yks-subject-icon{width:42px;height:42px;border-radius:10px;background:var(--pb);color:var(--p);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.yks-subject small{display:block;font:500 11px 'Inter',sans-serif;color:var(--mu);margin-top:6px;}
+.yks-course-head{background:#fff;border-radius:16px;padding:18px 20px;margin-bottom:14px;box-shadow:0 4px 16px rgba(70,21,153,.06);}
+.yks-course-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;}
+.yks-course-top h2{font:800 18px 'Manrope',sans-serif;}
+.yks-course-count{font-size:12px;color:var(--mu);font-weight:600;white-space:nowrap;}
+.yks-course-shell{display:grid;grid-template-columns:340px minmax(0,1fr);gap:14px;min-height:calc(100vh - 205px);}
+.yks-curriculum{background:#fff;border-radius:16px;padding:12px;overflow-y:auto;max-height:calc(100vh - 205px);box-shadow:0 4px 16px rgba(70,21,153,.06);scrollbar-width:thin;scrollbar-color:var(--primary-fixed-dim) transparent;}
+.yks-unit{border-bottom:1px solid var(--s-high);}
+.yks-unit:last-child{border-bottom:0;}
+.yks-unit summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 8px;cursor:pointer;}
+.yks-unit summary::-webkit-details-marker{display:none;}
+.yks-unit-num{width:28px;height:28px;border-radius:8px;background:var(--s-cnt);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.yks-unit-name{font-size:12px;font-weight:700;line-height:1.3;flex:1;}
+.yks-unit-pct{font-size:10px;color:var(--mu);font-weight:700;}
+.yks-lessons{padding:0 4px 10px 38px;display:flex;flex-direction:column;gap:4px;}
+.yks-lesson{border:0;background:transparent;border-radius:9px;padding:9px 10px;display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:7px;text-align:left;cursor:pointer;color:var(--tx);font:600 11px 'Inter',sans-serif;line-height:1.35;width:100%;}
+.yks-lesson:hover{background:var(--s-cnt);}.yks-lesson.active{background:var(--pb);color:var(--p);}
+.yks-lesson-status{width:20px;height:20px;border-radius:50%;border:2px solid var(--s-highest);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.yks-lesson-status.started{border-color:var(--pl);color:var(--p);}.yks-lesson-status.done{border-color:#16a34a;background:#16a34a;}
+.yks-lesson-pct{font-size:10px;color:var(--mu);font-weight:700;}
+.yks-player-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 16px rgba(70,21,153,.06);min-width:0;align-self:start;}
+.yks-video-frame{background:#111;border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;}
+.yks-video-frame video{width:100%;height:100%;display:block;background:#111;}
+.yks-video-info{padding:16px 2px 2px;}
+.yks-video-kicker{font-size:10px;font-weight:800;color:var(--p);text-transform:uppercase;margin-bottom:6px;}
+.yks-video-title{font:800 19px 'Manrope',sans-serif;line-height:1.3;}
+.yks-video-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;color:var(--mu);font-size:11px;font-weight:600;}
+.yks-player-actions{display:flex;justify-content:space-between;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--s-high);}
+.yks-nav-btn{display:flex;align-items:center;gap:5px;border:1px solid var(--br);background:#fff;color:var(--tx);border-radius:9px;padding:8px 12px;font:600 11px 'Inter',sans-serif;cursor:pointer;}
+.yks-nav-btn:hover:not(:disabled){background:var(--pb);color:var(--p);}.yks-nav-btn:disabled{opacity:.35;cursor:default;}
+@media(max-width:1050px){.yks-course-shell{grid-template-columns:280px minmax(0,1fr);}}
+@media(max-width:800px){.yks-level-grid,.yks-subject-grid{grid-template-columns:1fr 1fr}.yks-course-shell{grid-template-columns:1fr}.yks-curriculum{max-height:340px}.yks-player-card{grid-row:1}.yks-course-top{align-items:flex-start;flex-direction:column}.yks-course-shell{min-height:0}}
+@media(max-width:520px){.yks-level-grid,.yks-subject-grid{grid-template-columns:1fr}.yks-level{min-height:120px}.yks-level .material-symbols-outlined{margin-bottom:16px}.yks-player-card{padding:10px}.yks-video-title{font-size:16px}}
 /* hamburger */
 .app-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;}
 .app-hamburger span{display:block;width:22px;height:2px;background:var(--p);border-radius:99px;transition:all .25s;}
@@ -290,6 +344,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
       <button class="app-nav-item active" onclick="appSwitchTab('tHome',this)">
         <span class="material-symbols-outlined">home</span>Anasayfa
       </button>
+      <button class="app-nav-item" onclick="appSwitchTab('tYks',this)">
+        <span class="material-symbols-outlined">school</span>YKS Hazırlık
+      </button>
       <button class="app-nav-item" onclick="appSwitchTab('tFas',this)">
         <span class="material-symbols-outlined">auto_stories</span>Fasiküller
       </button>
@@ -322,6 +379,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
     </header>
     <div class="app-content">
       <div class="app-tp on" id="tHome"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
+      <div class="app-tp" id="tYks"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
       <div class="app-tp" id="tFas"><div class="fgrid" id="fgrid"></div></div>
       <div class="app-tp" id="tAyarlar"><div class="ld"><div class="sp"></div>Yükleniyor...</div></div>
     </div>
@@ -355,9 +413,12 @@ const FASIKUL_ASSET_VERSION='20260619-f2-reset';
 
 let CU=null,CP=null;
 let studentStatsCache=null,studentUserCache=null;
+let yksCatalogCache=null,yksView='root',yksActive={subjectIndex:0,lessonIndex:0},yksSaveTimer=null,yksLastPersist=0;
+const YKS_SUBJECTS=['Biyoloji (TYT)','Coğrafya (TYT)','Din Kültürü ve Ahlak Bilgisi (TYT)','Felsefe (TYT/AYT)','Fizik (TYT)','Kimya (TYT)','Matematik (TYT)','Tarih (TYT)','Türkçe (TYT)'];
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
 const ini=n=>(n||'?').charAt(0).toUpperCase();
 const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const showScr=id=>{document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const actTab=id=>{document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));document.querySelectorAll('.tp').forEach(p=>p.classList.toggle('on',p.id===id));};
 const ld=id=>$(id).innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
@@ -418,6 +479,188 @@ function renderFasCards(statsData,userData){
     card.onclick=()=>openFrame(f.f,f.t,{uid:CU.uid,name:CP.name,role:'student',fid:f.id,tid:CP.teacherId||'',resetAt:us[f.id+'_resetAt']||0,correct:c,wrong:w,minutes:m,solutionViews:fs.solutionViews||fs.shown||0,lastPos:fs.lastPos||null});
     g.appendChild(card);
   });
+}
+
+async function loadYksCatalog(){
+  if(yksCatalogCache)return yksCatalogCache;
+  const res=await fetch('./mebi-tyt-matematik-video-ders-link.json',{cache:'no-cache'});
+  if(!res.ok)throw new Error('YKS içerik dosyası yüklenemedi.');
+  const data=await res.json();
+  if(!Array.isArray(data.lowerSubjects))throw new Error('YKS içerik biçimi geçersiz.');
+  yksCatalogCache=data;
+  return data;
+}
+
+function yksProgress(){
+  if(!studentStatsCache)studentStatsCache={};
+  if(!studentStatsCache.yksVideoProgress)studentStatsCache.yksVideoProgress={};
+  return studentStatsCache.yksVideoProgress;
+}
+
+function lessonProgress(id){return yksProgress()[id]||{};}
+function lessonPct(id){return Math.max(0,Math.min(100,Number(lessonProgress(id).percent)||0));}
+
+function scheduleYksSave(immediate=false){
+  clearTimeout(yksSaveTimer);
+  const wait=immediate?0:1800;
+  yksSaveTimer=setTimeout(flushYksProgress,wait);
+}
+
+async function flushYksProgress(){
+  if(!CU||!studentStatsCache)return;
+  clearTimeout(yksSaveTimer);yksSaveTimer=null;
+  try{
+    await setDoc(doc(db,'stats',CU.uid),{
+      yksVideoProgress:studentStatsCache.yksVideoProgress||{},
+      yksLearning:studentStatsCache.yksLearning||{}
+    },{merge:true});
+    yksLastPersist=Date.now();
+  }catch(e){console.warn('Video ilerlemesi kaydedilemedi.',e);}
+}
+
+function renderYksRoot(){
+  const el=$('tYks');
+  const p=studentStatsCache?.yksVideoProgress||{};
+  const started=Object.values(p).filter(v=>(v.percent||0)>0).length;
+  const completed=Object.values(p).filter(v=>v.completed).length;
+  el.innerHTML=`<div class="yks-wrap">
+    <div class="yks-section-title">YKS Hazırlık</div>
+    <div class="yks-section-meta">${started?`${started} video başladı · ${completed} video tamamlandı`:'Çalışma alanınızı seçin'}</div>
+    <div class="yks-level-grid">
+      <button class="yks-level tyt" onclick="openYksLevel('tyt')"><span class="material-symbols-outlined">edit_note</span><span class="yks-level-name">TYT</span><span class="yks-level-note">Temel Yeterlilik Testi</span></button>
+      <button class="yks-level ayt" disabled><span class="material-symbols-outlined">functions</span><span class="yks-level-name">AYT</span><span class="yks-level-note">Yakında</span></button>
+      <button class="yks-level support" disabled><span class="material-symbols-outlined">menu_book</span><span class="yks-level-name">Temel Destek Paketleri</span><span class="yks-level-note">Yakında</span></button>
+    </div>
+  </div>`;
+}
+
+function renderYksSubjects(){
+  $('tYks').innerHTML=`<div class="yks-wrap">
+    <div class="yks-toolbar"><button class="yks-back" onclick="openYksLevel('root')"><span class="material-symbols-outlined" style="font-size:17px">arrow_back</span>YKS Hazırlık</button><div class="yks-breadcrumb">YKS Hazırlık / TYT</div></div>
+    <div class="yks-section-title">TYT Dersleri</div><div class="yks-section-meta">Matematik video dersleri kullanıma açık</div>
+    <div class="yks-subject-grid">${YKS_SUBJECTS.map((name,i)=>{
+      const active=name==='Matematik (TYT)';
+      return `<button class="yks-subject" ${active?'onclick="openYksMath()"':'disabled'}><span class="yks-subject-icon"><span class="material-symbols-outlined">${active?'calculate':'lock'}</span></span><span>${esc(name)}<small>${active?'26 konu · 128 video':'Yakında'}</small></span></button>`;
+    }).join('')}</div>
+  </div>`;
+}
+
+function stopYksPlayback(){const video=$('yksVideo');if(video&&!video.paused)video.pause();}
+window.openYksLevel=(view)=>{stopYksPlayback();yksView=view;if(view==='root')renderYksRoot();else renderYksSubjects();};
+
+window.openYksMath=async()=>{
+  const el=$('tYks');
+  el.innerHTML='<div class="ld"><div class="sp"></div>Video dersler hazırlanıyor...</div>';
+  try{
+    const catalog=await loadYksCatalog();
+    const last=studentStatsCache?.yksLearning||{};
+    const si=Math.max(0,Math.min(catalog.lowerSubjects.length-1,Number(last.subjectIndex)||0));
+    const maxLi=Math.max(0,(catalog.lowerSubjects[si]?.subjectDetails?.length||1)-1);
+    yksActive={subjectIndex:si,lessonIndex:Math.max(0,Math.min(maxLi,Number(last.lessonIndex)||0))};
+    yksView='math';renderYksMath();
+  }catch(e){el.innerHTML=`<div class="es"><div class="ic">⚠</div><p>${esc(e.message)}</p></div>`;}
+};
+
+function allYksLessons(catalog=yksCatalogCache){
+  return (catalog?.lowerSubjects||[]).flatMap((unit,si)=>(unit.subjectDetails||[]).map((lesson,li)=>({unit,lesson,si,li})));
+}
+
+function unitProgress(unit){
+  const list=unit.subjectDetails||[];
+  if(!list.length)return 0;
+  return Math.round(list.reduce((sum,l)=>sum+lessonPct(l.id),0)/list.length);
+}
+
+function renderYksMath(){
+  const catalog=yksCatalogCache;if(!catalog)return;
+  const flat=allYksLessons(catalog),total=flat.length;
+  const completed=flat.filter(x=>lessonProgress(x.lesson.id).completed).length;
+  const overall=total?Math.round(flat.reduce((s,x)=>s+lessonPct(x.lesson.id),0)/total):0;
+  const activeUnit=catalog.lowerSubjects[yksActive.subjectIndex];
+  const activeLesson=activeUnit?.subjectDetails?.[yksActive.lessonIndex]||activeUnit?.subjectDetails?.[0];
+  if(!activeLesson)return;
+  const currentFlat=flat.findIndex(x=>x.si===yksActive.subjectIndex&&x.li===yksActive.lessonIndex);
+  const currentProgress=lessonProgress(activeLesson.id);
+  $('tYks').innerHTML=`<div class="yks-wrap">
+    <div class="yks-toolbar"><button class="yks-back" onclick="openYksLevel('tyt')"><span class="material-symbols-outlined" style="font-size:17px">arrow_back</span>TYT Dersleri</button><div class="yks-breadcrumb">TYT / Matematik</div></div>
+    <div class="yks-course-head">
+      <div class="yks-course-top"><div><h2>Matematik (TYT)</h2><div class="yks-section-meta" style="margin:3px 0 0">${catalog.lowerSubjects.length} konu · ${total} video</div></div><div class="yks-course-count">${completed}/${total} tamamlandı · %${overall}</div></div>
+      <div class="app-prog-track"><div class="app-prog-fill" style="width:${overall}%"></div></div>
+    </div>
+    <div class="yks-course-shell">
+      <aside class="yks-curriculum" aria-label="Matematik video müfredatı">${catalog.lowerSubjects.map((unit,si)=>`<details class="yks-unit" ${si===yksActive.subjectIndex?'open':''}>
+        <summary><span class="yks-unit-num">${unit.order||si+1}</span><span class="yks-unit-name">${esc(unit.title)}</span><span class="yks-unit-pct">%${unitProgress(unit)}</span></summary>
+        <div class="yks-lessons">${(unit.subjectDetails||[]).map((lesson,li)=>{
+          const pct=lessonPct(lesson.id),done=lessonProgress(lesson.id).completed;
+          return `<button class="yks-lesson ${si===yksActive.subjectIndex&&li===yksActive.lessonIndex?'active':''}" data-video-id="${esc(lesson.id)}" onclick="selectYksLesson(${si},${li})"><span class="yks-lesson-status ${done?'done':pct?'started':''}">${done?'✓':li+1}</span><span>${esc(lesson.title)}</span><span class="yks-lesson-pct">${pct?'%'+pct:''}</span></button>`;
+        }).join('')}</div>
+      </details>`).join('')}</aside>
+      <section class="yks-player-card">
+        <div class="yks-video-frame"><video id="yksVideo" controls playsinline preload="metadata" src="${esc(activeLesson.videoUrl)}"></video></div>
+        <div class="yks-video-info">
+          <div class="yks-video-kicker">${esc(activeUnit.title)} · Video ${yksActive.lessonIndex+1}/${activeUnit.subjectDetails.length}</div>
+          <div class="yks-video-title">${esc(activeLesson.title)}</div>
+          <div class="yks-video-meta"><span id="yksCurrentTime">${currentProgress.lastPosition?formatVideoTime(currentProgress.lastPosition)+' konumundan devam':'Henüz izlenmedi'}</span><span id="yksCurrentPct">%${lessonPct(activeLesson.id)} izlendi</span></div>
+          <div class="app-prog-track" style="margin-top:8px"><div class="app-prog-fill" id="yksCurrentFill" style="width:${lessonPct(activeLesson.id)}%"></div></div>
+          <div class="yks-player-actions"><button class="yks-nav-btn" onclick="playYksRelative(-1)" ${currentFlat<=0?'disabled':''}><span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>Önceki</button><button class="yks-nav-btn" onclick="playYksRelative(1)" ${currentFlat>=flat.length-1?'disabled':''}>Sonraki<span class="material-symbols-outlined" style="font-size:16px">arrow_forward</span></button></div>
+        </div>
+      </section>
+    </div>
+  </div>`;
+  bindYksVideo(activeLesson);
+}
+
+function formatVideoTime(seconds){
+  const s=Math.max(0,Math.floor(Number(seconds)||0)),m=Math.floor(s/60),r=s%60;
+  return `${m}:${String(r).padStart(2,'0')}`;
+}
+
+function updateYksProgressDisplay(id,pct,current){
+  const pctEl=$('yksCurrentPct'),fill=$('yksCurrentFill'),time=$('yksCurrentTime');
+  if(pctEl)pctEl.textContent='%'+pct+' izlendi';if(fill)fill.style.width=pct+'%';if(time)time.textContent=formatVideoTime(current)+' konumunda';
+  const row=document.querySelector(`.yks-lesson[data-video-id="${CSS.escape(id)}"]`);
+  if(row){const pe=row.querySelector('.yks-lesson-pct'),se=row.querySelector('.yks-lesson-status');if(pe)pe.textContent=pct?'%'+pct:'';if(se&&pct>=90){se.className='yks-lesson-status done';se.textContent='✓';}else if(se&&pct){se.classList.add('started');}}
+}
+
+function bindYksVideo(lesson){
+  const video=$('yksVideo');if(!video)return;
+  const saved=lessonProgress(lesson.id);let lastTick=0;
+  video.addEventListener('loadedmetadata',()=>{
+    if(saved.lastPosition>0&&saved.lastPosition<video.duration-3)video.currentTime=saved.lastPosition;
+    if(!saved.duration&&Number.isFinite(video.duration)){saved.duration=Math.round(video.duration);}
+  },{once:true});
+  video.addEventListener('timeupdate',()=>{
+    const now=Date.now();if(now-lastTick<1000)return;lastTick=now;
+    const duration=Math.max(1,Math.round(video.duration||saved.duration||1));
+    const current=Math.max(0,Math.round(video.currentTime||0));
+    const maxPosition=Math.max(Number(saved.maxPosition)||0,current);
+    const percent=Math.min(100,Math.round(maxPosition/duration*100));
+    Object.assign(saved,{lastPosition:current,maxPosition,duration,percent,completed:percent>=90,updatedAt:now});
+    yksProgress()[lesson.id]=saved;
+    studentStatsCache.yksLearning={lastLessonId:lesson.id,subjectIndex:yksActive.subjectIndex,lessonIndex:yksActive.lessonIndex,updatedAt:now};
+    updateYksProgressDisplay(lesson.id,percent,current);
+    if(now-yksLastPersist>12000)scheduleYksSave();
+  });
+  video.addEventListener('pause',()=>scheduleYksSave(true));
+  video.addEventListener('ended',()=>{saved.percent=100;saved.completed=true;saved.lastPosition=Math.round(video.duration||0);saved.maxPosition=saved.lastPosition;yksProgress()[lesson.id]=saved;updateYksProgressDisplay(lesson.id,100,saved.lastPosition);scheduleYksSave(true);});
+}
+
+window.selectYksLesson=(si,li)=>{
+  stopYksPlayback();
+  scheduleYksSave(true);
+  yksActive={subjectIndex:si,lessonIndex:li};
+  const lesson=yksCatalogCache?.lowerSubjects?.[si]?.subjectDetails?.[li];
+  if(lesson&&studentStatsCache){studentStatsCache.yksLearning={lastLessonId:lesson.id,subjectIndex:si,lessonIndex:li,updatedAt:Date.now()};scheduleYksSave();}
+  renderYksMath();
+};
+window.playYksRelative=(delta)=>{
+  const flat=allYksLessons();const at=flat.findIndex(x=>x.si===yksActive.subjectIndex&&x.li===yksActive.lessonIndex);const next=flat[at+delta];if(next)selectYksLesson(next.si,next.li);
+};
+
+async function renderYks(){
+  if(yksView==='math'){await openYksMath();return;}
+  if(yksView==='tyt'){renderYksSubjects();return;}
+  renderYksRoot();
 }
 
 window.doLogin=async()=>{
@@ -529,7 +772,7 @@ window.addEventListener('message',async e=>{
   }
 });
 
-window.doLogout=async()=>{await signOut(auth);CU=null;CP=null;studentStatsCache=null;studentUserCache=null;showScr('sLogin');};
+window.doLogout=async()=>{await flushYksProgress();await signOut(auth);CU=null;CP=null;studentStatsCache=null;studentUserCache=null;showScr('sLogin');};
 
 onAuthStateChanged(auth,async user=>{
   const loadEl=$('sLoading');
@@ -573,13 +816,15 @@ window.appToggleSidebar=()=>{$('appSidebar').classList.toggle('open');$('appSbOv
 window.appCloseSidebar=()=>{$('appSidebar').classList.remove('open');$('appSbOverlay').classList.remove('on');};
 
 window.appSwitchTab=(id,el)=>{
+  if(id!=='tYks')stopYksPlayback();
   document.querySelectorAll('.app-tp').forEach(t=>t.classList.remove('on'));
   $(id).classList.add('on');
   document.querySelectorAll('.app-nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active');
-  const titles={tHome:['Anasayfa','Genel performans ve aktivite'],tFas:['Fasiküller','Çalışmaya devam et'],tAyarlar:['Ayarlar','Hesap ve istatistik araçları']};
+  const titles={tHome:['Anasayfa','Genel performans ve aktivite'],tYks:['YKS Hazırlık','Video dersler ve öğrenme ilerlemesi'],tFas:['Fasiküller','Çalışmaya devam et'],tAyarlar:['Ayarlar','Hesap ve istatistik araçları']};
   if(titles[id]){$('appTopTitle').textContent=titles[id][0];$('appTopSub').textContent=titles[id][1];}
   if(id==='tHome') renderHome();
+  if(id==='tYks') renderYks();
   if(id==='tFas') renderFas();
   if(id==='tAyarlar') renderAyarlar();
   appCloseSidebar();
@@ -594,6 +839,7 @@ async function showApp(){
   await loadStudentCache(true);
   renderHome();
   renderFas();
+  if('requestIdleCallback' in window)requestIdleCallback(()=>loadYksCatalog().catch(()=>{}));
   // Stats değişince anasayfayı güncelle (öğretmen sıfırlama dahil)
   if(window._statsHomeUnsub) window._statsHomeUnsub();
   let _firstSnap=true;
