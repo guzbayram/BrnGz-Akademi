@@ -252,8 +252,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .yks-lesson-status.started{border-color:var(--pl);color:var(--p);}.yks-lesson-status.done{border-color:#16a34a;background:#16a34a;}
 .yks-lesson-pct{font-size:10px;color:var(--mu);font-weight:700;}
 .yks-player-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 16px rgba(70,21,153,.06);min-width:0;align-self:start;}
+.yks-study-tabs{display:flex;gap:6px;margin-bottom:12px;padding:4px;background:var(--s-low);border-radius:11px;overflow-x:auto;scrollbar-width:none;}
+.yks-study-tabs::-webkit-scrollbar{display:none;}
+.yks-study-tab{display:flex;align-items:center;justify-content:center;gap:6px;min-width:max-content;flex:1;border:0;border-radius:8px;background:transparent;color:var(--mu);padding:9px 12px;font:700 11px 'Inter',sans-serif;cursor:pointer;}
+.yks-study-tab:hover:not(:disabled){background:var(--s-cnt);color:var(--tx);}.yks-study-tab.active{background:#fff;color:var(--p);box-shadow:0 2px 8px rgba(70,21,153,.09);}.yks-study-tab:disabled{opacity:.38;cursor:default;}
+.yks-study-tab .material-symbols-outlined{font-size:17px;}
 .yks-video-frame{background:#111;border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;}
 .yks-video-frame video{width:100%;height:100%;display:block;background:#111;}
+.yks-practice-launch{min-height:360px;border:1px solid var(--s-highest);border-radius:12px;background:var(--s-low);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;}
+.yks-practice-launch-icon{width:58px;height:58px;border-radius:14px;background:var(--pb);color:var(--p);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.yks-practice-launch-icon .material-symbols-outlined{font-size:30px;}
+.yks-practice-title{font:800 18px 'Manrope',sans-serif;color:var(--tx);margin-bottom:5px;}
+.yks-practice-sub{font-size:11px;color:var(--mu);font-weight:600;margin-bottom:18px;}
+.yks-practice-open{display:inline-flex;align-items:center;gap:7px;border:0;background:var(--p);color:#fff;border-radius:9px;padding:11px 16px;text-decoration:none;font-size:12px;font-weight:700;box-shadow:0 4px 12px rgba(70,21,153,.2);}
+.yks-practice-open:hover{background:var(--pd);}
 .yks-video-info{padding:16px 2px 2px;}
 .yks-video-kicker{font-size:10px;font-weight:800;color:var(--p);text-transform:uppercase;margin-bottom:6px;}
 .yks-video-title{font:800 19px 'Manrope',sans-serif;line-height:1.3;}
@@ -263,7 +275,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .yks-nav-btn:hover:not(:disabled){background:var(--pb);color:var(--p);}.yks-nav-btn:disabled{opacity:.35;cursor:default;}
 @media(max-width:1050px){.yks-course-shell{grid-template-columns:280px minmax(0,1fr);}}
 @media(max-width:800px){.yks-level-grid,.yks-subject-grid{grid-template-columns:1fr 1fr}.yks-course-shell{grid-template-columns:1fr}.yks-curriculum{max-height:340px}.yks-player-card{grid-row:1}.yks-course-top{align-items:flex-start;flex-direction:column}.yks-course-shell{min-height:0}}
-@media(max-width:520px){.yks-level-grid,.yks-subject-grid{grid-template-columns:1fr}.yks-level{min-height:120px}.yks-level .material-symbols-outlined{margin-bottom:16px}.yks-player-card{padding:10px}.yks-video-title{font-size:16px}}
+@media(max-width:520px){.yks-level-grid,.yks-subject-grid{grid-template-columns:1fr}.yks-level{min-height:120px}.yks-level .material-symbols-outlined{margin-bottom:16px}.yks-player-card{padding:10px}.yks-video-title{font-size:16px}.yks-practice-launch{min-height:300px;padding:24px 16px}.yks-practice-title{font-size:16px}}
 /* hamburger */
 .app-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;}
 .app-hamburger span{display:block;width:22px;height:2px;background:var(--p);border-radius:99px;transition:all .25s;}
@@ -413,7 +425,7 @@ const FASIKUL_ASSET_VERSION='20260619-f2-reset';
 
 let CU=null,CP=null;
 let studentStatsCache=null,studentUserCache=null;
-let yksCatalogCache=null,yksView='root',yksActive={subjectIndex:0,lessonIndex:0},yksSaveTimer=null,yksLastPersist=0;
+let yksCatalogCache=null,yksView='root',yksMode='video',yksActive={subjectIndex:0,lessonIndex:0},yksSaveTimer=null,yksLastPersist=0;
 const YKS_SUBJECTS=['Biyoloji (TYT)','Coğrafya (TYT)','Din Kültürü ve Ahlak Bilgisi (TYT)','Felsefe (TYT/AYT)','Fizik (TYT)','Kimya (TYT)','Matematik (TYT)','Tarih (TYT)','Türkçe (TYT)'];
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
 const ini=n=>(n||'?').charAt(0).toUpperCase();
@@ -571,6 +583,23 @@ function unitProgress(unit){
   return Math.round(list.reduce((sum,l)=>sum+lessonPct(l.id),0)/list.length);
 }
 
+function renderYksStudyBody(lesson,unit,currentFlat,flat,currentProgress){
+  if(yksMode==='solve'||yksMode==='past'){
+    const url=yksMode==='solve'?lesson.practiceUrl:lesson.pastQuestionsUrl;
+    const title=yksMode==='solve'?'Soru Çöz':'Çıkmış Sorular';
+    if(!url)return `<div class="es"><div class="ic">assignment_late</div><p>Bu ders için ${title} bağlantısı bulunmuyor.</p></div>`;
+    return `<div class="yks-practice-launch"><div class="yks-practice-launch-icon"><span class="material-symbols-outlined">${yksMode==='solve'?'edit_note':'history_edu'}</span></div><div class="yks-video-kicker">${esc(unit.title)} · ${esc(lesson.title)}</div><div class="yks-practice-title">${title}</div><div class="yks-practice-sub">MEBİ soru çalışma kanvası</div><a class="yks-practice-open" href="${esc(url)}" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:17px">open_in_new</span>Çalışma kanvasını aç</a></div>`;
+  }
+  return `<div class="yks-video-frame"><video id="yksVideo" controls playsinline preload="metadata" src="${esc(lesson.videoUrl)}"></video></div>
+    <div class="yks-video-info">
+      <div class="yks-video-kicker">${esc(unit.title)} · Video ${yksActive.lessonIndex+1}/${unit.subjectDetails.length}</div>
+      <div class="yks-video-title">${esc(lesson.title)}</div>
+      <div class="yks-video-meta"><span id="yksCurrentTime">${currentProgress.lastPosition?formatVideoTime(currentProgress.lastPosition)+' konumundan devam':'Henüz izlenmedi'}</span><span id="yksCurrentPct">%${lessonPct(lesson.id)} izlendi</span></div>
+      <div class="app-prog-track" style="margin-top:8px"><div class="app-prog-fill" id="yksCurrentFill" style="width:${lessonPct(lesson.id)}%"></div></div>
+      <div class="yks-player-actions"><button class="yks-nav-btn" onclick="playYksRelative(-1)" ${currentFlat<=0?'disabled':''}><span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>Önceki</button><button class="yks-nav-btn" onclick="playYksRelative(1)" ${currentFlat>=flat.length-1?'disabled':''}>Sonraki<span class="material-symbols-outlined" style="font-size:16px">arrow_forward</span></button></div>
+    </div>`;
+}
+
 function renderYksMath(){
   const catalog=yksCatalogCache;if(!catalog)return;
   const flat=allYksLessons(catalog),total=flat.length;
@@ -596,18 +625,16 @@ function renderYksMath(){
         }).join('')}</div>
       </details>`).join('')}</aside>
       <section class="yks-player-card">
-        <div class="yks-video-frame"><video id="yksVideo" controls playsinline preload="metadata" src="${esc(activeLesson.videoUrl)}"></video></div>
-        <div class="yks-video-info">
-          <div class="yks-video-kicker">${esc(activeUnit.title)} · Video ${yksActive.lessonIndex+1}/${activeUnit.subjectDetails.length}</div>
-          <div class="yks-video-title">${esc(activeLesson.title)}</div>
-          <div class="yks-video-meta"><span id="yksCurrentTime">${currentProgress.lastPosition?formatVideoTime(currentProgress.lastPosition)+' konumundan devam':'Henüz izlenmedi'}</span><span id="yksCurrentPct">%${lessonPct(activeLesson.id)} izlendi</span></div>
-          <div class="app-prog-track" style="margin-top:8px"><div class="app-prog-fill" id="yksCurrentFill" style="width:${lessonPct(activeLesson.id)}%"></div></div>
-          <div class="yks-player-actions"><button class="yks-nav-btn" onclick="playYksRelative(-1)" ${currentFlat<=0?'disabled':''}><span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>Önceki</button><button class="yks-nav-btn" onclick="playYksRelative(1)" ${currentFlat>=flat.length-1?'disabled':''}>Sonraki<span class="material-symbols-outlined" style="font-size:16px">arrow_forward</span></button></div>
+        <div class="yks-study-tabs" role="tablist" aria-label="Ders çalışma modu">
+          <button class="yks-study-tab ${yksMode==='video'?'active':''}" onclick="switchYksMode('video')"><span class="material-symbols-outlined">play_circle</span>Video</button>
+          <button class="yks-study-tab ${yksMode==='solve'?'active':''}" onclick="switchYksMode('solve')" ${activeLesson.practiceUrl?'':'disabled'}><span class="material-symbols-outlined">edit_note</span>Soru Çöz</button>
+          <button class="yks-study-tab ${yksMode==='past'?'active':''}" onclick="switchYksMode('past')" ${activeLesson.pastQuestionsUrl?'':'disabled'}><span class="material-symbols-outlined">history_edu</span>Çıkmış Sorular</button>
         </div>
+        ${renderYksStudyBody(activeLesson,activeUnit,currentFlat,flat,currentProgress)}
       </section>
     </div>
   </div>`;
-  bindYksVideo(activeLesson);
+  if(yksMode==='video')bindYksVideo(activeLesson);
 }
 
 function formatVideoTime(seconds){
@@ -648,11 +675,13 @@ function bindYksVideo(lesson){
 window.selectYksLesson=(si,li)=>{
   stopYksPlayback();
   scheduleYksSave(true);
+  yksMode='video';
   yksActive={subjectIndex:si,lessonIndex:li};
   const lesson=yksCatalogCache?.lowerSubjects?.[si]?.subjectDetails?.[li];
   if(lesson&&studentStatsCache){studentStatsCache.yksLearning={lastLessonId:lesson.id,subjectIndex:si,lessonIndex:li,updatedAt:Date.now()};scheduleYksSave();}
   renderYksMath();
 };
+window.switchYksMode=(mode)=>{stopYksPlayback();yksMode=mode;renderYksMath();};
 window.playYksRelative=(delta)=>{
   const flat=allYksLessons();const at=flat.findIndex(x=>x.si===yksActive.subjectIndex&&x.li===yksActive.lessonIndex);const next=flat[at+delta];if(next)selectYksLesson(next.si,next.li);
 };
