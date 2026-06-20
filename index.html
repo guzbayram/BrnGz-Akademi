@@ -236,6 +236,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .yks-course-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;}
 .yks-course-top h2{font:800 18px 'Manrope',sans-serif;}
 .yks-course-count{font-size:12px;color:var(--mu);font-weight:600;white-space:nowrap;}
+.yks-edit-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.yks-icon-btn{width:28px;height:28px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--mu);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.yks-icon-btn:hover{background:var(--pb);color:var(--p);border-color:var(--br);}
+.yks-icon-btn.danger:hover{background:#fee2e2;color:#b91c1c;border-color:#fecaca;}
+.yks-icon-btn .material-symbols-outlined{font-size:17px;}
 .yks-course-shell{display:grid;grid-template-columns:340px minmax(0,1fr);gap:14px;min-height:calc(100vh - 205px);}
 .yks-curriculum{background:#fff;border-radius:16px;padding:12px;overflow-y:auto;max-height:calc(100vh - 205px);box-shadow:0 4px 16px rgba(70,21,153,.06);scrollbar-width:thin;scrollbar-color:var(--primary-fixed-dim) transparent;}
 .yks-unit{border-bottom:1px solid var(--s-high);}
@@ -246,8 +251,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .yks-unit-name{font-size:12px;font-weight:700;line-height:1.3;flex:1;}
 .yks-unit-pct{font-size:10px;color:var(--mu);font-weight:700;}
 .yks-lessons{padding:0 4px 10px 38px;display:flex;flex-direction:column;gap:4px;}
-.yks-lesson{border:0;background:transparent;border-radius:9px;padding:9px 10px;display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:7px;text-align:left;cursor:pointer;color:var(--tx);font:600 11px 'Inter',sans-serif;line-height:1.35;width:100%;}
+.yks-lesson{border-radius:9px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px;color:var(--tx);font:600 11px 'Inter',sans-serif;line-height:1.35;width:100%;}
 .yks-lesson:hover{background:var(--s-cnt);}.yks-lesson.active{background:var(--pb);color:var(--p);}
+.yks-lesson-main{border:0;background:transparent;border-radius:9px;padding:9px 8px;display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:7px;text-align:left;cursor:pointer;color:inherit;font:inherit;line-height:inherit;width:100%;}
+.yks-lesson-actions{display:flex;align-items:center;gap:2px;padding-right:3px;}
 .yks-lesson-status{width:20px;height:20px;border-radius:50%;border:2px solid var(--s-highest);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;}
 .yks-lesson-status.started{border-color:var(--pl);color:var(--p);}.yks-lesson-status.done{border-color:#16a34a;background:#16a34a;}
 .yks-lesson-pct{font-size:10px;color:var(--mu);font-weight:700;}
@@ -421,7 +428,7 @@ const FASIKUL=[
   {id:'f7',t:'İş-Güç-Enerji',s:'Fizik 10. Sınıf',f:'is-guc-enerji.html',c:'green',n:'7'},
   {id:'f8',t:'Temel Matematik',s:'Matematik',f:'Temel_Matematik.html',c:'purple',n:'8'}
 ];
-const FASIKUL_ASSET_VERSION='20260620-f2-karne-sync';
+const FASIKUL_ASSET_VERSION='20260620-yks-crud';
 
 let CU=null,CP=null;
 let studentStatsCache=null,studentUserCache=null;
@@ -499,9 +506,95 @@ async function loadYksCatalog(){
   if(!res.ok)throw new Error('YKS içerik dosyası yüklenemedi.');
   const data=await res.json();
   if(!Array.isArray(data.lowerSubjects))throw new Error('YKS içerik biçimi geçersiz.');
-  yksCatalogCache=data;
-  return data;
+  let savedCatalog=null;
+  try{const saved=localStorage.getItem('yks_math_catalog_override_v1');if(saved)savedCatalog=JSON.parse(saved);}catch(_){savedCatalog=null;}
+  if(savedCatalog&&!Array.isArray(savedCatalog.lowerSubjects))savedCatalog=null;
+  yksCatalogCache=savedCatalog||data;
+  normalizeYksCatalog(yksCatalogCache);
+  return yksCatalogCache;
 }
+
+function makeYksId(prefix){return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;}
+function normalizeYksCatalog(catalog=yksCatalogCache){
+  (catalog?.lowerSubjects||[]).forEach((unit,si)=>{
+    unit.order=si+1;
+    unit.subjectDetails=unit.subjectDetails||[];
+    unit.subjectDetailCount=unit.subjectDetails.length;
+    unit.videoCount=unit.subjectDetails.length;
+    unit.subjectDetails.forEach((lesson,li)=>{lesson.order=li+1;if(!lesson.id)lesson.id=makeYksId('lesson');});
+  });
+}
+function persistYksCatalog(){
+  if(!yksCatalogCache)return;
+  normalizeYksCatalog(yksCatalogCache);
+  localStorage.setItem('yks_math_catalog_override_v1',JSON.stringify(yksCatalogCache));
+}
+function promptYksValue(label,current=''){
+  const value=prompt(label,current||'');
+  return value===null?null:value.trim();
+}
+
+window.addYksUnit=()=>{
+  const title=promptYksValue('Yeni ana konu adı');
+  if(!title)return;
+  const unit={order:(yksCatalogCache.lowerSubjects||[]).length+1,id:makeYksId('unit'),title,subjectDetailCount:0,videoCount:0,subjectDetails:[]};
+  yksCatalogCache.lowerSubjects.push(unit);
+  yksActive={subjectIndex:yksCatalogCache.lowerSubjects.length-1,lessonIndex:0};
+  persistYksCatalog();renderYksMath();
+};
+window.editYksUnit=(si,e)=>{
+  e?.preventDefault();e?.stopPropagation();
+  const unit=yksCatalogCache?.lowerSubjects?.[si];if(!unit)return;
+  const title=promptYksValue('Ana konu adı',unit.title);
+  if(!title)return;
+  unit.title=title;persistYksCatalog();renderYksMath();
+};
+window.deleteYksUnit=(si,e)=>{
+  e?.preventDefault();e?.stopPropagation();
+  const unit=yksCatalogCache?.lowerSubjects?.[si];if(!unit)return;
+  if(!confirm(`${unit.title} ana konusu silinsin mi?`))return;
+  yksCatalogCache.lowerSubjects.splice(si,1);
+  const maxSi=Math.max(0,(yksCatalogCache.lowerSubjects||[]).length-1);
+  yksActive={subjectIndex:Math.min(yksActive.subjectIndex,maxSi),lessonIndex:0};
+  persistYksCatalog();renderYksMath();
+};
+window.addYksLesson=(si,e)=>{
+  e?.preventDefault();e?.stopPropagation();
+  const unit=yksCatalogCache?.lowerSubjects?.[si];if(!unit)return;
+  const title=promptYksValue('Video başlığı');if(!title)return;
+  const videoUrl=promptYksValue('Video URL');if(videoUrl===null)return;
+  const practiceUrl=promptYksValue('Soru Çöz URL (opsiyonel)')||'';
+  const pastQuestionsUrl=promptYksValue('Çıkmış Sorular URL (opsiyonel)')||'';
+  const lesson={order:unit.subjectDetails.length+1,id:makeYksId('lesson'),title,lessonUrl:'',videoUrl,videoUrls:videoUrl?[videoUrl]:[],practiceUrl,pastQuestionsUrl,duration:null};
+  unit.subjectDetails.push(lesson);
+  yksActive={subjectIndex:si,lessonIndex:unit.subjectDetails.length-1};
+  persistYksCatalog();renderYksMath();
+};
+window.editYksLesson=(si,li,e)=>{
+  e?.preventDefault();e?.stopPropagation();
+  const lesson=yksCatalogCache?.lowerSubjects?.[si]?.subjectDetails?.[li];if(!lesson)return;
+  const title=promptYksValue('Video başlığı',lesson.title);if(!title)return;
+  const videoUrl=promptYksValue('Video URL',lesson.videoUrl||'');if(videoUrl===null)return;
+  const practiceUrl=promptYksValue('Soru Çöz URL (opsiyonel)',lesson.practiceUrl||'');if(practiceUrl===null)return;
+  const pastQuestionsUrl=promptYksValue('Çıkmış Sorular URL (opsiyonel)',lesson.pastQuestionsUrl||'');if(pastQuestionsUrl===null)return;
+  Object.assign(lesson,{title,videoUrl,videoUrls:videoUrl?[videoUrl]:[],practiceUrl,pastQuestionsUrl});
+  persistYksCatalog();renderYksMath();
+};
+window.deleteYksLesson=(si,li,e)=>{
+  e?.preventDefault();e?.stopPropagation();
+  const unit=yksCatalogCache?.lowerSubjects?.[si],lesson=unit?.subjectDetails?.[li];if(!lesson)return;
+  if(!confirm(`${lesson.title} videosu silinsin mi?`))return;
+  unit.subjectDetails.splice(li,1);
+  yksActive={subjectIndex:si,lessonIndex:Math.min(yksActive.lessonIndex,Math.max(0,unit.subjectDetails.length-1))};
+  persistYksCatalog();renderYksMath();
+};
+window.toggleYksUnit=(si,e)=>{
+  e?.preventDefault();
+  stopYksPlayback();
+  const unit=yksCatalogCache?.lowerSubjects?.[si];if(!unit)return;
+  yksActive={subjectIndex:si,lessonIndex:Math.min(yksActive.subjectIndex===si?yksActive.lessonIndex:0,Math.max(0,(unit.subjectDetails||[]).length-1))};
+  renderYksMath();
+};
 
 function yksProgress(){
   if(!studentStatsCache)studentStatsCache={};
@@ -607,34 +700,36 @@ function renderYksMath(){
   const overall=total?Math.round(flat.reduce((s,x)=>s+lessonPct(x.lesson.id),0)/total):0;
   const activeUnit=catalog.lowerSubjects[yksActive.subjectIndex];
   const activeLesson=activeUnit?.subjectDetails?.[yksActive.lessonIndex]||activeUnit?.subjectDetails?.[0];
-  if(!activeLesson)return;
+  if(!activeUnit)return;
   const currentFlat=flat.findIndex(x=>x.si===yksActive.subjectIndex&&x.li===yksActive.lessonIndex);
-  const currentProgress=lessonProgress(activeLesson.id);
+  const currentProgress=activeLesson?lessonProgress(activeLesson.id):{};
   $('tYks').innerHTML=`<div class="yks-wrap">
     <div class="yks-toolbar"><button class="yks-back" onclick="openYksLevel('tyt')"><span class="material-symbols-outlined" style="font-size:17px">arrow_back</span>TYT Dersleri</button><div class="yks-breadcrumb">TYT / Matematik</div></div>
     <div class="yks-course-head">
-      <div class="yks-course-top"><div><h2>Matematik (TYT)</h2><div class="yks-section-meta" style="margin:3px 0 0">${catalog.lowerSubjects.length} konu · ${total} video</div></div><div class="yks-course-count">${completed}/${total} tamamlandı · %${overall}</div></div>
+      <div class="yks-course-top"><div><h2>Matematik (TYT)</h2><div class="yks-section-meta" style="margin:3px 0 0">${catalog.lowerSubjects.length} konu · ${total} video</div></div><div class="yks-edit-bar"><button class="yks-icon-btn" onclick="addYksUnit()" title="Ana konu ekle" aria-label="Ana konu ekle"><span class="material-symbols-outlined">add</span></button><div class="yks-course-count">${completed}/${total} tamamlandı · %${overall}</div></div></div>
       <div class="app-prog-track"><div class="app-prog-fill" style="width:${overall}%"></div></div>
     </div>
     <div class="yks-course-shell">
       <aside class="yks-curriculum" aria-label="Matematik video müfredatı">${catalog.lowerSubjects.map((unit,si)=>`<details class="yks-unit" ${si===yksActive.subjectIndex?'open':''}>
-        <summary><span class="yks-unit-num">${unit.order||si+1}</span><span class="yks-unit-name">${esc(unit.title)}</span><span class="yks-unit-pct">%${unitProgress(unit)}</span></summary>
+        <summary onclick="toggleYksUnit(${si},event)"><span class="yks-unit-num">${unit.order||si+1}</span><span class="yks-unit-name">${esc(unit.title)}</span><span class="yks-unit-pct">%${unitProgress(unit)}</span><span class="yks-edit-bar"><button class="yks-icon-btn" onclick="editYksUnit(${si},event)" title="Ana konuyu düzenle" aria-label="Ana konuyu düzenle"><span class="material-symbols-outlined">edit</span></button><button class="yks-icon-btn" onclick="addYksLesson(${si},event)" title="Video ekle" aria-label="Video ekle"><span class="material-symbols-outlined">add</span></button><button class="yks-icon-btn danger" onclick="deleteYksUnit(${si},event)" title="Ana konuyu sil" aria-label="Ana konuyu sil"><span class="material-symbols-outlined">delete</span></button></span></summary>
         <div class="yks-lessons">${(unit.subjectDetails||[]).map((lesson,li)=>{
           const pct=lessonPct(lesson.id),done=lessonProgress(lesson.id).completed;
-          return `<button class="yks-lesson ${si===yksActive.subjectIndex&&li===yksActive.lessonIndex?'active':''}" data-video-id="${esc(lesson.id)}" onclick="selectYksLesson(${si},${li})"><span class="yks-lesson-status ${done?'done':pct?'started':''}">${done?'✓':li+1}</span><span>${esc(lesson.title)}</span><span class="yks-lesson-pct">${pct?'%'+pct:''}</span></button>`;
+          return `<div class="yks-lesson ${si===yksActive.subjectIndex&&li===yksActive.lessonIndex?'active':''}" data-video-id="${esc(lesson.id)}"><button class="yks-lesson-main" onclick="selectYksLesson(${si},${li})"><span class="yks-lesson-status ${done?'done':pct?'started':''}">${done?'✓':li+1}</span><span>${esc(lesson.title)}</span><span class="yks-lesson-pct">${pct?'%'+pct:''}</span></button><span class="yks-lesson-actions"><button class="yks-icon-btn" onclick="editYksLesson(${si},${li},event)" title="Videoyu düzenle" aria-label="Videoyu düzenle"><span class="material-symbols-outlined">edit</span></button><button class="yks-icon-btn danger" onclick="deleteYksLesson(${si},${li},event)" title="Videoyu sil" aria-label="Videoyu sil"><span class="material-symbols-outlined">delete</span></button></span></div>`;
         }).join('')}</div>
       </details>`).join('')}</aside>
       <section class="yks-player-card">
+        ${activeLesson?`
         <div class="yks-study-tabs" role="tablist" aria-label="Ders çalışma modu">
           <button class="yks-study-tab ${yksMode==='video'?'active':''}" onclick="switchYksMode('video')"><span class="material-symbols-outlined">play_circle</span>Video</button>
           <button class="yks-study-tab ${yksMode==='solve'?'active':''}" onclick="switchYksMode('solve')" ${activeLesson.practiceUrl?'':'disabled'}><span class="material-symbols-outlined">edit_note</span>Soru Çöz</button>
           <button class="yks-study-tab ${yksMode==='past'?'active':''}" onclick="switchYksMode('past')" ${activeLesson.pastQuestionsUrl?'':'disabled'}><span class="material-symbols-outlined">history_edu</span>Çıkmış Sorular</button>
         </div>
         ${renderYksStudyBody(activeLesson,activeUnit,currentFlat,flat,currentProgress)}
+        `:`<div class="yks-practice-launch"><div class="yks-practice-launch-icon"><span class="material-symbols-outlined">video_library</span></div><div class="yks-video-kicker">${esc(activeUnit.title)}</div><div class="yks-practice-title">Bu ana konuda video yok</div><div class="yks-practice-sub">Yeni video ekleyerek listeyi başlatın.</div><button class="yks-practice-open" onclick="addYksLesson(${yksActive.subjectIndex},event)"><span class="material-symbols-outlined" style="font-size:17px">add</span>Video ekle</button></div>`}
       </section>
     </div>
   </div>`;
-  if(yksMode==='video')bindYksVideo(activeLesson);
+  if(activeLesson&&yksMode==='video')bindYksVideo(activeLesson);
 }
 
 function formatVideoTime(seconds){
