@@ -421,7 +421,7 @@ const FASIKUL=[
   {id:'f7',t:'İş-Güç-Enerji',s:'Fizik 10. Sınıf',f:'is-guc-enerji.html',c:'green',n:'7'},
   {id:'f8',t:'Temel Matematik',s:'Matematik',f:'Temel_Matematik.html',c:'purple',n:'8'}
 ];
-const FASIKUL_ASSET_VERSION='20260619-f2-reset';
+const FASIKUL_ASSET_VERSION='20260620-f2-karne-sync';
 
 let CU=null,CP=null;
 let studentStatsCache=null,studentUserCache=null;
@@ -705,7 +705,7 @@ window.doLogin=async()=>{
   if(!ok){err.textContent='Kullanıcı adı veya şifre hatalı.';err.style.display='block';btn.disabled=false;btn.textContent='Giriş Yap';}
 };
 
-window.openFrame=(url,title,params={})=>{
+window.openFrame=async(url,title,params={})=>{
   const lastPos=params.lastPos||{};
   const p=new URLSearchParams({
     dd_uid:params.uid||'',
@@ -726,8 +726,36 @@ window.openFrame=(url,title,params={})=>{
   // Son açılan fasikülü kaydet (uygulama kapatılıp açılınca hatırlatmak için)
   if(params.uid&&params.fid) try{localStorage.setItem('dd_last_'+params.uid,params.fid);}catch(e){}
   const sep=url.includes('?')?'&':'?';
-  $('fasikülFrame').src=url+sep+p.toString();
   $('frmOverlay').classList.add('on');
+  // Fasikül yüklenince önceki ilerlemeyi gönder
+  if(params.uid&&params.fid){
+    try{
+      const snap=await getDoc(doc(db,'stats',params.uid));
+      const prev=(snap.exists()?snap.data():{})[params.fid]||{};
+      // URL parametrelerine de önceki değerleri ekle
+      p.set('dd_correct',prev.correct||0);
+      p.set('dd_wrong',prev.wrong||0);
+      p.set('dd_shown',prev.shown||0);
+      p.set('dd_minutes',prev.minutes||0);
+      const initData={
+        type:'initStats',
+        correct:prev.correct||0,
+        wrong:prev.wrong||0,
+        shown:prev.shown||0,
+        minutes:prev.minutes||0,
+        sections:prev.sections||{},
+        peekSections:prev.peekSections||{}
+      };
+      $('fasikülFrame').src=url+sep+p.toString();
+      const frame=$('fasikülFrame');
+      const sendInit=()=>{try{frame.contentWindow.postMessage(initData,'*');}catch(_){}};
+      frame.onload=()=>{setTimeout(sendInit,300);setTimeout(sendInit,1200);};
+    }catch(_){
+      $('fasikülFrame').src=url+sep+p.toString();
+    }
+  } else {
+    $('fasikülFrame').src=url+sep+p.toString();
+  }
 };
 window.closeFrame=async()=>{
   $('frmOverlay').classList.remove('on');
