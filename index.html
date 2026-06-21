@@ -255,6 +255,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .yks-unit-num{width:28px;height:28px;border-radius:8px;background:var(--s-cnt);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
 .yks-unit-name{font-size:12px;font-weight:700;line-height:1.3;flex:1;}
 .yks-unit-pct{font-size:10px;color:var(--mu);font-weight:700;}
+.yks-unit-duration{font-size:10px;color:var(--mu);font-weight:600;white-space:nowrap;}
 .yks-lessons{padding:0 4px 10px 38px;display:flex;flex-direction:column;gap:4px;}
 .yks-lesson{border-radius:9px;display:block;color:var(--tx);font:600 11px 'Inter',sans-serif;line-height:1.35;width:100%;}
 .yks-lesson:hover{background:var(--s-cnt);}.yks-lesson.active{background:var(--pb);color:var(--p);}
@@ -769,12 +770,12 @@ function renderYksMath(){
   $('tYks').innerHTML=`<div class="yks-wrap">
     <div class="yks-toolbar"><button class="yks-back" onclick="openYksLevel('tyt')"><span class="material-symbols-outlined" style="font-size:17px">arrow_back</span>TYT Dersleri</button><div class="yks-breadcrumb">TYT / Matematik</div></div>
     <div class="yks-course-head">
-      <div class="yks-course-top"><div><h2>Matematik (TYT)</h2><div class="yks-section-meta" style="margin:3px 0 0">${catalog.lowerSubjects.length} konu · ${total} video</div></div><div class="yks-course-count">${completed}/${total} tamamlandı · %${overall}</div></div>
+      <div class="yks-course-top"><div><h2>Matematik (TYT)</h2><div class="yks-section-meta" style="margin:3px 0 0">${catalog.lowerSubjects.length} konu · ${total} video</div></div><div class="yks-course-count">${completed}/${total} tamamlandı · ${formatYksDurationSum(sumYksDurationSeconds(flat.map(x=>x.lesson)))} · %${overall}</div></div>
       <div class="app-prog-track"><div class="app-prog-fill" style="width:${overall}%"></div></div>
     </div>
     <div class="yks-course-shell">
       <aside class="yks-curriculum" aria-label="Matematik video müfredatı">${catalog.lowerSubjects.map((unit,si)=>`<details class="yks-unit" ${si===yksOpenUnitIndex?'open':''}>
-        <summary onclick="toggleYksUnit(${si},event)"><span class="yks-unit-num">${unit.order||si+1}</span><span class="yks-unit-name">${esc(unit.title)}</span><span class="yks-unit-pct">%${unitProgress(unit)}</span></summary>
+        <summary onclick="toggleYksUnit(${si},event)"><span class="yks-unit-num">${unit.order||si+1}</span><span class="yks-unit-name">${esc(unit.title)}</span><span class="yks-unit-duration">${formatYksDurationSum(sumYksDurationSeconds(unit.subjectDetails))}</span><span class="yks-unit-pct">%${unitProgress(unit)}</span></summary>
         <div class="yks-lessons">${(unit.subjectDetails||[]).map((lesson,li)=>{
           const pct=lessonPct(lesson.id),done=lessonProgress(lesson.id).completed;
           const knownDur=lesson.duration||lessonProgress(lesson.id).duration;
@@ -842,6 +843,21 @@ function parseYksDurationToSeconds(value){
     return parts.reduce((acc,p)=>acc*60+p,0);
   }
   return Number(value)||0;
+}
+
+// Bir dizi videonun toplam süresini saniye olarak toplar.
+function sumYksDurationSeconds(lessons){
+  return (lessons||[]).reduce((sum,l)=>{
+    const dur=l.duration||lessonProgress(l.id)?.duration||0;
+    return sum+parseYksDurationToSeconds(dur);
+  },0);
+}
+// Toplam saniyeyi "1 sa 12 dk" / "42 dk" gibi okunabilir biçime çevirir.
+function formatYksDurationSum(totalSeconds){
+  const s=Math.max(0,Math.round(totalSeconds));
+  const h=Math.floor(s/3600),m=Math.round((s%3600)/60);
+  if(h>0)return `${h} sa ${String(m).padStart(2,'0')} dk`;
+  return `${m} dk`;
 }
 
 function updateYksProgressDisplay(id,pct,current){
