@@ -417,7 +417,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{initializeAuth,browserSessionPersistence,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,serverTimestamp,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,serverTimestamp,onSnapshot,runTransaction}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FB=initializeApp({apiKey:"AIzaSyCfkt5Pf82o2InXvcqRdkHiXEkD-18_u0M",authDomain:"dijital-fasikul.firebaseapp.com",projectId:"dijital-fasikul",storageBucket:"dijital-fasikul.firebasestorage.app",messagingSenderId:"127715156463",appId:"1:127715156463:web:b69b4dc29b6762dc69561a",databaseURL:"https://dijital-fasikul-default-rtdb.europe-west1.firebasedatabase.app"});
 const auth=initializeAuth(FB,{persistence:browserSessionPersistence}),db=getFirestore(FB);
@@ -924,29 +924,40 @@ window.addEventListener('message',async e=>{
   if(e.data&&e.data.type==='statsUpdate'&&CU&&e.data.uid===CU.uid){
     try{
       const ref=doc(db,'stats',CU.uid);
-      const snap=await getDoc(ref);
-      const existing=snap.exists()?snap.data():{};
-      const prev=existing[e.data.fid]||{};
-      await setDoc(ref,{...existing,[e.data.fid]:{
-        correct:e.data.correct,
-        wrong:e.data.wrong,
-        shown:e.data.shown||0,
-        minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
-        solutionViews:e.data.solutionViews||0,
-        lastPos:e.data.lastPos||prev.lastPos||null,
-        sections:e.data.sections||{},
-        peekSections:e.data.peekSections||{}
-      }});
-      studentStatsCache={...existing,[e.data.fid]:{
-        correct:e.data.correct,
-        wrong:e.data.wrong,
-        shown:e.data.shown||0,
-        minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
-        solutionViews:e.data.solutionViews||0,
-        lastPos:e.data.lastPos||prev.lastPos||null,
-        sections:e.data.sections||{},
-        peekSections:e.data.peekSections||{}
-      }};
+      const fid=e.data.fid;
+      // Bu yazma için benzersiz bir sıra numarası (yarış durumlarında "en yeni veri" karşılaştırması için)
+      const clientSeq=Date.now();
+      let savedEntry=null;
+      // runTransaction: aynı dokümana eşzamanlı yazan başka bir kaynak (örn. fasikül
+      // sayfasının kendisi veya başka bir sekme/cihaz) varsa Firestore otomatik olarak
+      // okuma+yazmayı yeniden dener; böylece "son yazan diğerinin verisini siler" riski kalkar.
+      await runTransaction(db,async(tx)=>{
+        const snap=await tx.get(ref);
+        const existing=snap.exists()?snap.data():{};
+        const prev=existing[fid]||{};
+        // Eğer dokümanda bu fasikül için daha yeni bir clientSeq varsa
+        // (başka bir sekme/cihaz bizden sonra yazdıysa), bizim eski verimizi üstüne yazma.
+        if(prev._clientSeq&&prev._clientSeq>clientSeq){return;}
+        savedEntry={
+          correct:e.data.correct,
+          wrong:e.data.wrong,
+          shown:e.data.shown||0,
+          minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
+          solutionViews:e.data.solutionViews||0,
+          lastPos:e.data.lastPos||prev.lastPos||null,
+          sections:e.data.sections||{},
+          peekSections:e.data.peekSections||{},
+          _clientSeq:clientSeq,
+          updatedAt:serverTimestamp()
+        };
+        tx.set(ref,{[fid]:savedEntry},{merge:true});
+      });
+      if(savedEntry){
+        studentStatsCache={...(studentStatsCache||{}),[fid]:savedEntry};
+      } else {
+        // Bizim verimiz daha eskiymiş; en güncel hâli tekrar oku ki ekran tutarlı kalsın.
+        await loadStudentCache(true);
+      }
     }catch(_){}
     return;
   }
