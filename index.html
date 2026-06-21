@@ -478,6 +478,8 @@ const YKS_SUBJECT_DEFAULTS=[
   {id:'tur-tyt',name:'Türkçe (TYT)',note:'Yakında',icon:'lock',enabled:false}
 ];
 const fmt=m=>!m?'0dk':m<60?m+'dk':Math.floor(m/60)+'s '+(m%60)+'dk';
+const statMinutes=fs=>Math.max(0,Number(fs?.minutesTotal ?? fs?.minutes ?? 0)||0);
+const statSessionMinutes=fs=>Math.max(0,Number(fs?.sessionMinutes ?? 0)||0);
 const ini=n=>(n||'?').charAt(0).toUpperCase();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -512,7 +514,7 @@ function renderFasCards(statsData,userData){
     return 0;
   });
   sortedFas.forEach(f=>{
-    const fs=us[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0;
+    const fs=us[f.id]||{},c=fs.correct||0,w=fs.wrong||0,m=statMinutes(fs);
     const started=c||w||m,total=c+w,pct=total?Math.round(c/total*100):0;
     const numPad=f.n.toString().padStart(2,'0');
     const isLast=f.id===lastFid&&started;
@@ -529,7 +531,7 @@ function renderFasCards(statsData,userData){
       '<div class="fsub">'+f.s+'</div>'+
       '<div class="fc-meta">'+
         (c||w?'<div class="fc-meta-item">✓ '+c+' Doğru · '+w+' Yanlış</div>':'')+
-        (m?'<div class="fc-meta-item">⏱ '+fmt(m)+'</div>':'')+
+        (m?'<div class="fc-meta-item">⏱ '+fmt(m)+' toplam</div>':'')+
         (!started?'<div class="fc-meta-item" style="color:var(--mu);font-style:italic;">Henüz başlanmadı</div>':'')+
       '</div>'+
       '<div class="fc-footer">'+
@@ -1047,13 +1049,15 @@ window.openFrame=async(url,title,params={})=>{
       p.set('dd_correct',prev.correct||0);
       p.set('dd_wrong',prev.wrong||0);
       p.set('dd_shown',prev.shown||0);
-      p.set('dd_minutes',prev.minutes||0);
+      p.set('dd_minutes',statMinutes(prev));
       const initData={
         type:'initStats',
         correct:prev.correct||0,
         wrong:prev.wrong||0,
         shown:prev.shown||0,
-        minutes:prev.minutes||0,
+        minutes:statMinutes(prev),
+        minutesTotal:statMinutes(prev),
+        sessionMinutes:statSessionMinutes(prev),
         sections:prev.sections||{},
         peekSections:prev.peekSections||{}
       };
@@ -1120,15 +1124,26 @@ window.addEventListener('message',async e=>{
         // kayıt, eski sekmeden gelen veriyle "geri gelir".
         const resetAt=existing[fid+'_resetAt']||0;
         if(resetAt&&e.data.sessionStart&&e.data.sessionStart<resetAt){return;}
+        const previousMinutes=statMinutes(prev);
+        const incomingTotal=Number(e.data.minutesTotal ?? e.data.minutes ?? 0)||0;
+        const incomingSession=Math.max(0,Number(e.data.sessionMinutes ?? 0)||0);
+        const prevSessionStart=prev._sessionStart||0;
+        const prevSessionMinutes=prevSessionStart&&prevSessionStart===e.data.sessionStart?Math.max(0,Number(prev._sessionMinutes||0)||0):0;
+        const sessionDelta=Math.max(0,incomingSession-prevSessionMinutes);
+        const mergedMinutes=Math.max(previousMinutes,incomingTotal,previousMinutes+sessionDelta);
         savedEntry={
           correct:e.data.correct,
           wrong:e.data.wrong,
           shown:e.data.shown||0,
-          minutes:e.data.minutes!=null?e.data.minutes:(prev.minutes||0),
+          minutes:mergedMinutes,
+          minutesTotal:mergedMinutes,
+          sessionMinutes:incomingSession,
           solutionViews:e.data.solutionViews||0,
           lastPos:e.data.lastPos||prev.lastPos||null,
           sections:e.data.sections||{},
           peekSections:e.data.peekSections||{},
+          _sessionStart:e.data.sessionStart||prev._sessionStart||0,
+          _sessionMinutes:incomingSession,
           _clientSeq:clientSeq,
           updatedAt:serverTimestamp()
         };
@@ -1260,8 +1275,8 @@ async function renderHome(){
   }
   const data=studentStatsCache||{};
   const visibleFas=visibleFasikulList();
-  let tc=0,tw=0,tm=0,tsv=0;
-  visibleFas.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;tsv+=fs.solutionViews||fs.shown||0;});
+  let tc=0,tw=0,tm=0,tsm=0,tsv=0;
+  visibleFas.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=statMinutes(fs);tsm+=statSessionMinutes(fs);tsv+=fs.solutionViews||fs.shown||0;});
   const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
   const daily=data.daily||{};
   const hm=buildStudentHeatmap(daily);
@@ -1277,7 +1292,7 @@ async function renderHome(){
 
   const fasStats=visibleFas.map(f=>{
     const fs=data[f.id]||{};
-    const c=fs.correct||0,w=fs.wrong||0,m=fs.minutes||0,sv=fs.solutionViews||fs.shown||0;
+    const c=fs.correct||0,w=fs.wrong||0,m=statMinutes(fs),sv=fs.solutionViews||fs.shown||0;
     const total=c+w;
     return{...f,c,w,m,sv,total,pct:total?Math.round(c/total*100):0,started:!!(c||w||m)};
   });
@@ -1306,8 +1321,8 @@ async function renderHome(){
     </div>
     <div class="app-stat-card">
       <div class="app-stat-icon"><span class="material-symbols-outlined">schedule</span></div>
-      <div class="app-stat-val" id="hs-time">${fmt(tm)}</div>
-      <div class="app-stat-label">Toplam Süre</div>
+      <div class="app-stat-val" id="hs-time">${fmt(tsm)} / ${fmt(tm)}</div>
+      <div class="app-stat-label">Bu Oturumdaki Süre / Baştan Beri Toplam Süre</div>
     </div>
   </div>
 
@@ -1375,7 +1390,7 @@ async function renderAyarlar(){
   if(!studentStatsCache) await loadStudentCache();
   const data=studentStatsCache||{};
   let tc=0,tw=0,tm=0;
-  FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=fs.minutes||0;});
+  FASIKUL.forEach(f=>{const fs=data[f.id]||{};tc+=fs.correct||0;tw+=fs.wrong||0;tm+=statMinutes(fs);});
   const pct=tc+tw?Math.round(tc/(tc+tw)*100):0;
   el.innerHTML=`
   <div style="max-width:600px;margin:0 auto;">
@@ -1393,7 +1408,7 @@ async function renderAyarlar(){
     <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(70,21,153,.06);margin-bottom:16px;">
       <div style="font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:var(--tx);margin-bottom:16px;">📊 Genel İstatistik</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
-        ${[{l:'Toplam Soru',v:tc+tw,c:'var(--p)'},{l:'Doğru',v:tc,c:'#16a34a'},{l:'Yanlış',v:tw,c:'#dc2626'},{l:'Başarı',v:'%'+pct,c:'var(--p)'},{l:'Süre',v:fmt(tm),c:'var(--p)'},{l:'Aktif Fasikül',v:FASIKUL.filter(f=>{const d=data[f.id]||{};return d.correct||d.wrong||d.minutes;}).length,c:'var(--p)'}]
+        ${[{l:'Toplam Soru',v:tc+tw,c:'var(--p)'},{l:'Doğru',v:tc,c:'#16a34a'},{l:'Yanlış',v:tw,c:'#dc2626'},{l:'Başarı',v:'%'+pct,c:'var(--p)'},{l:'Süre',v:fmt(tm),c:'var(--p)'},{l:'Aktif Fasikül',v:FASIKUL.filter(f=>{const d=data[f.id]||{};return d.correct||d.wrong||statMinutes(d);}).length,c:'var(--p)'}]
           .map(s=>`<div style="background:var(--s-low);border-radius:12px;padding:14px;text-align:center;">
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--mu);letter-spacing:.08em;margin-bottom:6px;">${s.l}</div>
             <div style="font-family:'Manrope',sans-serif;font-size:22px;font-weight:900;color:${s.c};">${s.v}</div>
