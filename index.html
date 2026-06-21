@@ -258,10 +258,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 .yks-lessons{padding:0 4px 10px 38px;display:flex;flex-direction:column;gap:4px;}
 .yks-lesson{border-radius:9px;display:block;color:var(--tx);font:600 11px 'Inter',sans-serif;line-height:1.35;width:100%;}
 .yks-lesson:hover{background:var(--s-cnt);}.yks-lesson.active{background:var(--pb);color:var(--p);}
-.yks-lesson-main{border:0;background:transparent;border-radius:9px;padding:9px 8px;display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:7px;text-align:left;cursor:pointer;color:inherit;font:inherit;line-height:inherit;width:100%;}
-.yks-lesson-status{width:20px;height:20px;border-radius:50%;border:2px solid var(--s-highest);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;}
-.yks-lesson-status.started{border-color:var(--pl);color:var(--p);}.yks-lesson-status.done{border-color:#16a34a;background:#16a34a;}
+.yks-lesson-main{border:0;background:transparent;border-radius:9px;padding:9px 8px;display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;align-items:center;gap:7px;text-align:left;cursor:pointer;color:inherit;font:inherit;line-height:inherit;width:100%;}
+.yks-lesson-status{width:20px;height:20px;border-radius:50%;border:2px solid var(--s-highest);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--mu);}
+.yks-lesson-status.started{border-color:var(--pl);color:var(--p);}.yks-lesson-status.done{border-color:#16a34a;background:#16a34a;color:#fff;}
 .yks-lesson-pct{font-size:10px;color:var(--mu);font-weight:700;}
+.yks-lesson-duration{font-size:10px;color:var(--mu);font-weight:600;white-space:nowrap;}
 .yks-player-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 16px rgba(70,21,153,.06);min-width:0;align-self:start;}
 .yks-study-tabs{display:flex;gap:6px;margin-bottom:12px;padding:4px;background:var(--s-low);border-radius:11px;overflow-x:auto;scrollbar-width:none;}
 .yks-study-tabs::-webkit-scrollbar{display:none;}
@@ -776,7 +777,9 @@ function renderYksMath(){
         <summary onclick="toggleYksUnit(${si},event)"><span class="yks-unit-num">${unit.order||si+1}</span><span class="yks-unit-name">${esc(unit.title)}</span><span class="yks-unit-pct">%${unitProgress(unit)}</span></summary>
         <div class="yks-lessons">${(unit.subjectDetails||[]).map((lesson,li)=>{
           const pct=lessonPct(lesson.id),done=lessonProgress(lesson.id).completed;
-          return `<div class="yks-lesson ${si===yksActive.subjectIndex&&li===yksActive.lessonIndex?'active':''}" data-video-id="${esc(lesson.id)}"><button class="yks-lesson-main" onclick="selectYksLesson(${si},${li})"><span class="yks-lesson-status ${done?'done':pct?'started':''}">${done?'✓':li+1}</span><span>${esc(lesson.title)}</span><span class="yks-lesson-pct">${pct?'%'+pct:''}</span></button></div>`;
+          const knownDur=lesson.duration||lessonProgress(lesson.id).duration;
+          const durLabel=knownDur?formatVideoTime(knownDur):'…';
+          return `<div class="yks-lesson ${si===yksActive.subjectIndex&&li===yksActive.lessonIndex?'active':''}" data-video-id="${esc(lesson.id)}"><button class="yks-lesson-main" onclick="selectYksLesson(${si},${li})"><span class="yks-lesson-status ${done?'done':pct?'started':''}">${done?'✓':li+1}</span><span>${esc(lesson.title)}</span><span class="yks-lesson-duration">${durLabel}</span><span class="yks-lesson-pct">${pct?'%'+pct:''}</span></button></div>`;
         }).join('')}</div>
       </details>`).join('')}</aside>
       <section class="yks-player-card">
@@ -792,6 +795,32 @@ function renderYksMath(){
     </div>
   </div>`;
   if(activeLesson&&yksMode==='video')bindYksVideo(activeLesson);
+  primeYksDurations(catalog.lowerSubjects[yksOpenUnitIndex]);
+}
+
+// Videoyu oynatmadan sadece süresini (metadata) öğrenmek için arka planda
+// gizli <video> elemanları kullanır. Süre bir kez öğrenildiğinde önbelleğe
+// alınır (yksVideoProgress[id].duration) ki tekrar tekrar indirilmesin.
+function primeYksDurations(unit){
+  if(!unit||!unit.subjectDetails)return;
+  unit.subjectDetails.forEach(lesson=>{
+    if(!lesson?.id||!lesson.videoUrl)return;
+    const prog=lessonProgress(lesson.id);
+    if(lesson.duration||prog.duration)return; // zaten biliniyor
+    const probe=document.createElement('video');
+    probe.preload='metadata';probe.muted=true;probe.src=lesson.videoUrl;
+    probe.addEventListener('loadedmetadata',()=>{
+      const dur=Math.round(probe.duration||0);
+      if(!dur||!Number.isFinite(dur))return;
+      const p=yksProgress();
+      p[lesson.id]=Object.assign({},p[lesson.id],{duration:dur});
+      const row=document.querySelector(`.yks-lesson[data-video-id="${CSS.escape(lesson.id)}"] .yks-lesson-duration`);
+      if(row)row.textContent=formatVideoTime(dur);
+      scheduleYksSave(); // bir süre sonra Firestore'a kaydet, tekrar indirme olmasın
+      probe.removeAttribute('src');probe.load();
+    },{once:true});
+    probe.addEventListener('error',()=>{},{once:true});
+  });
 }
 
 function formatVideoTime(seconds){
