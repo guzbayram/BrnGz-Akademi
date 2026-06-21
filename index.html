@@ -938,6 +938,12 @@ window.addEventListener('message',async e=>{
         // Eğer dokümanda bu fasikül için daha yeni bir clientSeq varsa
         // (başka bir sekme/cihaz bizden sonra yazdıysa), bizim eski verimizi üstüne yazma.
         if(prev._clientSeq&&prev._clientSeq>clientSeq){return;}
+        // GÜVENLİK KİLİDİ: Admin bu fasikülü sıfırladıysa (resetAt yazıldıysa) ve
+        // bu mesaj o sıfırlamadan ÖNCE açılmış bir oturumdan geliyorsa
+        // (sessionStart < resetAt), bu bayat veriyi yazma — yoksa sıfırlanan
+        // kayıt, eski sekmeden gelen veriyle "geri gelir".
+        const resetAt=existing[fid+'_resetAt']||0;
+        if(resetAt&&e.data.sessionStart&&e.data.sessionStart<resetAt){return;}
         savedEntry={
           correct:e.data.correct,
           wrong:e.data.wrong,
