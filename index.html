@@ -778,7 +778,7 @@ function renderYksMath(){
         <div class="yks-lessons">${(unit.subjectDetails||[]).map((lesson,li)=>{
           const pct=lessonPct(lesson.id),done=lessonProgress(lesson.id).completed;
           const knownDur=lesson.duration||lessonProgress(lesson.id).duration;
-          const durLabel=knownDur?formatVideoTime(knownDur):'…';
+          const durLabel=knownDur?formatYksDuration(knownDur):'…';
           return `<div class="yks-lesson ${si===yksActive.subjectIndex&&li===yksActive.lessonIndex?'active':''}" data-video-id="${esc(lesson.id)}"><button class="yks-lesson-main" onclick="selectYksLesson(${si},${li})"><span class="yks-lesson-status ${done?'done':pct?'started':''}">${done?'✓':li+1}</span><span>${esc(lesson.title)}</span><span class="yks-lesson-duration">${durLabel}</span><span class="yks-lesson-pct">${pct?'%'+pct:''}</span></button></div>`;
         }).join('')}</div>
       </details>`).join('')}</aside>
@@ -826,6 +826,22 @@ function primeYksDurations(unit){
 function formatVideoTime(seconds){
   const s=Math.max(0,Math.floor(Number(seconds)||0)),m=Math.floor(s/60),r=s%60;
   return `${m}:${String(r).padStart(2,'0')}`;
+}
+
+// JSON kataloğundaki "duration" alanı "15:35" gibi metin olarak geliyor;
+// ileride saniye (sayı) olarak gelirse de doğru biçimde göstersin.
+function formatYksDuration(value){
+  if(typeof value==='string'&&value.includes(':'))return value;
+  return formatVideoTime(value);
+}
+function parseYksDurationToSeconds(value){
+  if(typeof value==='number')return value;
+  if(typeof value==='string'&&value.includes(':')){
+    const parts=value.split(':').map(Number);
+    if(parts.some(isNaN))return 0;
+    return parts.reduce((acc,p)=>acc*60+p,0);
+  }
+  return Number(value)||0;
 }
 
 function updateYksProgressDisplay(id,pct,current){
