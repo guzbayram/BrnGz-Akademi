@@ -461,13 +461,17 @@ const FASIKUL_ASSET_VERSION='20260621-yks-json-catalogs';
 let CU=null,CP=null;
 let studentStatsCache=null,studentUserCache=null;
 let yksCatalogCache=null,yksView='root',yksMode='video',yksActive={subjectIndex:0,lessonIndex:0},yksOpenUnitIndex=0,yksSaveTimer=null,yksLastPersist=0;
-let yksSubjectsCache=null,yksSubjectDragIndex=null,yksActiveDirectoryIndex=0,yksSubjectEditIndex=null,yksPendingCatalog=null;
+let yksSubjectsCache=null,yksSubjectDragIndex=null,yksActiveDirectoryIndex=0,yksSubjectEditIndex=null,yksPendingCatalog=null,yksPendingCatalogUrl='';
+const YKS_DEFAULT_CATALOGS={
+  'mat-tyt':'./mebi-tyt-matematik-video-ders-link.json',
+  'fiz-tyt':'./mebi-matematik-destek-video-ders-link.json'
+};
 const YKS_SUBJECT_DEFAULTS=[
   {id:'bio-tyt',name:'Biyoloji (TYT)',note:'Yakında',icon:'lock',enabled:false},
   {id:'geo-tyt',name:'Coğrafya (TYT)',note:'Yakında',icon:'lock',enabled:false},
   {id:'din-tyt',name:'Din Kültürü ve Ahlak Bilgisi (TYT)',note:'Yakında',icon:'lock',enabled:false},
   {id:'fel-tyt-ayt',name:'Felsefe (TYT/AYT)',note:'Yakında',icon:'lock',enabled:false},
-  {id:'fiz-tyt',name:'Fizik (TYT)',note:'Yakında',icon:'lock',enabled:false},
+  {id:'fiz-tyt',name:'Fizik (TYT)',note:'26 konu · 28 video',icon:'calculate',enabled:true,catalogUrl:'./mebi-matematik-destek-video-ders-link.json'},
   {id:'kim-tyt',name:'Kimya (TYT)',note:'Yakında',icon:'lock',enabled:false},
   {id:'mat-tyt',name:'Matematik (TYT)',note:'26 konu · 128 video',icon:'calculate',enabled:true,kind:'math'},
   {id:'tar-tyt',name:'Tarih (TYT)',note:'Yakında',icon:'lock',enabled:false},
@@ -542,15 +546,10 @@ function renderFasCards(statsData,userData){
 async function loadYksCatalog(directoryIndex=yksActiveDirectoryIndex){
   const subject=loadYksSubjects()[directoryIndex];
   if(!subject)throw new Error('Ders dizini bulunamadı.');
-  if(subject.catalog){
-    yksCatalogCache=structuredClone(subject.catalog);
-  }else if(subject.kind==='math'){
-    const res=await fetch('./mebi-tyt-matematik-video-ders-link.json',{cache:'no-cache'});
-    if(!res.ok)throw new Error('YKS içerik dosyası yüklenemedi.');
-    yksCatalogCache=await res.json();
-  }else{
-    throw new Error('Bu ders dizinine henüz video JSON dosyası yüklenmedi.');
-  }
+  if(!subject.catalogUrl)throw new Error('Bu ders dizinine henüz video JSON dosyası bağlanmadı.');
+  const res=await fetch(subject.catalogUrl,{cache:'no-cache'});
+  if(!res.ok)throw new Error(`Video kataloğu yüklenemedi (${res.status}).`);
+  yksCatalogCache=await res.json();
   if(!Array.isArray(yksCatalogCache?.lowerSubjects))throw new Error('YKS içerik biçimi geçersiz.');
   normalizeYksCatalog(yksCatalogCache);
   return yksCatalogCache;
@@ -567,15 +566,19 @@ function normalizeYksCatalog(catalog=yksCatalogCache){
   });
 }
 function normalizeYksSubjects(list){
-  return (Array.isArray(list)?list:[]).map((subject,i)=>({
-    id:subject.id||makeYksId('subject'),
-    name:subject.name||`Ders ${i+1}`,
-    note:subject.note||'Yakında',
-    icon:subject.icon||((subject.enabled||subject.kind==='math')?'calculate':'lock'),
-    enabled:!!subject.enabled,
-    kind:subject.kind||'',
-    catalog:Array.isArray(subject.catalog?.lowerSubjects)?subject.catalog:null
-  }));
+  return (Array.isArray(list)?list:[]).map((subject,i)=>{
+    const catalogUrl=subject.catalogUrl||YKS_DEFAULT_CATALOGS[subject.id]||'';
+    const migratedFizikNote=subject.id==='fiz-tyt'&&['Yakında','Devam'].includes(subject.note)?'26 konu · 28 video':subject.note;
+    return{
+      id:subject.id||makeYksId('subject'),
+      name:subject.name||`Ders ${i+1}`,
+      note:migratedFizikNote||'Yakında',
+      icon:catalogUrl?'calculate':(subject.icon||'lock'),
+      enabled:!!catalogUrl,
+      kind:subject.kind||'',
+      catalogUrl
+    };
+  });
 }
 
 function loadYksSubjects(){
@@ -594,7 +597,7 @@ function persistYksSubjects(){
 
 window.openYksSubject=(index)=>{
   const subject=loadYksSubjects()[index];if(!subject)return;
-  if(subject.kind==='math'||subject.catalog){yksActiveDirectoryIndex=index;openYksMath();}
+  if(subject.catalogUrl){yksActiveDirectoryIndex=index;openYksMath();}
 };
 
 window.addYksSubject=()=>{
@@ -607,18 +610,14 @@ window.editYksSubject=(index,e)=>{
 window.openYksSubjectEditor=(index)=>{
   const subject=index===null?null:loadYksSubjects()[index];
   if(index!==null&&!subject)return;
-  yksSubjectEditIndex=index;yksPendingCatalog=null;
+  yksSubjectEditIndex=index;yksPendingCatalog=null;yksPendingCatalogUrl='';
   $('yksDirectoryModalTitle').textContent=subject?'Ders dizinini düzenle':'Ders dizini ekle';
   $('yksDirectoryName').value=subject?.name||'';
   $('yksDirectoryNote').value=subject?.note||'Yakında';
   $('yksDirectoryJson').value='';
   const info=$('yksDirectoryFileInfo');
-  if(subject?.catalog){
-    const lessonCount=allYksLessons(subject.catalog).length;
-    info.textContent=`Mevcut katalog: ${subject.catalog.lowerSubjects.length} konu · ${lessonCount} video. Yeni dosya seçilmezse korunur.`;
-    info.className='yks-directory-file-info ok';
-  }else if(subject?.kind==='math'){
-    info.textContent='Varsayılan Matematik video kataloğu kullanılıyor. Yeni dosya seçilmezse korunur.';
+  if(subject?.catalogUrl){
+    info.textContent=`Bağlı sunucu kataloğu: ${subject.catalogUrl.replace(/^\.\//,'')}. Yeni dosya seçilmezse korunur.`;
     info.className='yks-directory-file-info ok';
   }else{
     info.textContent='JSON yüklenmedi. Video derslerini açmak için bir katalog seçin.';
@@ -629,20 +628,23 @@ window.openYksSubjectEditor=(index)=>{
 };
 window.closeYksSubjectEditor=()=>{
   $('yksDirectoryModal').classList.remove('on');
-  yksSubjectEditIndex=null;yksPendingCatalog=null;
+  yksSubjectEditIndex=null;yksPendingCatalog=null;yksPendingCatalogUrl='';
 };
 window.previewYksSubjectJson=async(e)=>{
   const file=e.target.files?.[0],info=$('yksDirectoryFileInfo');
-  yksPendingCatalog=null;
+  yksPendingCatalog=null;yksPendingCatalogUrl='';
   if(!file){info.textContent='JSON dosyası seçilmedi.';info.className='yks-directory-file-info';return;}
   try{
-    const data=JSON.parse(await file.text());
+    const catalogUrl=`./${file.name}`;
+    const response=await fetch(catalogUrl,{cache:'no-cache'});
+    if(!response.ok)throw new Error('Dosya uygulama dizininde bulunamadı. Önce dosyayı repo dizinine ekleyip push edin.');
+    const data=await response.json();
     if(!Array.isArray(data?.lowerSubjects))throw new Error('lowerSubjects listesi bulunamadı.');
     normalizeYksCatalog(data);
     const lessonCount=allYksLessons(data).length;
     if(!lessonCount)throw new Error('Video dersi bulunamadı.');
-    yksPendingCatalog=data;
-    info.textContent=`${file.name}: ${data.lowerSubjects.length} konu · ${lessonCount} video yüklemeye hazır.`;
+    yksPendingCatalog=data;yksPendingCatalogUrl=catalogUrl;
+    info.textContent=`${file.name}: ${data.lowerSubjects.length} konu · ${lessonCount} video. Sunucudan kullanıma hazır.`;
     info.className='yks-directory-file-info ok';
   }catch(err){
     info.textContent=`Dosya okunamadı: ${err.message}`;
@@ -655,12 +657,12 @@ window.saveYksSubjectEditor=()=>{
   const subjects=loadYksSubjects();
   let subject=yksSubjectEditIndex===null?null:subjects[yksSubjectEditIndex];
   if(!subject){
-    subject={id:makeYksId('subject'),name,note:note||'Yakında',icon:'lock',enabled:false,kind:'',catalog:null};
+    subject={id:makeYksId('subject'),name,note:note||'Yakında',icon:'lock',enabled:false,kind:'',catalogUrl:''};
     subjects.push(subject);
   }
   Object.assign(subject,{name,note:note||'Yakında'});
   if(yksPendingCatalog){
-    subject.catalog=yksPendingCatalog;
+    subject.catalogUrl=yksPendingCatalogUrl;
     subject.enabled=true;subject.icon='calculate';
     subject.note=`${yksPendingCatalog.lowerSubjects.length} konu · ${allYksLessons(yksPendingCatalog).length} video`;
   }
@@ -679,7 +681,7 @@ window.resetYksSubjectStats=async(index,e)=>{
   const subject=loadYksSubjects()[index];if(!subject)return;
   if(!confirm(`"${subject.name}" dizinindeki TÜM videoların izlenme istatistikleri (izlenme yüzdesi, tamamlanma durumu, son konum) sıfırlanacak. Bu işlem geri alınamaz. Devam edilsin mi?`))return;
   try{
-    const catalog=(subject.catalog||subject.kind==='math')?await loadYksCatalog(index):{lowerSubjects:[]};
+    const catalog=subject.catalogUrl?await loadYksCatalog(index):{lowerSubjects:[]};
     const ids=[];
     (catalog.lowerSubjects||[]).forEach(unit=>(unit.subjectDetails||[]).forEach(lesson=>{if(lesson?.id)ids.push(lesson.id);}));
     const progress=yksProgress();
@@ -787,7 +789,7 @@ function renderYksSubjects(){
     <div class="yks-toolbar"><button class="yks-back" onclick="openYksLevel('root')"><span class="material-symbols-outlined" style="font-size:17px">arrow_back</span>YKS Hazırlık</button><div class="yks-breadcrumb">YKS Hazırlık / TYT</div></div>
     <div class="yks-section-title">TYT Dersleri</div><div class="yks-section-meta">JSON kataloğu yüklenen video dersleri kullanıma açık</div>
     <div class="yks-subject-grid">${subjects.map((subject,i)=>{
-      const active=subject.kind==='math'||!!subject.catalog;
+      const active=!!subject.catalogUrl;
       return `<div class="yks-subject ${active?'':'is-locked'}" draggable="true" ondragstart="startYksSubjectDrag(${i},event)" ondragend="endYksSubjectDrag(event)" ondragover="event.preventDefault()" ondrop="dropYksSubject(${i},event)">
         <span class="yks-subject-icon"><span class="material-symbols-outlined">${esc(subject.icon||'folder')}</span></span>
         <div class="yks-subject-main" onclick="openYksSubject(${i})">${esc(subject.name)}<small>${esc(subject.note||'Yakında')}</small></div>
