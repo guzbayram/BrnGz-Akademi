@@ -595,6 +595,28 @@ window.deleteYksSubject=(index,e)=>{
   subjects.splice(index,1);
   persistYksSubjects();renderYksSubjects();
 };
+window.resetYksSubjectStats=async(index,e)=>{
+  e?.preventDefault();e?.stopPropagation();
+  const subject=loadYksSubjects()[index];if(!subject)return;
+  if(subject.kind!=='math'){alert('Bu dizin için video istatistiği bulunmuyor.');return;}
+  if(!confirm(`"${subject.name}" dizinindeki TÜM videoların izlenme istatistikleri (izlenme yüzdesi, tamamlanma durumu, son konum) sıfırlanacak. Bu işlem geri alınamaz. Devam edilsin mi?`))return;
+  try{
+    const catalog=await loadYksCatalog();
+    const ids=[];
+    (catalog.lowerSubjects||[]).forEach(unit=>(unit.subjectDetails||[]).forEach(lesson=>{if(lesson?.id)ids.push(lesson.id);}));
+    const progress=yksProgress();
+    let removed=0;
+    ids.forEach(id=>{if(progress[id]){delete progress[id];removed++;}});
+    if(studentStatsCache)studentStatsCache.yksLearning={subjectIndex:0,lessonIndex:0};
+    yksActive={subjectIndex:0,lessonIndex:0};yksOpenUnitIndex=0;
+    await flushYksProgress();
+    alert(`"${subject.name}" için video istatistikleri sıfırlandı (${removed}/${ids.length} video).`);
+    if(yksView==='math')window.openYksMath();
+  }catch(err){
+    console.warn('Video istatistikleri sıfırlanamadı:',err);
+    alert('Sıfırlama sırasında bir hata oluştu, tekrar deneyin.');
+  }
+};
 window.startYksSubjectDrag=(index,e)=>{
   yksSubjectDragIndex=index;
   e.currentTarget.classList.add('is-dragging');
@@ -679,6 +701,7 @@ function renderYksSubjects(){
         <span class="yks-subject-icon"><span class="material-symbols-outlined">${esc(subject.icon||'folder')}</span></span>
         <div class="yks-subject-main" onclick="openYksSubject(${i})">${esc(subject.name)}<small>${esc(subject.note||'Yakında')}</small></div>
         <span class="yks-subject-actions">
+          ${subject.kind==='math'?`<button class="yks-icon-btn" onclick="resetYksSubjectStats(${i},event)" title="Video istatistiklerini sıfırla" aria-label="Video istatistiklerini sıfırla"><span class="material-symbols-outlined">restart_alt</span></button>`:''}
           <button class="yks-icon-btn" onclick="editYksSubject(${i},event)" title="Dizini düzenle" aria-label="Dizini düzenle"><span class="material-symbols-outlined">edit</span></button>
           <button class="yks-icon-btn danger" onclick="deleteYksSubject(${i},event)" title="Dizini sil" aria-label="Dizini sil"><span class="material-symbols-outlined">delete</span></button>
         </span>
