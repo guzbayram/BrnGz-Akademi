@@ -1,0 +1,586 @@
+{
+  "sourceUrl": "https://mebi.eba.gov.tr/student/section/upper-subjects/6283030c-281d-4ff3-1536-08dce12e5803",
+  "title": "Matematik (Destek)",
+  "breadcrumb": [
+    "Giriş",
+    "YKS Hazırlık",
+    "Temel Destek Paketleri",
+    "Matematik (Destek)"
+  ],
+  "generatedAt": "2026-06-21T11:12:08.759854Z",
+  "format": "upperSubject -> lowerSubjects[] -> subjectDetails[] with lessonUrl and videoUrl",
+  "lowerSubjects": [
+    {
+      "order": 1,
+      "id": "3c3a7804-fd78-401c-c977-08dce3899805",
+      "title": "Kesirler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/3c3a7804-fd78-401c-c977-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "a2bdbbd0-25ca-46ae-0546-08dce38e4979",
+          "title": "Kesirler ve Kesirlerle İşlemler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/a2bdbbd0-25ca-46ae-0546-08dce38e4979",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/5269a446f7_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/5269a446f7_c.mp4"
+          ],
+          "duration": "15:32"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "id": "a5997b2f-7947-4554-c978-08dce3899805",
+      "title": "Yüzdeler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/a5997b2f-7947-4554-c978-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "8ac577e3-be34-40be-274a-08dce39258cc",
+          "title": "Yüzdeler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/8ac577e3-be34-40be-274a-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/48ae7f9565_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/48ae7f9565_c.mp4"
+          ],
+          "duration": "14:59"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "id": "7f2ea5a9-7a4d-4558-c97f-08dce3899805",
+      "title": "Çarpanlar ve Katları",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/7f2ea5a9-7a4d-4558-c97f-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "b4029917-0e6a-4ec8-274b-08dce39258cc",
+          "title": "Çarpanlar ve Katları",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/b4029917-0e6a-4ec8-274b-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/ed36e4b665_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/ed36e4b665_c.mp4"
+          ],
+          "duration": "21:24"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "id": "e88e2c9f-3ed5-4d23-c993-08dce3899805",
+      "title": "Kümeler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/e88e2c9f-3ed5-4d23-c993-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "17c42310-940a-4f7c-274c-08dce39258cc",
+          "title": "Kümeler ve Kümelerle İşlemler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/17c42310-940a-4f7c-274c-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/b24f468513_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/b24f468513_c.mp4"
+          ],
+          "duration": "17:32"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "id": "579b8024-717c-4b4e-c994-08dce3899805",
+      "title": "Tam Sayılar",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/579b8024-717c-4b4e-c994-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "6cc652c9-9aed-4115-274d-08dce39258cc",
+          "title": "Tam Sayılar ve Tam Sayılarla İşlemler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/6cc652c9-9aed-4115-274d-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/0d952fcdcc_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/0d952fcdcc_c.mp4"
+          ],
+          "duration": "16:08"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "id": "f83ddf21-7b72-41bb-c995-08dce3899805",
+      "title": "Rasyonel Sayılar",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/f83ddf21-7b72-41bb-c995-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "ffe5ee44-87e2-4aca-274e-08dce39258cc",
+          "title": "Rasyonel Sayılar ve Devirli Olan ve Olmayan Ondalık Gösterimler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/ffe5ee44-87e2-4aca-274e-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/d39576ea46_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/d39576ea46_c.mp4"
+          ],
+          "duration": "16:54"
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "id": "36b19b1e-8171-4504-c996-08dce3899805",
+      "title": "Oran - Orantı",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/36b19b1e-8171-4504-c996-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "082d442c-39f3-4ac7-274f-08dce39258cc",
+          "title": "Oran - Orantı",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/082d442c-39f3-4ac7-274f-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/363f27a0d4_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/363f27a0d4_c.mp4"
+          ],
+          "duration": "17:15"
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "id": "fe89f690-975b-437e-c997-08dce3899805",
+      "title": "Üslü İfadeler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/fe89f690-975b-437e-c997-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "303289bf-7827-4138-2750-08dce39258cc",
+          "title": "Üslü İfadeler ve Bilimsel Gösterim",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/303289bf-7827-4138-2750-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/93e4b255f3_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/93e4b255f3_c.mp4"
+          ],
+          "duration": "16:33"
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "id": "98178273-43df-4359-c998-08dce3899805",
+      "title": "Kareköklü İfadeler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/98178273-43df-4359-c998-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "139f6398-d06a-4a28-2751-08dce39258cc",
+          "title": "Kareköklü İfadeler ve İşlemler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/139f6398-d06a-4a28-2751-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/318a756127_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/318a756127_c.mp4"
+          ],
+          "duration": "31:24"
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "id": "651159eb-1a12-4b5a-c980-08dce3899805",
+      "title": "Eşitlik ve Denklemler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/651159eb-1a12-4b5a-c980-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "7ba52936-6505-43e9-2752-08dce39258cc",
+          "title": "Eşitlik ve Denklemler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/7ba52936-6505-43e9-2752-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/5518507edd_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/5518507edd_c.mp4"
+          ],
+          "duration": "13:02"
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "id": "af8fc726-d548-4624-c981-08dce3899805",
+      "title": "Doğrusal Denklemler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/af8fc726-d548-4624-c981-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "6a5ee913-82ed-47fc-2753-08dce39258cc",
+          "title": "Doğrusal Denklemler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/6a5ee913-82ed-47fc-2753-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/911abda150_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/911abda150_c.mp4"
+          ],
+          "duration": "17:26"
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "id": "c8adf683-59b8-4f8e-c982-08dce3899805",
+      "title": "Cebirsel İfadeler ve Özdeşlikler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/c8adf683-59b8-4f8e-c982-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "bd0a9d11-93ef-40fc-2754-08dce39258cc",
+          "title": "Cebirsel İfadeler ve Özdeşlikler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/bd0a9d11-93ef-40fc-2754-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/fea4c98e6a_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/fea4c98e6a_c.mp4"
+          ],
+          "duration": "25:05"
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "id": "433c614b-7616-44bd-c983-08dce3899805",
+      "title": "Eşitsizlikler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/433c614b-7616-44bd-c983-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "8e62586f-0f5e-41bf-2755-08dce39258cc",
+          "title": "Eşitsizlikler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/8e62586f-0f5e-41bf-2755-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/f23cd4808c_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/f23cd4808c_c.mp4"
+          ],
+          "duration": "17:18"
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "id": "55abed13-d39d-473d-c984-08dce3899805",
+      "title": "Temel Geometrik Kavramlar",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/55abed13-d39d-473d-c984-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "523f6f42-5d12-4316-2756-08dce39258cc",
+          "title": "Temel Geometrik Kavramlar",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/523f6f42-5d12-4316-2756-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/e2e1ea332f_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/e2e1ea332f_c.mp4"
+          ],
+          "duration": "17:30"
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "id": "56dae3f7-0335-411d-c985-08dce3899805",
+      "title": "Üçgen ve Dörtgenler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/56dae3f7-0335-411d-c985-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "416b7fd3-6525-4a24-2757-08dce39258cc",
+          "title": "Üçgen ve Dörtgenler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/416b7fd3-6525-4a24-2757-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/c93b8f19eb_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/c93b8f19eb_c.mp4"
+          ],
+          "duration": "22:15"
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "id": "0263fcbf-40a7-44d5-c986-08dce3899805",
+      "title": "Uzunluk ve Zaman Ölçme",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/0263fcbf-40a7-44d5-c986-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "9c2c87e9-ef7b-4939-2758-08dce39258cc",
+          "title": "Uzunluk ve Zaman Ölçme",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/9c2c87e9-ef7b-4939-2758-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/d214c52c96_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/d214c52c96_c.mp4"
+          ],
+          "duration": "15:45"
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "id": "aa13f5ea-f596-426d-c987-08dce3899805",
+      "title": "Alan Ölçme",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/aa13f5ea-f596-426d-c987-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "0613181d-8523-4ea6-2759-08dce39258cc",
+          "title": "Alan Ölçme",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/0613181d-8523-4ea6-2759-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/51a2b3fbc7_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/51a2b3fbc7_c.mp4"
+          ],
+          "duration": "29:44"
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "id": "9b6a41a9-8de4-416e-c988-08dce3899805",
+      "title": "Geometrik Cisimler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/9b6a41a9-8de4-416e-c988-08dce3899805",
+      "subjectDetailCount": 3,
+      "videoCount": 3,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "e69c15a2-9c20-438c-275a-08dce39258cc",
+          "title": "Prizmalar",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/e69c15a2-9c20-438c-275a-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/60a8bef471_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/60a8bef471_c.mp4"
+          ],
+          "duration": "13:14"
+        },
+        {
+          "order": 2,
+          "id": "04c8bbeb-b1de-44d2-275b-08dce39258cc",
+          "title": "Silindir",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/04c8bbeb-b1de-44d2-275b-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/af9fbfad14_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/af9fbfad14_c.mp4"
+          ],
+          "duration": "12:43"
+        },
+        {
+          "order": 3,
+          "id": "942328dc-2e5a-4f03-275c-08dce39258cc",
+          "title": "Koni",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/942328dc-2e5a-4f03-275c-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/aa686ca545_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/aa686ca545_c.mp4"
+          ],
+          "duration": "13:57"
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "id": "e8795121-f220-43fb-c98b-08dce3899805",
+      "title": "Çember ve Daire",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/e8795121-f220-43fb-c98b-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "4e4a871e-58f5-40ec-275d-08dce39258cc",
+          "title": "Çember ve Daire",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/4e4a871e-58f5-40ec-275d-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/cfd8ef3fb8_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/cfd8ef3fb8_c.mp4"
+          ],
+          "duration": "16:10"
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "id": "e133e8be-cedd-4a3a-c98c-08dce3899805",
+      "title": "Sıvı Ölçme",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/e133e8be-cedd-4a3a-c98c-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "22c139e4-0a05-41d4-275e-08dce39258cc",
+          "title": "Sıvı Ölçme",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/22c139e4-0a05-41d4-275e-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/7123bdfa6b_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/7123bdfa6b_c.mp4"
+          ],
+          "duration": "11:16"
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "id": "8c82ae21-384e-425d-c98d-08dce3899805",
+      "title": "Dönüşüm Geometrisi",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/8c82ae21-384e-425d-c98d-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "fdc4948b-9262-47dd-275f-08dce39258cc",
+          "title": "Dönüşüm Geometrisi",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/fdc4948b-9262-47dd-275f-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/0cb500051a_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/0cb500051a_c.mp4"
+          ],
+          "duration": "17:44"
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "id": "78dc19e0-2e68-484a-c98e-08dce3899805",
+      "title": "Çokgenler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/78dc19e0-2e68-484a-c98e-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "802cb490-0b67-4e65-2760-08dce39258cc",
+          "title": "Çokgenler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/802cb490-0b67-4e65-2760-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/01d0e88ce9_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/01d0e88ce9_c.mp4"
+          ],
+          "duration": "15:10"
+        }
+      ]
+    },
+    {
+      "order": 23,
+      "id": "d27f15a6-9499-4a0f-c98f-08dce3899805",
+      "title": "Özel Dörtgenler",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/d27f15a6-9499-4a0f-c98f-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "86678d89-c314-42ec-2761-08dce39258cc",
+          "title": "Özel Dörtgenler",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/86678d89-c314-42ec-2761-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/522b5e8d37.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/522b5e8d37.mp4"
+          ],
+          "duration": "24:23"
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "id": "b16dd409-7e49-4d3f-c990-08dce3899805",
+      "title": "Eşlik ve Benzerlik",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/b16dd409-7e49-4d3f-c990-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "a5657513-6b65-434f-2762-08dce39258cc",
+          "title": "Eşlik ve Benzerlik",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/a5657513-6b65-434f-2762-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/d5dcdfc114_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/d5dcdfc114_c.mp4"
+          ],
+          "duration": "21:24"
+        }
+      ]
+    },
+    {
+      "order": 25,
+      "id": "4d7bba2a-bd71-417f-c991-08dce3899805",
+      "title": "Veri Toplama ve Değerlendirme",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/4d7bba2a-bd71-417f-c991-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "02f16954-3c61-42de-2763-08dce39258cc",
+          "title": "Veri Toplama ve Değerlendirme",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/02f16954-3c61-42de-2763-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/27e290e520_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/27e290e520_c.mp4"
+          ],
+          "duration": "25:15"
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "id": "8f20c2bc-271e-41a7-c992-08dce3899805",
+      "title": "Basit Olayların Olma Olasılığı",
+      "lowerSubjectUrl": "https://mebi.eba.gov.tr/student/section/lower-subjects/8f20c2bc-271e-41a7-c992-08dce3899805",
+      "subjectDetailCount": 1,
+      "videoCount": 1,
+      "subjectDetails": [
+        {
+          "order": 1,
+          "id": "e24af3c3-891b-4df1-2764-08dce39258cc",
+          "title": "Basit Olayların Olma Olasılığı",
+          "lessonUrl": "https://mebi.eba.gov.tr/student/section/subject-details/e24af3c3-891b-4df1-2764-08dce39258cc",
+          "videoUrl": "https://ogm-large-cdn.eba.gov.tr/mebi/video/2d32f80a09_c.mp4",
+          "videoUrls": [
+            "https://ogm-large-cdn.eba.gov.tr/mebi/video/2d32f80a09_c.mp4"
+          ],
+          "duration": "26:40"
+        }
+      ]
+    }
+  ],
+  "lowerSubjectCount": 26,
+  "subjectDetailCount": 28,
+  "videoCount": 28,
+  "missingVideoCount": 0
+}
